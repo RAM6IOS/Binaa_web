@@ -1,0 +1,123 @@
+{
+  "Auth": {
+    "Login": {
+      "title": "Connexion",
+      "description": "Bienvenue à nouveau sur la plateforme Binaa",
+      "email": "Adresse Email",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "google": "Google",
+      "noAccount": "Pas encore de compte ?",
+      "registerNow": "S'inscrire",
+      "magicLink": {
+        "send": "Lien magique",
+        "emailRequired": "Veuillez d'abord saisir votre email",
+        "success": "Lien envoyé ! Vérifiez votre boîte mail",
+        "error": "Erreur lors de l'envoi du lien"
+      },
+      "validation": {
+        "passwordRequired": "Le mot de passe est requis",
+        "emailInvalid": "Veuillez saisir un email valide"
+      },
+      "messages": {
+        "success": "Connexion réussie",
+        "error": "Échec de la connexion",
+        "resetSuccess": "Mot de passe réinitialisé. Vous pouvez vous connecter."
+      }
+    },
+    "Register": {
+      "title": "Créer un compte",
+      "description": "Rejoignez Binaa et gérez vos projets professionnellement",
+      "fullName": "Nom complet",
+      "phone": "Téléphone",
+      "jobTitle": "Poste",
+      "companyName": "Nom de l'entreprise",
+      "email": "Adresse Email",
+      "password": "Mot de passe",
+      "submit": "S'inscrire",
+      "haveAccount": "Déjà un compte ?",
+      "loginNow": "Se connecter",
+      "messages": {
+        "success": "Compte créé avec succès",
+        "error": "Erreur lors de la création du compte"
+      }
+    },
+    "ForgotPassword": {
+      "title": "Mot de passe oublié",
+      "description": "Entrez votre email pour recevoir un lien de réinitialisation",
+      "email": "Adresse Email",
+      "submit": "Envoyer le lien",
+      "backToLogin": "Retour à la connexion",
+      "messages": {
+        "success": "Lien de réinitialisation envoyé",
+        "error": "Erreur lors de l'envoi du lien"
+      }
+    },
+    "ResetPassword": {
+      "title": "Nouveau mot de passe",
+      "description": "Veuillez saisir votre nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Enregistrer",
+      "strength": {
+        "length": "Min 8 caractères",
+        "number": "Contient un chiffre",
+        "special": "Caractère spécial (!@#$)",
+        "uppercase": "Majuscule (ABC)"
+      },
+      "messages": {
+        "success": "Mot de passe mis à jour avec succès",
+        "error": "Erreur lors de la mise à jour",
+        "mismatch": "Les mots de passe ne correspondent pas",
+        "requirementsNotMet": "Les exigences du mot de passe ne sont pas satisfaites",
+        "verifyFirst": "Veuillez d'abord vérifier le code"
+      }
+    },
+    "VerifyOtp": {
+      "title": "Vérification du code",
+      "description": "Entrez le code à 8 chiffres envoyé à votre email",
+      "email": "Adresse Email",
+      "submit": "Vérifier",
+      "resend": "Renvoyer le code",
+      "resendWait": "Renvoyer le code dans {seconds}s",
+      "changeEmail": "Changer l'e-mail",
+      "validation": {
+        "digitsRequired": "Veuillez entrer 8 chiffres"
+      },
+      "messages": {
+        "success": "Vérification réussie",
+        "error": "Code invalide ou expiré. Veuillez en demander un nouveau.",
+        "resendSuccess": "Code renvoyé avec succès",
+        "resendError": "Échec du renvoi du code"
+      }
+    },
+    "Logout": {
+      "button": "Se déconnecter",
+      "confirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+      "messages": {
+        "success": "Déconnexion réussie"
+      }
+    }
+  },
+  "Navigation": {
+    "home": "Accueil",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "backToHome": "Retour"
+  },
+  "Common": {
+    "loading": "Chargement...",
+    "or": "Ou continuer avec",
+    "error": "Une erreur est survenue",
+    "success": "Succès",
+    "copyright": "Tous droits réservés.",
+    "validation": {
+      "emailRequired": "L'adresse email est requise",
+      "emailInvalid": "Veuillez saisir un email valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "fieldRequired": "Ce champ est requis"
+    }
+  }
+}
