@@ -145,7 +145,7 @@ let mockProjectWorkersDb: ProjectWorker[] = [
     role_fr: "Chef Charpentier",
     daily_hours: 8,
     assigned_at: "2024-01-10",
-  }
+  } as any
 ];
 
 let mockProjectEquipmentDb: ProjectEquipment[] = [

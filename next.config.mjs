@@ -6,7 +6,12 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["nqajokbclpujrryttxxm.supabase.co"], // Replace with actual Supabase domain later
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'nqajokbclpujrryttxxm.supabase.co',
+      },
+    ],
   },
 };
 
