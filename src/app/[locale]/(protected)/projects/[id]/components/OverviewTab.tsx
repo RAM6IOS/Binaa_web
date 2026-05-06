@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Project, ProjectStatus } from "@/lib/types/projects";
 import { ProgressBar } from "@/components/projects/ProgressBar";
@@ -14,20 +14,29 @@ import { Button } from "@/components/ui/button";
 interface Props {
   project: Project;
   isAr: boolean;
+  onRefresh?: () => void;
 }
 
-export function OverviewTab({ project, isAr }: Props) {
+export function OverviewTab({ project, isAr, onRefresh }: Props) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [editStatus, setEditStatus] = useState<ProjectStatus>(project.status);
   const [editProgress, setEditProgress] = useState(project.progress);
   const [editActualCost, setEditActualCost] = useState(project.actual_cost);
 
+  // Sync state with props when project changes (e.g. via real-time update)
+  useEffect(() => {
+    setEditStatus(project.status);
+    setEditProgress(project.progress);
+    setEditActualCost(project.actual_cost);
+  }, [project.status, project.progress, project.actual_cost]);
+
   const handleUpdate = async (field: keyof Project, value: any) => {
     setIsUpdating(true);
     try {
       await projectsService.update(project.id, { [field]: value });
       toast.success(isAr ? 'تم التحديث بنجاح' : 'Mise à jour réussie');
+      if (onRefresh) onRefresh();
     } catch (error) {
       toast.error(isAr ? 'حدث خطأ' : 'Erreur');
     } finally {

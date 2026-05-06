@@ -36,8 +36,8 @@ export default function ProjectDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProject = async () => {
-    setIsLoading(true);
+  const fetchProject = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     setError(null);
     try {
       const { data, error: supabaseError } = await supabase
@@ -64,7 +64,7 @@ export default function ProjectDetailPage({
       console.error('Error fetching project:', err);
       setError(err.message || 'Failed to fetch project');
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
@@ -77,7 +77,7 @@ export default function ProjectDetailPage({
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'projects', filter: `id=eq.${id}` },
-        () => fetchProject()
+        () => fetchProject(true)
       )
       .subscribe();
 
@@ -214,13 +214,10 @@ export default function ProjectDetailPage({
           <TabsTrigger value="resources" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
             {isAr ? 'العمال والعتاد' : 'Ressources'}
           </TabsTrigger>
-          {/* <TabsTrigger value="documents" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
-            {isAr ? 'الوثائق' : 'Documents'}
-          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
-          <OverviewTab project={project} isAr={isAr} />
+          <OverviewTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-0 focus-visible:outline-none">

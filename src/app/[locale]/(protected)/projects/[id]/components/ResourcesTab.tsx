@@ -22,8 +22,8 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
   const [assignedEquipment, setAssignedEquipment] = useState<ProjectEquipment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchResources = async () => {
-    setIsLoading(true);
+  const fetchResources = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     try {
       const [workersData, equipmentData] = await Promise.all([
         projectWorkersService.fetchProjectWorkers(project.id),
@@ -35,12 +35,26 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
       console.error("Resources fetch error:", error);
       toast.error(isAr ? 'فشل في تحميل الموارد. يرجى التحقق من اتصال قاعدة البيانات.' : 'Échec du chargement des ressources. Veuillez vérifier la connexion.');
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchResources();
+
+    // Subscribe to changes
+    const unsubWorkers = projectWorkersService.subscribe(project.id, () => {
+      fetchResources(true);
+    });
+
+    const unsubEquipment = projectEquipmentService.subscribe(project.id, () => {
+      fetchResources(true);
+    });
+
+    return () => {
+      unsubWorkers();
+      unsubEquipment();
+    };
   }, [project.id]);
 
   const handleRemoveWorker = async (id: string) => {
