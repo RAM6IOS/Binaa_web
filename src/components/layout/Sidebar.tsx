@@ -4,7 +4,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import { Building2, LayoutDashboard, Briefcase, FileText, PieChart, Users, Construction, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function Sidebar({ locale }: { locale: string }) {
+export function Sidebar({ locale, className }: { locale: string; className?: string }) {
   const pathname = usePathname();
   const isAr = locale === 'ar';
 
@@ -17,7 +17,7 @@ export function Sidebar({ locale }: { locale: string }) {
   ];
 
   return (
-    <aside className="fixed inset-y-0 w-64 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 rtl:border-l rtl:border-r-0">
+    <aside className={cn("fixed inset-y-0 w-64 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 rtl:border-l rtl:border-r-0 z-40", className)}>
       <div className="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
         <Building2 className="w-8 h-8 text-blue-500" />
         <span className="text-xl font-bold tracking-tight">Binaa SaaS</span>
