@@ -131,7 +131,7 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
             
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full md:w-[140px]">
                   <SelectValue placeholder={isAr ? "الحالة" : "Statut"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,7 +145,7 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
               </Select>
 
               <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-full md:w-[120px]">
                   <SelectValue placeholder={isAr ? "الولاية" : "Wilaya"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -155,7 +155,7 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
               </Select>
 
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full md:w-[140px]">
                   <SelectValue placeholder={isAr ? "نوع المشروع" : "Type"} />
                 </SelectTrigger>
                 <SelectContent>

@@ -149,7 +149,7 @@ export default function DashboardPage({ params }: { params: Promise<{ locale: st
       </div>
 
       <div className="grid gap-4 md:grid-cols-7">
-        <Card className="col-span-4 hover:shadow-md transition-shadow">
+        <Card className="col-span-1 md:col-span-4 hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{isAr ? 'تتبع الميزانية' : 'Suivi du budget'}</CardTitle>
             <CardDescription>
@@ -210,7 +210,7 @@ export default function DashboardPage({ params }: { params: Promise<{ locale: st
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 hover:shadow-md transition-shadow">
+        <Card className="col-span-1 md:col-span-3 hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{isAr ? 'أحدث المشاريع' : 'Projets récents'}</CardTitle>
             <CardDescription>{isAr ? 'حالة المشاريع النشطة' : 'Statut des projets actifs'}</CardDescription>
