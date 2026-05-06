@@ -71,7 +71,7 @@ export function Navbar({ locale }: NavbarProps) {
           <div className="flex md:hidden items-center gap-2">
             <LanguageSwitcher />
             <button 
-              className="p-2 text-slate-600"
+              className="p-3 text-slate-600 rounded-md hover:bg-slate-100 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X /> : <Menu />}
@@ -94,19 +94,19 @@ export function Navbar({ locale }: NavbarProps) {
                 <Link 
                   key={link.name} 
                   href={link.href} 
-                  className="block py-2 text-slate-600"
+                  className="block py-3 px-2 text-slate-600 text-base font-medium rounded-md hover:bg-slate-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.name}
                 </Link>
               ))}
               <div className="pt-4 flex flex-col gap-2">
-                <Button variant="outline" className="w-full" asChild>
+                <Button variant="outline" size="lg" className="w-full text-base h-12" asChild>
                   <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                     {isAr ? "تسجيل الدخول" : "Connexion"}
                   </Link>
                 </Button>
-                <Button className="w-full bg-blue-600 text-white" asChild>
+                <Button size="lg" className="w-full bg-blue-600 text-white text-base h-12" asChild>
                   <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
                     {isAr ? "ابدأ مجاناً" : "Essayer gratuitement"}
                   </Link>
