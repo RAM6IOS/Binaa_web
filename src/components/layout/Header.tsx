@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Globe, LogOut } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { Sidebar } from "./Sidebar";
 
 export function Header({ 
   locale, 
@@ -27,7 +30,23 @@ export function Header({
 
   return (
     <header className="h-16 border-b bg-white dark:bg-slate-900 flex items-center justify-between px-6 sticky top-0 z-30">
-      <div className="flex font-semibold text-lg text-slate-800 dark:text-slate-100">
+      <div className="flex font-semibold text-lg text-slate-800 dark:text-slate-100 items-center gap-4">
+        {/* Mobile Sidebar Trigger */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="p-0 w-64 border-none">
+              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetDescription className="sr-only">Navigation sidebar</SheetDescription>
+              <Sidebar locale={locale} className="static inset-0 w-full h-full" />
+            </SheetContent>
+          </Sheet>
+        </div>
         {/* Could insert dynamic page title here based on route */}
       </div>
       

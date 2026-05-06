@@ -54,7 +54,7 @@ export default function LandingPage() {
       <Navbar locale={locale} />
 
       {/* 2. Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+      <section className="relative pt-24 pb-16 md:pt-40 md:pb-32 overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 -z-10 w-full h-full">
           <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px]" />
@@ -78,19 +78,19 @@ export default function LandingPage() {
               <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-xl ml-auto">
                 منصة جزائرية متكاملة تساعد المقاولين على متابعة المشاريع، العمال، والمعدات في الوقت الفعلي ومن أي مكان.
               </p>
-              <div className="flex flex-wrap gap-4 justify-start flex-row-reverse">
-                <Button size="lg" className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-xl shadow-xl shadow-blue-200 group" asChild>
+              <div className="flex flex-col sm:flex-row-reverse gap-4 justify-start">
+                <Button size="lg" className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-xl shadow-xl shadow-blue-200 group" asChild>
                   <LinkNext href={`/${locale}/auth/register`}>
                     ابدأ تجربة مجانية
                     <ArrowLeft className="mr-2 w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                   </LinkNext>
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-slate-200 hover:bg-slate-50">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-xl border-slate-200 hover:bg-slate-50">
                   شاهد الفيديو
                 </Button>
               </div>
               
-              <div className="mt-12 flex items-center gap-6 justify-end text-sm text-slate-500">
+              <div className="mt-12 flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 justify-end text-sm text-slate-500">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
                   <span>لا يلزم بطاقة ائتمان</span>
@@ -390,12 +390,12 @@ export default function LandingPage() {
                 انضم إلى أكثر من 150 شركة جزائرية تعتمد على Binaa لزيادة كفاءتها وتوفير تكاليفها.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 text-xl font-bold rounded-2xl shadow-xl transition-all hover:scale-105" asChild>
+                <Button size="lg" className="w-full sm:w-auto h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 text-xl font-bold rounded-2xl shadow-xl transition-all hover:scale-105" asChild>
                   <LinkNext href={`/${locale}/auth/register`}>
                     ابدأ الآن مجاناً
                   </LinkNext>
                 </Button>
-                <Button size="lg" variant="outline" className="h-16 px-10 bg-transparent border-white/20 text-white hover:bg-white/10 text-xl font-bold rounded-2xl" asChild>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-10 bg-transparent border-white/20 text-white hover:bg-white/10 text-xl font-bold rounded-2xl" asChild>
                   <LinkNext href="#contact">
                     تواصل مع المبيعات
                   </LinkNext>

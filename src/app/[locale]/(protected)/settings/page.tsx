@@ -55,28 +55,11 @@ export default function SettingsPage({ params }: { params: Promise<{ locale: str
         </div>
       </div>
 
-      {/* Mobile Layout (Tabs) */}
+      {/* Mobile Layout (No Tabs as extra sections are hidden) */}
       <div className="md:hidden">
-        <Tabs defaultValue="profile" value={activeSection} onValueChange={setActiveSection} className="w-full">
-          <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-slate-100 dark:bg-slate-900 rounded-xl mb-6">
-            <TabsTrigger value="profile" className="py-2 text-xs">{isAr ? 'شخصي' : 'Profil'}</TabsTrigger>
-            <TabsTrigger value="company" className="py-2 text-xs">{isAr ? 'شركة' : 'Entreprise'}</TabsTrigger>
-            <TabsTrigger value="notifications" className="py-2 text-xs">{isAr ? 'إشعارات' : 'Notif.'}</TabsTrigger>
-          </TabsList>
-          
-          <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-            <TabsContent value="profile" className="mt-0"><ProfileSettings locale={locale} /></TabsContent>
-            <TabsContent value="company" className="mt-0"><CompanySettings locale={locale} /></TabsContent>
-            <TabsContent value="notifications" className="mt-0"><NotificationSettings locale={locale} /></TabsContent>
-            <TabsContent value="security" className="mt-0"><SecuritySettings locale={locale} /></TabsContent>
-            <TabsContent value="billing" className="mt-0"><BillingSettings locale={locale} /></TabsContent>
-          </div>
-          
-          <TabsList className="w-full grid grid-cols-2 h-auto p-1 bg-slate-100 dark:bg-slate-900 rounded-xl mt-4">
-            <TabsTrigger value="security" className="py-2 text-xs">{isAr ? 'أمان' : 'Sécurité'}</TabsTrigger>
-            <TabsTrigger value="billing" className="py-2 text-xs">{isAr ? 'فوترة' : 'Facturation'}</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+          {renderSection()}
+        </div>
       </div>
     </div>
   );
