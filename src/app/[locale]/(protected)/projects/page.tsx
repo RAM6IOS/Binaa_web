@@ -181,8 +181,95 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
               ))}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <>
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y">
+                {filteredProjects.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500">
+                    {isAr ? 'لا توجد مشاريع مطابقة' : 'Aucun projet trouvé'}
+                  </div>
+                ) : (
+                  filteredProjects.map((project) => (
+                    <div key={project.id} className="p-4 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <Link href={`/projects/${project.id}`} className="font-bold text-lg text-blue-600 dark:text-blue-400 block">
+                            {project.name}
+                          </Link>
+                          {project.contract_number && (
+                            <div className="text-xs text-slate-500 font-mono">{project.contract_number}</div>
+                          )}
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/projects/${project.id}`}>{isAr ? 'عرض التفاصيل' : 'Voir les détails'}</Link>
+                            </DropdownMenuItem>
+                            <CreateProjectDialog 
+                              isAr={isAr} 
+                              onSuccess={fetchProjects} 
+                              project={project}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2">
+                                  <Edit className="w-4 h-4" />
+                                  {isAr ? 'تعديل' : 'Modifier'}
+                                </DropdownMenuItem>
+                              }
+                            />
+                            <DropdownMenuItem 
+                              className="text-red-600 gap-2" 
+                              onClick={() => handleDelete(project.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {isAr ? 'حذف' : 'Supprimer'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-500 text-xs">{isAr ? 'النوع' : 'Type'}</span>
+                          <ProjectTypeBadge type={project.project_type} isAr={isAr} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-500 text-xs">{isAr ? 'الحالة' : 'Statut'}</span>
+                          <ProjectStatusBadge status={project.status} isAr={isAr} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-500 text-xs">{isAr ? 'الولاية' : 'Wilaya'}</span>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5" /> {project.wilaya}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-500 text-xs">{isAr ? 'الميزانية' : 'Budget'}</span>
+                          <div className="font-semibold">
+                            {project.budget.toLocaleString()} <span className="text-[10px]">DZD</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs">
+                          <span>{isAr ? 'التقدم' : 'Progrès'}</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <ProgressBar progress={project.progress} status={project.status} className="w-full" />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
                 <TableHeader className="bg-slate-50 dark:bg-slate-900 border-y">
                   <TableRow>
                     <TableHead className="w-[250px]">{isAr ? 'اسم المشروع' : 'Nom du projet'}</TableHead>
@@ -277,8 +364,9 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
                     ))
                   )}
                 </TableBody>
-              </Table>
-            </div>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
