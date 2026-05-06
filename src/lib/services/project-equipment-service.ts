@@ -44,5 +44,25 @@ export const projectEquipmentService = {
     
     if (error) throw error;
     return true;
+  },
+
+  subscribe(projectId: string, callback: () => void) {
+    const channel = supabase
+      .channel(`project-equipment-${projectId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'project_equipment',
+          filter: `project_id=eq.${projectId}`
+        },
+        () => callback()
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 };
