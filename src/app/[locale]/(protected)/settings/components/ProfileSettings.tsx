@@ -50,18 +50,27 @@ export function ProfileSettings({ locale }: { locale: string }) {
           .from("profiles")
           .select("*")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Profile fetch error:", error);
           // If profile doesn't exist, we might want to create it or handle it
           // For now, let's just show an error toast
           toast.error(isAr ? "فشل في تحميل الملف الشخصي" : "Échec du chargement du profil");
-        } else {
+        } else if (data) {
           const userEmail = user?.email || "";
           setProfile({
             ...data,
             email: userEmail
+          } as UserProfile);
+          setCurrentEmail(userEmail);
+        } else {
+          // No profile data found, initialize with basic info from auth
+          const userEmail = user?.email || "";
+          setProfile({
+            id: user.id,
+            email: userEmail,
+            full_name: user?.user_metadata?.full_name || "",
           } as UserProfile);
           setCurrentEmail(userEmail);
         }
