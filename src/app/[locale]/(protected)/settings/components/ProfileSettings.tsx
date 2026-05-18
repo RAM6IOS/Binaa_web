@@ -61,7 +61,9 @@ export function ProfileSettings({ locale }: { locale: string }) {
           const userEmail = user?.email || "";
           setProfile({
             ...data,
-            email: userEmail
+            email: userEmail,
+            language: locale as 'ar' | 'fr',
+            theme: (theme as 'light' | 'dark' | 'system') || 'system'
           } as UserProfile);
           setCurrentEmail(userEmail);
         } else {
@@ -71,6 +73,8 @@ export function ProfileSettings({ locale }: { locale: string }) {
             id: user.id,
             email: userEmail,
             full_name: user?.user_metadata?.full_name || "",
+            language: locale as 'ar' | 'fr',
+            theme: (theme as 'light' | 'dark' | 'system') || 'system'
           } as UserProfile);
           setCurrentEmail(userEmail);
         }
@@ -121,9 +125,9 @@ export function ProfileSettings({ locale }: { locale: string }) {
         throw new Error(userError?.message ?? 'User not authenticated');
       }
 
-      // ── Generate unique filename: userId-timestamp.jpg ────────────────────
+      // ── Generate unique filename: userId/timestamp.jpg ────────────────────
       const timestamp = Date.now();
-      const fileName = `${user.id}-${timestamp}.jpg`;
+      const fileName = `${user.id}/${timestamp}.jpg`;
 
       // ── Upload to "avatars" bucket (public) ──────────────────────────────
       const { error: uploadError } = await supabase.storage
@@ -207,14 +211,13 @@ export function ProfileSettings({ locale }: { locale: string }) {
 
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: profile.id,
           full_name: profile.full_name,
           phone: profile.phone,
           job_title: profile.job_title,
-          language: profile.language,
-          theme: profile.theme
-        })
-        .eq('id', profile.id);
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
 
       if (error) throw error;
 
