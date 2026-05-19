@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Camera, Loader2, Eye, EyeOff } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -27,6 +28,10 @@ export function ProfileSettings({ locale }: { locale: string }) {
   const [isUploading, setIsUploading] = useState(false);
   const [currentEmail, setCurrentEmail] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [newEmailInput, setNewEmailInput] = useState("");
+  const [isEmailChanging, setIsEmailChanging] = useState(false);
+  const [rateLimitCooldown, setRateLimitCooldown] = useState(0);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -35,6 +40,18 @@ export function ProfileSettings({ locale }: { locale: string }) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (rateLimitCooldown > 0) {
+      timer = setInterval(() => {
+        setRateLimitCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [rateLimitCooldown]);
 
   useEffect(() => {
     async function loadProfile() {
@@ -199,19 +216,6 @@ export function ProfileSettings({ locale }: { locale: string }) {
 
     setIsSaving(true);
     try {
-      let emailChanged = false;
-      const newEmail = profile.email;
-      if (newEmail && newEmail !== currentEmail) {
-        const { error: authError } = await supabase.auth.updateUser({ email: newEmail });
-        if (authError) {
-          if (authError.message.includes('already registered') || authError.message.includes('exists') || authError.message.includes('duplicate key')) {
-            throw new Error(isAr ? 'هذا البريد الإلكتروني مستخدم بالفعل. يرجى استخدام بريد آخر.' : 'Cet email est déjà utilisé. Veuillez en utiliser un autre.');
-          }
-          throw authError;
-        }
-        emailChanged = true;
-      }
-
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -224,14 +228,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
 
       if (error) throw error;
 
-      if (emailChanged) {
-        toast.success(isAr ? "تم إرسال رابط/رمز تأكيد إلى البريد الجديد" : "Un lien/code de confirmation a été envoyé au nouvel email");
-        // Keep current email visible in the input until confirmed
-        setProfile(prev => prev ? { ...prev, email: currentEmail } : prev);
-        setPendingEmail(newEmail);
-      } else {
-        toast.success(isAr ? "تم حفظ التغييرات بنجاح" : "Modifications enregistrées");
-      }
+      toast.success(isAr ? "تم حفظ التغييرات بنجاح" : "Modifications enregistrées");
       
       // If language changed, redirect
       if (profile.language !== locale) {
@@ -242,6 +239,52 @@ export function ProfileSettings({ locale }: { locale: string }) {
       toast.error(error.message || (isAr ? "حدث خطأ أثناء الحفظ" : "Erreur lors de l'enregistrement"));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmailInput || newEmailInput === currentEmail) {
+      setIsEmailDialogOpen(false);
+      return;
+    }
+
+    setIsEmailChanging(true);
+    try {
+      const { error: authError } = await supabase.auth.updateUser({ email: newEmailInput });
+      if (authError) {
+        const errorMsg = authError.message.toLowerCase();
+        if (errorMsg.includes('already registered') || errorMsg.includes('exists') || errorMsg.includes('duplicate key')) {
+          throw new Error(isAr ? 'هذا البريد الإلكتروني مستخدم بالفعل. يرجى استخدام بريد آخر.' : 'Cet email est déjà utilisé. Veuillez en utiliser un autre.');
+        }
+        if (errorMsg.includes('rate limit') || errorMsg.includes('too many requests')) {
+          setRateLimitCooldown(60);
+          throw new Error(isAr ? 'لقد تجاوزت الحد المسموح لتغيير البريد الإلكتروني.\nيرجى الانتظار 5-10 دقائق ثم المحاولة مرة أخرى.' : 'Limite de demandes de changement d\'e-mail dépassée.\nVeuillez patienter 5 à 10 minutes avant de réessayer.');
+        }
+        throw authError;
+      }
+      
+      toast.success(isAr ? "تم إرسال طلب تغيير البريد بنجاح. يرجى التحقق من بريدك القديم والجديد لإكمال العملية." : "Demande de changement d'e-mail envoyée avec succès. Veuillez vérifier votre ancienne et nouvelle boîte de réception.");
+      setPendingEmail(newEmailInput);
+      setIsEmailDialogOpen(false);
+      setNewEmailInput("");
+    } catch (error: any) {
+      console.error("Change email error:", error);
+      toast.error(error.message || (isAr ? "حدث خطأ أثناء تغيير البريد" : "Erreur lors du changement d'email"));
+    } finally {
+      setIsEmailChanging(false);
+    }
+  };
+
+  const handleCancelEmailChange = async () => {
+    try {
+      // Calling updateUser with the current email resets the new_email flag in Supabase
+      await supabase.auth.updateUser({ email: currentEmail });
+      setPendingEmail("");
+      toast.success(isAr ? "تم إلغاء تغيير البريد الإلكتروني" : "Changement d'email annulé");
+    } catch (err) {
+      console.error(err);
+      toast.error(isAr ? "حدث خطأ أثناء الإلغاء" : "Erreur lors de l'annulation");
     }
   };
 
@@ -349,22 +392,51 @@ export function ProfileSettings({ locale }: { locale: string }) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">{isAr ? 'البريد الإلكتروني' : 'Email'}</Label>
-                <Input 
-                  id="email" 
-                  type="email"
-                  value={profile.email || ""} 
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="bg-white dark:bg-slate-900"
-                />
-                {pendingEmail ? (
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                    {isAr ? `في انتظار تأكيد البريد الجديد: ${pendingEmail}` : `En attente de confirmation pour le nouvel email : ${pendingEmail}`}
-                  </p>
-                ) : (
-                  <p className="text-xs text-amber-600 dark:text-amber-500">
-                    {isAr ? 'تغيير البريد يتطلب تأكيد جديد. سيبقى بريدك الحالي كما هو حتى يتم التأكيد.' : 'Changer d\'email nécessite une nouvelle confirmation. Votre email actuel restera inchangé jusqu\'à confirmation.'}
-                  </p>
+                <Label>{isAr ? 'البريد الإلكتروني' : 'Email'}</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    disabled
+                    value={currentEmail} 
+                    className="bg-slate-50 dark:bg-slate-900/50 flex-1"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => {
+                      setNewEmailInput("");
+                      setIsEmailDialogOpen(true);
+                    }}
+                  >
+                    {isAr ? 'تغيير' : 'Changer'}
+                  </Button>
+                </div>
+                {pendingEmail && (
+                  <div className="mt-6 space-y-3">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {isAr ? 'تغييرات معلقة' : 'Changements en attente'}
+                    </h4>
+                    <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-900/30">
+                      <div>
+                        <p className="text-sm text-amber-800 dark:text-amber-300 font-medium flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {isAr ? 'تغيير البريد الإلكتروني قيد الانتظار' : 'Changement d\'e-mail en attente'}
+                        </p>
+                        <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1.5">
+                          {isAr ? 'البريد الجديد: ' : 'Nouvel e-mail : '}
+                          <span className="font-semibold" dir="ltr">{pendingEmail}</span>
+                        </p>
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCancelEmailChange}
+                        className="bg-white hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-transparent dark:hover:bg-amber-900/40 dark:border-amber-900/50 dark:text-amber-400"
+                      >
+                        {isAr ? 'إلغاء الطلب' : 'Annuler la demande'}
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="space-y-2">
@@ -537,6 +609,76 @@ export function ProfileSettings({ locale }: { locale: string }) {
           </CardFooter>
         </form>
       </Card>
+
+      {/* Email Change Dialog */}
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleChangeEmail}>
+            <DialogHeader>
+              <DialogTitle>{isAr ? 'تغيير البريد الإلكتروني' : 'Changer l\'email'}</DialogTitle>
+              <DialogDescription className="text-start">
+                {isAr ? 'سيتم إرسال رسائل تأكيد.' : 'Des e-mails de confirmation seront envoyés.'}
+              </DialogDescription>
+              {isAr ? (
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-start mt-4">
+                  <p className="text-slate-800 dark:text-slate-200 font-medium mb-3">سيتم إرسال:</p>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <li>رسالة إشعار إلى بريدك القديم (<span dir="ltr" className="text-slate-800 dark:text-slate-300 font-medium">{currentEmail}</span>)</li>
+                    <li>رسالة تأكيد إلى البريد الجديد الذي أدخلته</li>
+                  </ul>
+                  <p className="font-semibold text-blue-600 dark:text-blue-400 mt-4 text-sm flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 inline-block"></span>
+                    يرجى التحقق من كلا البريدين لإكمال العملية.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-start mt-4">
+                  <p className="text-slate-800 dark:text-slate-200 font-medium mb-3">Il sera envoyé :</p>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <li>Un e-mail de notification à votre ancienne adresse (<span dir="ltr" className="text-slate-800 dark:text-slate-300 font-medium">{currentEmail}</span>)</li>
+                    <li>Un e-mail de confirmation à la nouvelle adresse saisie</li>
+                  </ul>
+                  <p className="font-semibold text-blue-600 dark:text-blue-400 mt-4 text-sm flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 inline-block"></span>
+                    Veuillez vérifier vos deux boîtes de réception pour terminer.
+                  </p>
+                </div>
+              )}
+            </DialogHeader>
+            <div className="flex items-center space-x-2 py-4">
+              <div className="grid flex-1 gap-2">
+                <Label htmlFor="new_email" className="sr-only">
+                  {isAr ? 'البريد الجديد' : 'Nouvel email'}
+                </Label>
+                <Input
+                  id="new_email"
+                  type="email"
+                  required
+                  placeholder={isAr ? 'أدخل البريد الجديد' : 'Entrez le nouvel email'}
+                  value={newEmailInput}
+                  onChange={(e) => setNewEmailInput(e.target.value)}
+                  dir="ltr"
+                  className="text-left"
+                />
+              </div>
+            </div>
+            <DialogFooter className="sm:justify-start flex-row-reverse sm:flex-row gap-2">
+              <Button type="button" variant="secondary" onClick={() => setIsEmailDialogOpen(false)}>
+                {isAr ? 'إلغاء' : 'Annuler'}
+              </Button>
+              <Button type="submit" disabled={isEmailChanging || !newEmailInput || newEmailInput === currentEmail || rateLimitCooldown > 0}>
+                {isEmailChanging ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : rateLimitCooldown > 0 ? (
+                  isAr ? `إعادة المحاولة بعد ${rateLimitCooldown}ث` : `Réessayer dans ${rateLimitCooldown}s`
+                ) : (
+                  isAr ? 'تغيير البريد' : 'Changer l\'e-mail'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
