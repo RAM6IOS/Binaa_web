@@ -32,9 +32,51 @@ function VerifyOtpContent() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  const handlePaste = (index: number, e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim().replace(/[^0-9]/g, "");
+    if (!pastedData) return;
+
+    const otpDigits = pastedData.split("");
+    const newOtp = [...otp];
+    
+    // If the pasted data is 8 digits, always paste starting from the first input
+    const startIndex = otpDigits.length === 8 ? 0 : index;
+
+    otpDigits.forEach((char, i) => {
+      if (startIndex + i < 8) newOtp[startIndex + i] = char;
+    });
+    setOtp(newOtp);
+
+    // Focus on the input after the last pasted digit or the last input
+    const nextIndex = Math.min(startIndex + otpDigits.length, 7);
+    inputRefs.current[nextIndex]?.focus();
+  };
+
   const handleChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      const pastedData = value.slice(0, 8).replace(/[^0-9]/g, "").split("");
+    const cleanValue = value.replace(/[^0-9]/g, "");
+    
+    if (cleanValue.length > 1) {
+      const oldDigit = otp[index];
+      let newDigit = cleanValue;
+      if (oldDigit && cleanValue.startsWith(oldDigit)) {
+        newDigit = cleanValue.substring(oldDigit.length);
+      } else if (oldDigit && cleanValue.endsWith(oldDigit)) {
+        newDigit = cleanValue.substring(0, cleanValue.length - oldDigit.length);
+      }
+      
+      if (newDigit.length === 1) {
+        const newOtp = [...otp];
+        newOtp[index] = newDigit;
+        setOtp(newOtp);
+        if (index < 7) {
+          inputRefs.current[index + 1]?.focus();
+        }
+        return;
+      }
+
+      // If it is indeed a multi-digit paste fallback
+      const pastedData = cleanValue.slice(0, 8).split("");
       const newOtp = [...otp];
       pastedData.forEach((char, i) => {
         if (index + i < 8) newOtp[index + i] = char;
@@ -45,20 +87,31 @@ function VerifyOtpContent() {
       return;
     }
 
-    if (/^[0-9]$/.test(value) || value === "") {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
+    const newOtp = [...otp];
+    newOtp[index] = cleanValue;
+    setOtp(newOtp);
 
-      if (value !== "" && index < 7) {
-        inputRefs.current[index + 1]?.focus();
-      }
+    if (cleanValue !== "" && index < 7) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+    if (e.key === "Backspace") {
+      if (otp[index] === "" && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 7) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
@@ -131,10 +184,10 @@ function VerifyOtpContent() {
               ref={(el) => { inputRefs.current[index] = el; }}
               type="text"
               inputMode="numeric"
-              maxLength={1}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={(e) => handlePaste(index, e)}
               className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-lg bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
               autoFocus={index === 0}
             />
