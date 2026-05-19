@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Loader2, Share2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw } from "lucide-react";
+import { MapPin, Calendar, Loader2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/routing";
@@ -140,12 +140,12 @@ export default function ProjectDetailPage({
           {isAr ? 'العودة إلى قائمة المشاريع' : 'Retour aux projets'}
         </Button>
         
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-2 h-9">
             <Share2 className="w-4 h-4" />
             {isAr ? 'مشاركة' : 'Partager'}
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Header Profile */}
