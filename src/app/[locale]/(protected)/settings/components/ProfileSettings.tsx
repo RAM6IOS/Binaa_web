@@ -26,6 +26,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [currentEmail, setCurrentEmail] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -66,6 +67,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
             theme: (theme as 'light' | 'dark' | 'system') || 'system'
           } as UserProfile);
           setCurrentEmail(userEmail);
+          setPendingEmail(user.new_email || "");
         } else {
           // No profile data found, initialize with basic info from auth
           const userEmail = user?.email || "";
@@ -77,6 +79,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
             theme: (theme as 'light' | 'dark' | 'system') || 'system'
           } as UserProfile);
           setCurrentEmail(userEmail);
+          setPendingEmail(user.new_email || "");
         }
       } catch (err) {
         console.error("Load profile error:", err);
@@ -201,8 +204,8 @@ export function ProfileSettings({ locale }: { locale: string }) {
       if (newEmail && newEmail !== currentEmail) {
         const { error: authError } = await supabase.auth.updateUser({ email: newEmail });
         if (authError) {
-          if (authError.message.includes('already registered') || authError.message.includes('exists')) {
-            throw new Error(isAr ? 'البريد الإلكتروني مستخدم بالفعل' : 'Cet email est déjà utilisé');
+          if (authError.message.includes('already registered') || authError.message.includes('exists') || authError.message.includes('duplicate key')) {
+            throw new Error(isAr ? 'هذا البريد الإلكتروني مستخدم بالفعل. يرجى استخدام بريد آخر.' : 'Cet email est déjà utilisé. Veuillez en utiliser un autre.');
           }
           throw authError;
         }
@@ -222,8 +225,10 @@ export function ProfileSettings({ locale }: { locale: string }) {
       if (error) throw error;
 
       if (emailChanged) {
-        toast.success(isAr ? "تم إرسال رابط التأكيد إلى بريدك الجديد" : "Un lien de confirmation a été envoyé à votre nouvel email");
-        setCurrentEmail(profile.email || "");
+        toast.success(isAr ? "تم إرسال رابط/رمز تأكيد إلى البريد الجديد" : "Un lien/code de confirmation a été envoyé au nouvel email");
+        // Keep current email visible in the input until confirmed
+        setProfile(prev => prev ? { ...prev, email: currentEmail } : prev);
+        setPendingEmail(newEmail);
       } else {
         toast.success(isAr ? "تم حفظ التغييرات بنجاح" : "Modifications enregistrées");
       }
@@ -352,9 +357,15 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   className="bg-white dark:bg-slate-900"
                 />
-                <p className="text-xs text-amber-600 dark:text-amber-500">
-                  {isAr ? 'تغيير البريد يتطلب تأكيد جديد' : 'Changer d\'email nécessite une nouvelle confirmation'}
-                </p>
+                {pendingEmail ? (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                    {isAr ? `في انتظار تأكيد البريد الجديد: ${pendingEmail}` : `En attente de confirmation pour le nouvel email : ${pendingEmail}`}
+                  </p>
+                ) : (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    {isAr ? 'تغيير البريد يتطلب تأكيد جديد. سيبقى بريدك الحالي كما هو حتى يتم التأكيد.' : 'Changer d\'email nécessite une nouvelle confirmation. Votre email actuel restera inchangé jusqu\'à confirmation.'}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">{isAr ? 'رقم الهاتف' : 'Numéro de téléphone'}</Label>
