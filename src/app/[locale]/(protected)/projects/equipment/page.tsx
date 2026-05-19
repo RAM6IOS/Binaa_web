@@ -166,8 +166,110 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               ))}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <>
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredEquipment.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-2">
+                    <Truck className="w-8 h-8 text-slate-300" />
+                    <p>{isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}</p>
+                  </div>
+                ) : (
+                  filteredEquipment.map((item) => (
+                    <div key={item.id} className="p-4 space-y-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/10">
+                      {/* Top row: Image + Name/Category + Actions */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0 overflow-hidden border border-emerald-100 dark:border-emerald-900/30">
+                            {item.photo_url ? (
+                              <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Truck className="w-6 h-6 text-emerald-600" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900 dark:text-slate-100">{item.name}</h3>
+                            <span className="text-xs text-slate-505 capitalize">{item.category}</span>
+                          </div>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rtl:text-right">
+                            <AddEquipmentDialog 
+                              isAr={isAr} 
+                              onSuccess={fetchEquipment} 
+                              equipment={item}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer gap-2">
+                                  <Edit className="w-4 h-4" />
+                                  {isAr ? 'تعديل' : 'Modifier'}
+                                </DropdownMenuItem>
+                              }
+                            />
+                            <DropdownMenuItem className="text-red-600 cursor-pointer gap-2" onClick={() => handleDelete(item.id)}>
+                              <Trash2 className="w-4 h-4" />
+                              {isAr ? 'حذف' : 'Supprimer'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Middle row: Brand/Model & Serial number */}
+                      <div className="grid grid-cols-2 gap-3 text-xs border-t border-slate-50 dark:border-slate-850 pt-2">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'العلامة / الموديل' : 'Marque / Modèle'}</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            {item.brand} <span className="text-slate-550 text-[10px]">({item.model})</span>
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'الرقم التسلسلي' : 'N° Série'}</span>
+                          <code className="text-xs font-mono font-medium text-slate-700 dark:text-slate-350">{item.serial_number}</code>
+                        </div>
+                      </div>
+
+                      {/* Badges/Details row: Statuses & Wilaya */}
+                      <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-lg border border-slate-100/50 dark:border-slate-800/30 items-center">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الولاية' : 'Wilaya'}</span>
+                          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-350 font-medium">
+                            <MapPin className="w-3.5 h-3.5 text-red-500" /> {item.wilaya}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الحالة' : 'Statut'}</span>
+                          <div>
+                            <EquipmentStatusBadge status={item.status} isAr={isAr} />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الصيانة' : 'Maint.'}</span>
+                          <div>
+                            <MaintenanceStatusBadge status={item.maintenance_status} isAr={isAr} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Daily Rate row */}
+                      <div className="flex justify-between items-center bg-emerald-50/30 dark:bg-emerald-950/10 p-2.5 rounded-lg border border-emerald-100/20 dark:border-emerald-900/10">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{isAr ? 'الأجر اليومي' : 'Taux journalier'}</span>
+                        <div className="font-bold text-slate-950 dark:text-slate-50">
+                          {item.daily_rate.toLocaleString()} <span className="text-[10px] text-slate-505 font-normal">DZD</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
                 <TableHeader className="bg-slate-50 dark:bg-slate-900 border-y">
                   <TableRow>
                     <TableHead className="w-[280px]">{isAr ? 'المعدة' : 'Équipement'}</TableHead>
@@ -272,6 +374,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                 </TableBody>
               </Table>
             </div>
+          </>
           )}
         </CardContent>
       </Card>

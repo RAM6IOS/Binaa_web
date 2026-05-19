@@ -24,7 +24,14 @@ export function Sidebar({ locale, className }: { locale: string; className?: str
       </div>
       <nav className="flex-1 py-6 px-3 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          // Check if there is another menu item that is a more specific match for the current path
+          const hasMoreSpecificMatch = menuItems.some(
+            (menuItem) =>
+              menuItem.href !== item.href &&
+              menuItem.href.startsWith(item.href) &&
+              pathname.startsWith(menuItem.href)
+          );
+          const isActive = !hasMoreSpecificMatch && pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link
