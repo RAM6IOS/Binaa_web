@@ -160,8 +160,102 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
               ))}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <>
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredWorkers.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-2">
+                    <User className="w-8 h-8 text-slate-300" />
+                    <p>{isAr ? 'لا يوجد عمال مطابقون للبحث' : 'Aucun ouvrier trouvé'}</p>
+                  </div>
+                ) : (
+                  filteredWorkers.map((worker) => (
+                    <div key={worker.id} className="p-4 space-y-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/10">
+                      {/* Top row: Avatar + Name + Actions */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
+                            {worker.photo_url ? (
+                              <img src={worker.photo_url} alt={worker.full_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-6 h-6 text-slate-500" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900 dark:text-slate-100">{worker.full_name}</h3>
+                            <span className="text-xs text-slate-500 font-mono">CIN: {worker.cin}</span>
+                          </div>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rtl:text-right">
+                            <AddWorkerDialog 
+                              isAr={isAr} 
+                              onSuccess={fetchWorkers} 
+                              worker={worker}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer gap-2">
+                                  <Edit className="w-4 h-4" />
+                                  {isAr ? 'تعديل' : 'Modifier'}
+                                </DropdownMenuItem>
+                              }
+                            />
+                            <DropdownMenuItem className="text-red-600 cursor-pointer gap-2" onClick={() => handleDelete(worker.id)}>
+                              <Trash2 className="w-4 h-4" />
+                              {isAr ? 'حذف' : 'Supprimer'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Middle row: Job title & Status */}
+                      <div className="flex items-center justify-between gap-2 border-t border-slate-50 dark:border-slate-850 pt-2">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'الوظيفة' : 'Poste'}</span>
+                          <span className="font-medium text-slate-900 dark:text-slate-100 text-sm">{worker.job_title}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold mb-1">{isAr ? 'الحالة' : 'Statut'}</span>
+                          <WorkerStatusBadge status={worker.availability} isAr={isAr} />
+                        </div>
+                      </div>
+
+                      {/* Details row: Phone & Wilaya */}
+                      <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-lg border border-slate-100/50 dark:border-slate-800/30">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'الهاتف' : 'Téléphone'}</span>
+                          <a href={`tel:${worker.phone}`} className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline">
+                            <Phone className="w-3.5 h-3.5" /> {worker.phone}
+                          </a>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'الولاية' : 'Wilaya'}</span>
+                          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-350">
+                            <MapPin className="w-3.5 h-3.5 text-red-500" /> {worker.wilaya}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Rate row */}
+                      <div className="flex justify-between items-center bg-blue-50/30 dark:bg-blue-950/10 p-2.5 rounded-lg border border-blue-100/20 dark:border-blue-900/10">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{isAr ? 'الأجر اليومي' : 'Taux journalier'}</span>
+                        <div className="font-bold text-slate-950 dark:text-slate-50">
+                          {worker.daily_rate.toLocaleString()} <span className="text-[10px] text-slate-505 font-normal">DZD/J</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
                 <TableHeader className="bg-slate-50 dark:bg-slate-900 border-y">
                   <TableRow>
                     <TableHead className="w-[250px]">{isAr ? 'صورة / العامل' : 'Photo / Ouvrier'}</TableHead>
@@ -257,6 +351,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                 </TableBody>
               </Table>
             </div>
+          </>
           )}
         </CardContent>
       </Card>

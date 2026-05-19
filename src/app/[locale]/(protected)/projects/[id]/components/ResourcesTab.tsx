@@ -149,7 +149,82 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
           />
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
+          {/* Mobile view */}
+          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            {isLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
+              </div>
+            ) : assignedWorkers.length === 0 ? (
+              <div className="py-12 text-center flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+                  <Users className="w-8 h-8 text-slate-300 dark:text-slate-700" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}</p>
+                  <p className="text-xs text-slate-500">{isAr ? 'لم يتم تعيين أي عمال لهذا المشروع بعد.' : 'Aucun ouvrier n\'a encore été affecté à ce projet.'}</p>
+                </div>
+              </div>
+            ) : (
+              assignedWorkers.map((pw) => (
+                <div key={pw.id} className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-850 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-800">
+                        {pw.worker?.photo_url ? (
+                          <img src={pw.worker.photo_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <HardHat className="w-5 h-5 text-slate-400" />
+                        )}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100 block">{pw.worker?.full_name}</span>
+                        <span className="text-[10px] text-slate-500 uppercase font-medium">{pw.worker?.job_title}</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 h-8 w-8"
+                      onClick={() => handleRemoveWorker(pw.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الدور في المشروع' : 'Rôle'}</span>
+                      <Badge variant="outline" className="font-normal bg-blue-50/50 text-blue-700 border-blue-100 dark:bg-blue-955/20 dark:text-blue-400 dark:border-blue-900/30">
+                        {pw.assigned_role}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-col gap-0.5 items-end">
+                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الاستخدام' : 'Heures'}</span>
+                      <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-350">
+                        <Clock className="w-3.5 h-3.5 text-slate-450" />
+                        {pw.daily_hours}h/{isAr ? 'يوم' : 'j'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/30 p-2 rounded-lg border border-slate-100 dark:border-slate-800 text-xs">
+                    <span className="font-medium text-slate-550">{isAr ? 'التكلفة اليومية' : 'Coût journalier'}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[10px] text-slate-500 font-normal">DZD</span>
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop view */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
                 <TableHead>{isAr ? 'العامل' : 'Ouvrier'}</TableHead>
@@ -239,10 +314,11 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
               )}
             </TableBody>
           </Table>
+        </div>
         </CardContent>
       </Card>
 
-      {/* Equipment Section (Stays similar for now) */}
+      {/* Equipment Section */}
       <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b flex flex-row items-center justify-between py-4">
           <div className="flex items-center gap-3">
@@ -263,7 +339,73 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
           />
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
+          {/* Mobile view */}
+          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            {isLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
+              </div>
+            ) : assignedEquipment.length === 0 ? (
+              <div className="py-12 text-center flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+                  <Construction className="w-8 h-8 text-slate-300 dark:text-slate-700" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{isAr ? 'لا يوجد عتاد' : 'Aucun équipement'}</p>
+                  <p className="text-xs text-slate-500">{isAr ? 'لم يتم تخصيص أي عتاد لهذا المشروع بعد.' : 'Aucun équipement n\'a encore été affecté à ce projet.'}</p>
+                </div>
+              </div>
+            ) : (
+              assignedEquipment.map((pe) => (
+                <div key={pe.id} className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600">
+                        <Truck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100 block">{pe.equipment?.name}</span>
+                        <Badge variant="outline" className="font-normal bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 text-[10px] px-1 py-0 h-auto">
+                          {pe.equipment?.type}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 h-8 w-8"
+                      onClick={() => handleRemoveEquipment(pe.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-slate-900/30 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الاستخدام' : 'Utilisation'}</span>
+                      <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-355">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {pe.usage_hours_per_day}h/{isAr ? 'يوم' : 'j'}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'تاريخ التعيين' : 'Assigné le'}</span>
+                      <span className="text-slate-600 dark:text-slate-300 font-medium">
+                        {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR') : '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop view */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
                 <TableHead>{isAr ? 'العتاد' : 'Équipement'}</TableHead>
@@ -344,6 +486,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
               )}
             </TableBody>
           </Table>
+        </div>
         </CardContent>
       </Card>
     </div>

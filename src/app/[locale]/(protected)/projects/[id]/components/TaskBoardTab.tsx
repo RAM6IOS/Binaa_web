@@ -324,7 +324,91 @@ export function TaskBoardTab({ project, isAr }: Props) {
           </div>
         ) : (
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950">
-            <Table>
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-950">
+              {tasks.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 italic">
+                  {isAr ? 'لا توجد مهام مضافة بعد.' : 'Aucune tâche ajoutée pour le moment.'}
+                </div>
+              ) : (
+                tasks.map((task) => {
+                  const assignedWorker = workers.find(w => w.id === task.assigned_to);
+                  return (
+                    <div key={task.id} className="p-4 space-y-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/10">
+                      {/* Top row: Title & Edit */}
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm leading-snug">{task.title}</h4>
+                          {task.description && (
+                            <p className="text-xs text-slate-505 font-normal line-clamp-2">{task.description}</p>
+                          )}
+                        </div>
+
+                        <AddTaskDialog 
+                          isAr={isAr} 
+                          projectId={project.id} 
+                          onSuccess={fetchTasks} 
+                          task={task}
+                          trigger={
+                            <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors shrink-0">
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                          }
+                        />
+                      </div>
+
+                      {/* Badges row: Status & Priority */}
+                      <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-50 dark:border-slate-850">
+                        <TaskStatusBadge status={task.status} isAr={isAr} />
+                        <TaskPriorityBadge priority={task.priority} isAr={isAr} />
+                      </div>
+
+                      {/* Details row: Due date & Responsible */}
+                      <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-lg border border-slate-100/50 dark:border-slate-800/30">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'تاريخ الاستحقاق' : 'Échéance'}</span>
+                          <span className="flex items-center gap-1 text-slate-700 dark:text-slate-350 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                            {task.due_date}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'المسؤول' : 'Responsable'}</span>
+                          <div className="flex items-center gap-1.5 text-slate-750 dark:text-slate-300 font-medium">
+                            <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border">
+                              {assignedWorker?.photo_url ? (
+                                <img src={assignedWorker.photo_url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="w-3 h-3 text-slate-400" />
+                              )}
+                            </div>
+                            <span className="truncate max-w-[90px]">
+                              {assignedWorker ? assignedWorker.full_name : (isAr ? 'غير معين' : 'Non assigné')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress row */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-505 font-semibold">{isAr ? 'التقدم' : 'Progrès'}</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">{task.progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/20">
+                          <div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${task.progress}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block">
+              <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-900/50">
                   <TableHead className="w-[300px]">{isAr ? 'المهمة' : 'Tâche'}</TableHead>
@@ -406,7 +490,8 @@ export function TaskBoardTab({ project, isAr }: Props) {
                   })
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </div>
         )}
       </CardContent>
