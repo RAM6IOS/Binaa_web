@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
+import { NotificationDropdown } from "./NotificationDropdown";
 
 export function Header({ 
   locale, 
@@ -55,6 +56,9 @@ export function Header({
           <Globe className="w-4 h-4" />
           {locale === 'ar' ? 'Français' : 'العربية'}
         </Button>
+        
+        {/* نظام الإشعارات المتكامل */}
+        <NotificationDropdown locale={locale} />
         
         <LogoutButton 
           variant="ghost" 
