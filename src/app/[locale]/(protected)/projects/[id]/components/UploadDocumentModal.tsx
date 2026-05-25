@@ -9,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Loader2, UploadCloud, MapPin, Image as ImageIcon, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { documentsService } from "@/lib/services/documents-service";
+import { documentService } from "@/lib/services/document-service";
 import { createClient } from "@/lib/supabase/client";
-import { ProjectDocument } from "@/lib/types/projects";
+import { ProjectDocument } from "@/lib/types/documents";
 
 interface Props {
   isAr: boolean;
@@ -112,22 +112,16 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // 1. Upload to Storage
-      const fileExt = selectedFile.name.split('.').pop();
-      const storagePath = `${projectId}/${Date.now()}.${fileExt}`;
-      const file_url = await documentsService.uploadFile(storagePath, selectedFile);
-
-      // 2. Insert into database
-      await documentsService.create({
-        project_id: projectId,
-        file_name: formData.file_name,
-        file_url: file_url,
-        file_type: formData.file_type,
-        notes: formData.notes,
-        gps_coordinates: formData.gps_coordinates,
-        uploaded_at: new Date().toISOString(),
-        uploaded_by: user.id
-      });
+      // Upload and insert database entry using documentService
+      await documentService.uploadDocument(
+        projectId,
+        selectedFile,
+        formData.file_name,
+        formData.notes || undefined,
+        formData.file_type || undefined,
+        formData.gps_coordinates || undefined,
+        supabase
+      );
 
       toast.success(isAr ? 'تم رفع الوثيقة بنجاح' : 'Document téléchargé avec succès');
       
