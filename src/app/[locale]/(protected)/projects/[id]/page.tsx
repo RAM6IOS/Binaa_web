@@ -214,6 +214,9 @@ export default function ProjectDetailPage({
           <TabsTrigger value="resources" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
             {isAr ? 'العمال والعتاد' : 'Ressources'}
           </TabsTrigger>
+          <TabsTrigger value="documents" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
+            {isAr ? 'الوثائق' : 'Documents'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
@@ -228,9 +231,9 @@ export default function ProjectDetailPage({
           <ResourcesTab project={project} isAr={isAr} />
         </TabsContent>
 
-        {/* <TabsContent value="documents" className="mt-0 focus-visible:outline-none">
+        <TabsContent value="documents" className="mt-0 focus-visible:outline-none">
           <DocumentsTab project={project} isAr={isAr} />
-        </TabsContent> */}
+        </TabsContent>
       </Tabs>
     </div>
   );
