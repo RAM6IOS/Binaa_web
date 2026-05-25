@@ -95,6 +95,8 @@ export async function POST(
       );
     }
 
+    const gpsCoordinates = formData.get('gps_coordinates') as string | null || formData.get('gpsCoordinates') as string | null;
+
     // رفع المستند باستخدام خدمة المستندات
     const newDocument = await documentService.uploadDocument(
       projectId,
@@ -102,6 +104,7 @@ export async function POST(
       title,
       description || undefined,
       category || undefined,
+      gpsCoordinates || undefined,
       supabase
     );
 
