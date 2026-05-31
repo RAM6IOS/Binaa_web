@@ -13,6 +13,7 @@ import { OverviewTab } from "./components/OverviewTab";
 import { TaskBoardTab } from "./components/TaskBoardTab";
 import { ResourcesTab } from "./components/ResourcesTab";
 import { DocumentsTab } from "./components/DocumentsTab";
+import { BudgetTab } from "./components/BudgetTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 
@@ -217,6 +218,9 @@ export default function ProjectDetailPage({
           <TabsTrigger value="documents" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
             {isAr ? 'الوثائق' : 'Documents'}
           </TabsTrigger>
+          <TabsTrigger value="budget" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-emerald-700 dark:text-emerald-400 data-[state=active]:text-emerald-700">
+            {isAr ? '💰 الميزانية والمالية' : '💰 Budget & Finances'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
@@ -233,6 +237,10 @@ export default function ProjectDetailPage({
 
         <TabsContent value="documents" className="mt-0 focus-visible:outline-none">
           <DocumentsTab project={project} isAr={isAr} />
+        </TabsContent>
+
+        <TabsContent value="budget" className="mt-0 focus-visible:outline-none">
+          <BudgetTab project={project} isAr={isAr} />
         </TabsContent>
       </Tabs>
     </div>
