@@ -124,6 +124,15 @@ export interface Equipment {
   warranty_expiry?: string;
   supplier_maintenance_contact?: string;
   created_at?: string;
+  
+  // Rental specific fields
+  owner_id?: string;
+  is_for_rent?: boolean;
+  rent_hourly_rate?: number;
+  rent_daily_rate?: number;
+  gps_coordinates?: string;
+  description?: string;
+  rental_description?: string;
 }
 
 export interface ProjectWorker {
@@ -147,3 +156,46 @@ export interface ProjectEquipment {
   assigned_at: string;
   equipment?: Equipment;
 }
+
+export type RentalStatus = 'pending' | 'approved' | 'ongoing' | 'completed' | 'rejected';
+
+export interface EquipmentRental {
+  id: string;
+  equipment_id: string;
+  project_id?: string;
+  renter_id: string;
+  owner_id: string;
+  start_date: string;
+  end_date: string;
+  total_cost: number;
+  status: RentalStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  
+  // Joins
+  equipment?: Equipment;
+  project?: {
+    id: string;
+    name: string;
+  };
+  renter?: {
+    id: string;
+    full_name: string;
+  };
+  owner?: {
+    id: string;
+    full_name: string;
+  };
+}
+
+export interface EquipmentAvailability {
+  id: string;
+  equipment_id: string;
+  start_date: string;
+  end_date: string;
+  is_available: boolean;
+  notes?: string;
+  created_at: string;
+}
+

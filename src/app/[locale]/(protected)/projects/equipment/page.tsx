@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { Link } from "@/i18n/routing";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,7 +88,21 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{isAr ? 'العتاد والمعدات' : 'Équipement & Matériel'}</h2>
           <p className="text-slate-500 mt-1">{isAr ? 'إدارة المعدات الثقيلة والآلات وتتبع حالتها' : 'Gérer les engins lourds, les machines et suivre leur état'}</p>
         </div>
-        <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/projects/equipment/rental-market">
+            <Button variant="outline" className="gap-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 h-10 font-semibold">
+              <Truck className="w-4 h-4" />
+              {isAr ? 'سوق تأجير العتاد' : 'Marché de Location'}
+            </Button>
+          </Link>
+          <Link href="/projects/equipment/my-rentals">
+            <Button variant="outline" className="gap-2 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 h-10 font-semibold">
+              <Settings className="w-4 h-4" />
+              {isAr ? 'إدارة تأجيراتي' : 'Mes Locations'}
+            </Button>
+          </Link>
+          <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />
+        </div>
       </div>
 
       <Card>

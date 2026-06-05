@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, usePathname } from "@/i18n/routing";
-import { Building2, LayoutDashboard, Briefcase, FileText, PieChart, Users, Construction, Settings } from "lucide-react";
+import { Building2, LayoutDashboard, Briefcase, Users, Construction, Settings, Tractor } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({ locale, className }: { locale: string; className?: string }) {
@@ -13,6 +13,7 @@ export function Sidebar({ locale, className }: { locale: string; className?: str
     { name: isAr ? 'المشاريع' : 'Projets', href: '/projects', icon: Briefcase },
     { name: isAr ? 'العمال' : 'العمال / Ouvriers', href: '/projects/workers', icon: Users },
     { name: isAr ? 'العتاد' : 'Équipement', href: '/projects/equipment', icon: Construction },
+    { name: isAr ? 'سوق التأجير' : 'Location Matériel', href: '/rent/market', icon: Tractor },
     { name: isAr ? 'الإعدادات' : 'Paramètres', href: '/settings', icon: Settings },
   ];
 
