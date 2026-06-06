@@ -72,8 +72,12 @@ export default function LandingPage() {
               <Badge className="mb-6 bg-blue-50 text-blue-700 border-blue-100 px-4 py-1.5 text-sm font-medium hover:bg-blue-100 transition-colors">
                 مستقبل إدارة الإنشاءات في الجزائر 🇩🇿
               </Badge>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] text-slate-900 mb-6">
-                إدارة مشاريع <span className="text-blue-600">الأشغال العمومية</span> والإنشاءات بذكاء
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.2] text-slate-900 mb-6">
+                <span className="block mb-2">سيّر مشروعك بذكاء</span>
+                <span className="block text-3xl md:text-4xl lg:text-5xl font-bold text-slate-500">
+                  من البناء الخاص إلى{" "}
+                  <span className="text-blue-600 font-extrabold">الأشغال العمومية</span>
+                </span>
               </h1>
               <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-xl ml-auto">
                 منصة جزائرية متكاملة تساعد المقاولين على متابعة المشاريع، العمال، والمعدات في الوقت الفعلي ومن أي مكان.
