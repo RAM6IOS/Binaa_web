@@ -3,15 +3,15 @@
 import React from "react";
 import LinkNext from "next/link";
 import Image from "next/image";
-import { 
-  Building2, 
-  Calendar, 
-  Users, 
-  Wrench, 
-  FileText, 
-  BarChart3, 
-  Bell, 
-  CheckCircle2, 
+import {
+  Building2,
+  Calendar,
+  Users,
+  Wrench,
+  FileText,
+  BarChart3,
+  Bell,
+  CheckCircle2,
   ArrowLeft,
   Menu,
   X,
@@ -63,7 +63,7 @@ export default function LandingPage() {
 
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div 
+            <motion.div
               initial="initial"
               animate="animate"
               variants={fadeIn}
@@ -93,7 +93,7 @@ export default function LandingPage() {
                   شاهد الفيديو
                 </Button>
               </div>
-              
+
               <div className="mt-12 flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 justify-end text-sm text-slate-500">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -106,17 +106,17 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
-                <Image 
-                  src="/images/hero_dashboard.png" 
-                  alt="Binaa Dashboard" 
-                  width={1200} 
+                <Image
+                  src="/images/hero_dashboard.png"
+                  alt="Binaa Dashboard"
+                  width={1200}
                   height={800}
                   className="w-full h-auto"
                   priority
@@ -126,27 +126,6 @@ export default function LandingPage() {
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl" />
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Trust Bar */}
-      <section className="py-12 border-y border-slate-100 bg-slate-50/50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-            <div className="flex items-center gap-3">
-              <span className="text-lg font-bold text-slate-700">مستخدم من قبل +150 مقاول جزائري</span>
-            </div>
-            <div className="h-6 w-px bg-slate-300 hidden md:block" />
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6 text-blue-600" />
-              <span className="text-lg font-bold text-slate-700">متوافق مع قانون المشتريات العمومية</span>
-            </div>
-            <div className="h-6 w-px bg-slate-300 hidden md:block" />
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-900 text-white px-2 py-0.5 rounded text-xs font-black">ANPT</div>
-              <span className="text-lg font-bold text-slate-700">مدعوم من طرف ANPT</span>
-            </div>
           </div>
         </div>
       </section>
@@ -163,7 +142,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -380,8 +359,8 @@ export default function LandingPage() {
           <div className="bg-blue-600 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-blue-200">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-400/20 rounded-full -ml-32 -mb-32 blur-3xl" />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -390,9 +369,7 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
                 جاهز لتبدأ إدارة مشاريعك بطريقة احترافية؟
               </h2>
-              <p className="text-xl text-blue-100 mb-10">
-                انضم إلى أكثر من 150 شركة جزائرية تعتمد على Binaa لزيادة كفاءتها وتوفير تكاليفها.
-              </p>
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="w-full sm:w-auto h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 text-xl font-bold rounded-2xl shadow-xl transition-all hover:scale-105" asChild>
                   <LinkNext href={`/${locale}/auth/register`}>
@@ -437,7 +414,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-bold text-slate-900 mb-6">المنصة</h4>
               <ul className="space-y-4 text-slate-600 text-sm">
@@ -476,7 +453,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <div className="flex gap-6">
               <LinkNext href="#" className="hover:text-blue-600">سياسة الخصوصية</LinkNext>
