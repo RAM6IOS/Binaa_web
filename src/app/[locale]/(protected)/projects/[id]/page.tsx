@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Loader2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw } from "lucide-react";
+import { MapPin, Calendar, Loader2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw, BookOpen } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/routing";
@@ -16,6 +16,7 @@ import { DocumentsTab } from "./components/DocumentsTab";
 import { BudgetTab } from "./components/BudgetTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
+import { DailyLogsTab } from "./components/DailyLogsTab";
 
 type ProjectWithJoins = Project & {
   project_documents: ProjectDocument[];
@@ -221,6 +222,10 @@ export default function ProjectDetailPage({
           <TabsTrigger value="budget" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-emerald-700 dark:text-emerald-400 data-[state=active]:text-emerald-700">
             {isAr ? '💰 الميزانية والمالية' : '💰 Budget & Finances'}
           </TabsTrigger>
+          <TabsTrigger value="daily-logs" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-orange-600 dark:text-orange-400 data-[state=active]:text-orange-600 flex items-center gap-1.5">
+            <BookOpen className="w-4 h-4" />
+            {isAr ? 'التقارير اليومية' : 'Rapports journaliers'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
@@ -241,6 +246,10 @@ export default function ProjectDetailPage({
 
         <TabsContent value="budget" className="mt-0 focus-visible:outline-none">
           <BudgetTab project={project} isAr={isAr} />
+        </TabsContent>
+
+        <TabsContent value="daily-logs" className="mt-0 focus-visible:outline-none">
+          <DailyLogsTab project={project} isAr={isAr} />
         </TabsContent>
       </Tabs>
     </div>
