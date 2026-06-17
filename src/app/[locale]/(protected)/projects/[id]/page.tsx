@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Loader2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw, BookOpen } from "lucide-react";
+import { MapPin, Calendar, Loader2, ArrowLeft, ArrowRight, AlertCircle, RefreshCcw, BookOpen, UserCheck } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/routing";
@@ -17,6 +17,7 @@ import { BudgetTab } from "./components/BudgetTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
+import { PointageTab } from "./components/PointageTab";
 
 type ProjectWithJoins = Project & {
   project_documents: ProjectDocument[];
@@ -226,6 +227,13 @@ export default function ProjectDetailPage({
             <BookOpen className="w-4 h-4" />
             {isAr ? 'التقارير اليومية' : 'Rapports journaliers'}
           </TabsTrigger>
+          <TabsTrigger 
+            value="pointage" 
+            className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-emerald-600 dark:text-emerald-400 data-[state=active]:text-emerald-600 flex items-center gap-1.5"
+          >
+            <UserCheck className="w-4 h-4" />
+            {isAr ? 'تسجيل الحضور (Pointage)' : 'Pointage'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
@@ -250,6 +258,10 @@ export default function ProjectDetailPage({
 
         <TabsContent value="daily-logs" className="mt-0 focus-visible:outline-none">
           <DailyLogsTab project={project} isAr={isAr} />
+        </TabsContent>
+
+        <TabsContent value="pointage" className="mt-0 focus-visible:outline-none">
+          <PointageTab project={project} isAr={isAr} />
         </TabsContent>
       </Tabs>
     </div>
