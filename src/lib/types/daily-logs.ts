@@ -1,3 +1,5 @@
+import { Attachment } from '../services/attachments-service';
+
 export type WeatherCondition = 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy' | 'foggy';
 
 export interface DailyLogWorker {
@@ -31,6 +33,7 @@ export interface DailyLog {
   workers_present: DailyLogWorker[];
   equipment_used: DailyLogEquipment[];
   photos: DailyLogPhoto[];
+  attachments?: Attachment[];
   created_by?: string;
   created_at?: string;
   updated_at?: string;
@@ -64,6 +67,7 @@ export interface Pointage {
   equipment_used: DailyLogEquipment[];
   photos: DailyLogPhoto[];
   pointage_workers: PointageWorker[];
+  attachments?: Attachment[];
   created_by?: string;
   created_at?: string;
   updated_at?: string;

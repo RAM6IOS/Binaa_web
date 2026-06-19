@@ -52,6 +52,8 @@ import {
   DailyLogPhoto,
 } from "@/lib/types/daily-logs";
 import { ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
+import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
+import { AttachmentsList } from "./AttachmentsList";
 
 interface Props {
   isAr: boolean;
@@ -96,6 +98,61 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!log;
 
+  // المرفقات الإضافية
+  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<{ file: File; id: string; progress: number; status: 'queued' | 'uploading' | 'success' | 'error' }[]>([]);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const fileInputRef2 = useRef<HTMLInputElement>(null);
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragActive(true);
+    } else if (e.type === "dragleave") {
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const files = Array.from(e.dataTransfer.files);
+      addPendingFiles(files);
+    }
+  };
+
+  const addPendingFiles = (files: File[]) => {
+    const newFiles = files.map(file => ({
+      file,
+      id: Math.random().toString(36).substring(7),
+      progress: 0,
+      status: 'queued' as const
+    }));
+    setPendingFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    try {
+      await attachmentsService.deleteAttachment(attachmentId);
+      setExistingAttachments(prev => prev.filter(att => att.id !== attachmentId));
+      toast.success(isAr ? "تم حذف المرفق بنجاح" : "Pièce jointe supprimée");
+    } catch (err) {
+      toast.error(isAr ? "فشل حذف المرفق" : "Échec de suppression");
+    }
+  };
+
   // تحميل الموارد عند فتح الـ Dialog
   useEffect(() => {
     if (!open) return;
@@ -131,12 +188,19 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
       setSelectedWorkers(log.workers_present || []);
       setSelectedEquipment(log.equipment_used || []);
       setPhotos(log.photos || []);
+
+      // تحميل المرفقات
+      attachmentsService.getAttachmentsByEntity('daily_log', log.id)
+        .then(setExistingAttachments)
+        .catch(err => console.error("Error fetching attachments:", err));
     } else {
       setFormData(defaultForm);
       setSelectedWorkers([]);
       setSelectedEquipment([]);
       setPhotos([]);
+      setExistingAttachments([]);
     }
+    setPendingFiles([]);
   }, [open, projectId, log]);
 
   const handleWorkerToggle = (pw: ProjectWorker) => {
@@ -238,13 +302,45 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
         photos,
       };
 
+      let savedLog;
       if (isEdit && log) {
-        await dailyLogService.update(log.id, payload);
-        toast.success(isAr ? "تم تحديث التقرير بنجاح ✓" : "Rapport mis à jour avec succès ✓");
+        savedLog = await dailyLogService.update(log.id, payload);
       } else {
-        await dailyLogService.create(payload);
-        toast.success(isAr ? "تم حفظ التقرير اليومي بنجاح ✓" : "Rapport journalier enregistré ✓");
+        savedLog = await dailyLogService.create(payload);
       }
+
+      // رفع المرفقات المعلقة
+      if (pendingFiles.length > 0) {
+        for (const pf of pendingFiles) {
+          setPendingFiles(prev => prev.map(f => f.id === pf.id ? { ...f, status: 'uploading' } : f));
+          
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress = Math.min(progress + 15, 90);
+            setPendingFiles(prev => prev.map(f => f.id === pf.id ? { ...f, progress } : f));
+          }, 100);
+
+          try {
+            await attachmentsService.uploadAttachment(pf.file, 'daily_log', savedLog.id);
+            clearInterval(interval);
+            setPendingFiles(prev => prev.map(f => f.id === pf.id ? { ...f, status: 'success', progress: 100 } : f));
+          } catch (uploadErr) {
+            clearInterval(interval);
+            setPendingFiles(prev => prev.map(f => f.id === pf.id ? { ...f, status: 'error', progress: 0 } : f));
+            throw uploadErr;
+          }
+        }
+      }
+
+      toast.success(
+        isEdit
+          ? isAr
+            ? "تم تحديث التقرير بنجاح ✓"
+            : "Rapport mis à jour avec succès ✓"
+          : isAr
+          ? "تم حفظ التقرير اليومي بنجاح ✓"
+          : "Rapport journalier enregistré ✓"
+      );
 
       setOpen(false);
       onSuccess?.();
@@ -649,6 +745,124 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                 {isAr ? "PNG, JPG, WEBP — متعددة مسموحة" : "PNG, JPG, WEBP — Plusieurs fichiers acceptés"}
               </span>
             </button>
+          </div>
+
+          {/* Section 6: المرفقات والمستندات */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <FileText className="w-4 h-4 text-orange-500" />
+              {isAr ? "المرفقات والمستندات" : "Pièces jointes & Documents"}
+              {(existingAttachments.length + pendingFiles.length) > 0 && (
+                <Badge className="bg-orange-100 text-orange-700 border-0 text-xs">
+                  {existingAttachments.length + pendingFiles.length}
+                </Badge>
+              )}
+            </h3>
+
+            {/* عرض المرفقات الحالية عند التعديل */}
+            {isEdit && existingAttachments.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-slate-500">
+                  {isAr ? "المرفقات الحالية:" : "Pièces jointes existantes :"}
+                </p>
+                <AttachmentsList
+                  attachments={existingAttachments}
+                  isAr={isAr}
+                  onDelete={handleDeleteAttachment}
+                  readOnly={false}
+                />
+              </div>
+            )}
+
+            {/* منطقة السحب والإفلات */}
+            <input
+              ref={fileInputRef2}
+              type="file"
+              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                addPendingFiles(files);
+                if (fileInputRef2.current) fileInputRef2.current.value = "";
+              }}
+            />
+
+            <div
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef2.current?.click()}
+              className={`w-full flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed rounded-xl transition-all cursor-pointer ${
+                isDragActive
+                  ? "border-orange-500 bg-orange-50 dark:bg-orange-950/10 text-orange-500"
+                  : "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-orange-400 hover:text-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-950/5"
+              }`}
+            >
+              <Plus className="w-8 h-8" />
+              <span className="text-sm font-semibold">
+                {isAr
+                  ? "اسحب الملفات هنا أو انقر لاختيارها"
+                  : "Glissez-déposez des fichiers ici ou cliquez pour sélectionner"}
+              </span>
+              <span className="text-xs text-slate-400">
+                {isAr
+                  ? "الصور، PDF، Word، Excel، Text (متعدد)"
+                  : "Images, PDF, Word, Excel, Text (Plusieurs)"}
+              </span>
+            </div>
+
+            {/* قائمة الملفات المحددة للرفع */}
+            {pendingFiles.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-slate-500">
+                  {isAr ? "الملفات المحددة للرفع:" : "Fichiers sélectionnés :"}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {pendingFiles.map((pf) => (
+                    <div
+                      key={pf.id}
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900"
+                    >
+                      <div className="flex-1 min-w-0 pr-3">
+                        <p className="text-xs font-semibold text-slate-800 dark:text-white truncate">
+                          {pf.file.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {formatFileSize(pf.file.size)}
+                        </p>
+                        {pf.status === 'uploading' && (
+                          <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                            <div
+                              className="bg-orange-500 h-1.5 rounded-full transition-all duration-100"
+                              style={{ width: `${pf.progress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {pf.status === 'success' && (
+                          <span className="text-emerald-500 text-xs font-bold">✓</span>
+                        )}
+                        {pf.status === 'error' && (
+                          <span className="text-red-500 text-xs font-bold">✗</span>
+                        )}
+                        {pf.status === 'queued' && (
+                          <button
+                            type="button"
+                            onClick={() => setPendingFiles(prev => prev.filter(f => f.id !== pf.id))}
+                            className="text-slate-400 hover:text-red-500 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
