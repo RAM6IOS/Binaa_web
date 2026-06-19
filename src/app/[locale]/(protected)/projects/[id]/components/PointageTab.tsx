@@ -36,6 +36,9 @@ import { Pointage } from "@/lib/types/daily-logs";
 import { Project } from "@/lib/types/projects";
 import { AddPointageDialog } from "./AddPointageDialog";
 import { toast } from "sonner";
+import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
+import { AttachmentsList } from "./AttachmentsList";
+import { FileText } from "lucide-react";
 
 interface PointageTabProps {
   project: Project;
@@ -73,6 +76,24 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
   // Expanded card state
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  // Attachments per pointage
+  const [attachmentsMap, setAttachmentsMap] = useState<Record<string, Attachment[]>>({});
+  const [loadingAttachments, setLoadingAttachments] = useState<Record<string, boolean>>({});
+
+  const loadAttachments = async (pointageId: string) => {
+    if (attachmentsMap[pointageId] !== undefined || loadingAttachments[pointageId]) return;
+    setLoadingAttachments((prev) => ({ ...prev, [pointageId]: true }));
+    try {
+      const data = await attachmentsService.getAttachmentsByEntity('pointage', pointageId);
+      setAttachmentsMap((prev) => ({ ...prev, [pointageId]: data }));
+    } catch (err) {
+      console.error("Error loading pointage attachments:", err);
+      setAttachmentsMap((prev) => ({ ...prev, [pointageId]: [] }));
+    } finally {
+      setLoadingAttachments((prev) => ({ ...prev, [pointageId]: false }));
+    }
+  };
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -118,7 +139,13 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedCards((prev) => {
+      const isExpanding = !prev[id];
+      if (isExpanding) {
+        loadAttachments(id);
+      }
+      return { ...prev, [id]: isExpanding };
+    });
   };
 
   // Filter & Search
@@ -555,6 +582,26 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                           </div>
                         </div>
                       )}
+
+                      {/* Attachments Section */}
+                      <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-850/60">
+                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                          <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                          {isAr ? "المرفقات ومستندات الإثبات" : "Pièces jointes & Preuves"}
+                        </h4>
+                        {loadingAttachments[log.id] ? (
+                          <div className="flex items-center gap-2 text-slate-400 py-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                            <span className="text-xs">{isAr ? "جاري تحميل المرفقات..." : "Chargement..."}</span>
+                          </div>
+                        ) : (
+                          <AttachmentsList
+                            attachments={attachmentsMap[log.id] || []}
+                            isAr={isAr}
+                            readOnly={true}
+                          />
+                        )}
+                      </div>
                     </div>
                   )}
                 </CardContent>

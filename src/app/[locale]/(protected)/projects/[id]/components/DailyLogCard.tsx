@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,13 @@ import {
   AlertTriangle,
   StickyNote,
   CalendarDays,
+  FileText,
+  Loader2,
 } from "lucide-react";
 import { DailyLog, WeatherCondition } from "@/lib/types/daily-logs";
 import { AddDailyLogDialog } from "./AddDailyLogDialog";
+import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
+import { AttachmentsList } from "./AttachmentsList";
 
 interface DailyLogCardProps {
   log: DailyLog;
@@ -89,6 +93,33 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
   const [expanded, setExpanded] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [isAttachmentsLoading, setIsAttachmentsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!expanded || !log?.id) {
+      setAttachments([]);
+      setIsAttachmentsLoading(false);
+      return;
+    }
+
+    setIsAttachmentsLoading(true);
+
+    attachmentsService.getAttachmentsByEntity('daily_log', log.id)
+      .then((data) => {
+        setAttachments(data || []);
+      })
+      .catch((err) => {
+        console.error("=== FULL ATTACHMENTS FETCH ERROR ===");
+        console.error("Error:", err);
+        console.error("Message:", err?.message);
+        console.error("Details:", err?.details);
+        setAttachments([]);
+      })
+      .finally(() => {
+        setIsAttachmentsLoading(false);
+      });
+  }, [expanded, log?.id]);   // ← أضف ? هنا
   const weather = weatherConfig[log.weather_condition] ?? weatherConfig.sunny;
 
   const formattedDate = new Date(log.log_date + "T00:00:00").toLocaleDateString(
@@ -317,6 +348,26 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
                   </div>
                 </div>
               )}
+
+              {/* Attachments Section */}
+              <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-orange-500" />
+                  {isAr ? "المرفقات والمستندات" : "Pièces jointes & Documents"}
+                </p>
+                {isAttachmentsLoading ? (
+                  <div className="flex items-center gap-2 text-slate-400 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+                    <span className="text-xs">{isAr ? "جاري تحميل المرفقات..." : "Chargement..."}</span>
+                  </div>
+                ) : (
+                  <AttachmentsList
+                    attachments={attachments}
+                    isAr={isAr}
+                    readOnly={true}
+                  />
+                )}
+              </div>
             </div>
           )}
         </CardContent>
