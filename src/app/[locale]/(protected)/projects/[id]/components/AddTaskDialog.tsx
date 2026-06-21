@@ -7,11 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, Calendar, Clock, AlertCircle, User, Users } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarUI } from "@/components/ui/calendar";
+import { Plus, Loader2, Calendar, Clock, AlertCircle, Users } from "lucide-react";
 import { toast } from "sonner";
 import { tasksService } from "@/lib/services/tasks-service";
 import { projectWorkersService } from "@/lib/services/project-workers-service";
 import { ProjectTask, TaskPriority, TaskStatus, Worker } from "@/lib/types/projects";
+import { format, addDays, parseISO, isBefore } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Props {
   isAr: boolean;
@@ -32,6 +36,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
     description: "",
     priority: "medium",
     status: "todo",
+    start_date: "",
     due_date: "",
     progress: 0,
     assigned_to: "unassigned",
@@ -71,8 +76,19 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
 
   useEffect(() => {
     if (task && open) {
+      let initialStartDate = task.start_date;
+      if (!initialStartDate && task.due_date) {
+        try {
+          const due = parseISO(task.due_date);
+          initialStartDate = format(addDays(due, -5), "yyyy-MM-dd");
+        } catch (e) {
+          initialStartDate = "";
+        }
+      }
+
       setFormData({
         ...task,
+        start_date: initialStartDate || "",
         assigned_to: task.assigned_to || "unassigned",
       });
     } else if (!task && open) {
@@ -81,6 +97,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
         description: "",
         priority: "medium",
         status: "todo",
+        start_date: "",
         due_date: "",
         progress: 0,
         assigned_to: "unassigned",
@@ -90,12 +107,55 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
     }
   }, [task, open]);
 
+  const handleStartDateChange = (date: Date | undefined) => {
+    if (!date) {
+      setFormData({ ...formData, start_date: "" });
+      return;
+    }
+    const formattedDate = format(date, "yyyy-MM-dd");
+    let newDueDate = formData.due_date;
+    
+    // Auto-suggest due_date if empty or before new start_date
+    if (!newDueDate || isBefore(parseISO(newDueDate), date)) {
+      newDueDate = format(addDays(date, 5), "yyyy-MM-dd");
+    }
+
+    setFormData({ ...formData, start_date: formattedDate, due_date: newDueDate });
+  };
+
+  const handleDueDateChange = (date: Date | undefined) => {
+    if (!date) {
+      setFormData({ ...formData, due_date: "" });
+      return;
+    }
+    setFormData({ ...formData, due_date: format(date, "yyyy-MM-dd") });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title) {
       toast.error(isAr ? 'العنوان مطلوب' : 'Le titre est requis');
       return;
+    }
+
+    if (!formData.start_date) {
+      toast.error(isAr ? 'تاريخ البداية مطلوب' : 'La date de début est requise');
+      return;
+    }
+
+    if (!formData.due_date) {
+      toast.error(isAr ? 'تاريخ الاستحقاق مطلوب' : 'La date d\'échéance est requise');
+      return;
+    }
+
+    if (formData.start_date && formData.due_date) {
+      const start = parseISO(formData.start_date);
+      const due = parseISO(formData.due_date);
+      if (isBefore(due, start)) {
+        toast.error(isAr ? 'يجب أن يكون تاريخ الاستحقاق بعد تاريخ البداية' : 'La date d\'échéance doit être après la date de début');
+        return;
+      }
     }
 
     if (!projectId) {
@@ -228,18 +288,61 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="due_date" className="text-sm font-semibold flex items-center gap-2">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-orange-500" />
+                {isAr ? 'تاريخ البداية' : 'Date de début'}
+                <span className="text-red-500">*</span>
+              </Label>
+              <Popover modal={true}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full h-11 justify-start text-left font-normal",
+                      !formData.start_date && "text-muted-foreground"
+                    )}
+                  >
+                    {formData.start_date ? format(parseISO(formData.start_date), "dd/MM/yyyy") : <span>{isAr ? "اختر التاريخ" : "Choisir une date"}</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[100] pointer-events-auto" align="start">
+                  <CalendarUI
+                    mode="single"
+                    selected={formData.start_date ? parseISO(formData.start_date) : undefined}
+                    onSelect={handleStartDateChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-orange-500" />
                 {isAr ? 'تاريخ الاستحقاق' : 'Date d\'échéance'}
+                <span className="text-red-500">*</span>
               </Label>
-              <Input 
-                id="due_date"
-                type="date"
-                required
-                value={formData.due_date || ''}
-                onChange={e => setFormData({ ...formData, due_date: e.target.value })}
-                className="h-11 focus-visible:ring-blue-500"
-              />
+              <Popover modal={true}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full h-11 justify-start text-left font-normal",
+                      !formData.due_date && "text-muted-foreground"
+                    )}
+                  >
+                    {formData.due_date ? format(parseISO(formData.due_date), "dd/MM/yyyy") : <span>{isAr ? "اختر التاريخ" : "Choisir une date"}</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[100] pointer-events-auto" align="start">
+                  <CalendarUI
+                    mode="single"
+                    selected={formData.due_date ? parseISO(formData.due_date) : undefined}
+                    onSelect={handleDueDateChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
