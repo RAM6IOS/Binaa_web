@@ -263,6 +263,7 @@ let mockTasksDb: ProjectTask[] = [
     title: "Construction de la structure",
     status: "todo",
     priority: "medium",
+    start_date: "2026-06-20",
     due_date: "2024-12-10",
     progress: 0,
     estimated_hours: 500,
@@ -306,7 +307,7 @@ function recalculateProjectProgress(projectId: string) {
   if (projectTasks.length === 0) return;
   const totalProgress = projectTasks.reduce((acc, t) => acc + (t.progress || 0), 0);
   const avgProgress = Math.round(totalProgress / projectTasks.length);
-  
+
   const pIndex = mockProjectsDb.findIndex(p => p.id === projectId);
   if (pIndex !== -1 && mockProjectsDb[pIndex].progress !== avgProgress) {
     mockProjectsDb[pIndex].progress = avgProgress;
@@ -524,10 +525,10 @@ export const mockSupabase = {
     },
     async assign(data: Omit<ProjectWorker, 'id' | 'assigned_at'>): Promise<ProjectWorker> {
       await delay(500);
-      const newAssignment = { 
-        ...data, 
-        id: `pw-${Date.now()}`, 
-        assigned_at: new Date().toISOString().split('T')[0] 
+      const newAssignment = {
+        ...data,
+        id: `pw-${Date.now()}`,
+        assigned_at: new Date().toISOString().split('T')[0]
       } as ProjectWorker;
       mockProjectWorkersDb = [newAssignment, ...mockProjectWorkersDb];
       return newAssignment;
@@ -550,10 +551,10 @@ export const mockSupabase = {
     },
     async assign(data: Omit<ProjectEquipment, 'id' | 'assigned_at'>): Promise<ProjectEquipment> {
       await delay(500);
-      const newAssignment = { 
-        ...data, 
-        id: `pe-${Date.now()}`, 
-        assigned_at: new Date().toISOString().split('T')[0] 
+      const newAssignment = {
+        ...data,
+        id: `pe-${Date.now()}`,
+        assigned_at: new Date().toISOString().split('T')[0]
       } as ProjectEquipment;
       mockProjectEquipmentDb = [newAssignment, ...mockProjectEquipmentDb];
       return newAssignment;
