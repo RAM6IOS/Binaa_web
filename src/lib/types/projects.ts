@@ -33,7 +33,7 @@ export interface ProjectTask {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  start_date?: string;
+  start_date: string;
   due_date: string;
   progress: number;
   assigned_to?: string;
