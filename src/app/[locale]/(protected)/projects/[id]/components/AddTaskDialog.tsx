@@ -310,7 +310,6 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                     mode="single"
                     selected={formData.start_date ? parseISO(formData.start_date) : undefined}
                     onSelect={handleStartDateChange}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -339,7 +338,6 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                     mode="single"
                     selected={formData.due_date ? parseISO(formData.due_date) : undefined}
                     onSelect={handleDueDateChange}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
