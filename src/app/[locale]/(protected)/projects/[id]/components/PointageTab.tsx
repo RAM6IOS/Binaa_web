@@ -117,9 +117,12 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
 
   useEffect(() => {
     fetchData();
-    const unsubscribe = pointageService.subscribe(project.id, () => fetchData(true));
+
+
+    const unsubscribe = pointageService.subscribe(() => fetchData(true));
+
     return unsubscribe;
-  }, [fetchData, project.id]);
+  }, [fetchData]);
 
   const handleDelete = async (id: string) => {
     const confirmed = confirm(
@@ -336,8 +339,8 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                   ? "ابدأ بتسجيل حضور العمال والعتاد اليومي للمشروع."
                   : "Commencez à enregistrer les présences quotidiennes des ouvriers."
                 : isAr
-                ? "حاول تعديل معايير البحث أو تصفية الأشهر."
-                : "Essayez de modifier vos critères de recherche."}
+                  ? "حاول تعديل معايير البحث أو تصفية الأشهر."
+                  : "Essayez de modifier vos critères de recherche."}
             </p>
           </div>
           {pointages.length === 0 && (
