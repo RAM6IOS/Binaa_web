@@ -15,14 +15,15 @@ function toPointageError(error: PostgrestError, fallback: string): Error {
     );
   }
   if (error.code === '23505') {
-    return new Error('A pointage already exists for this date on this project.');
+    return new Error('A pointage already exists for this date on this project/location.');
   }
   return new Error(error.message || fallback);
 }
 
 export const pointageService = {
   /**
-   * حساب ساعات العمل تلقائياً استناداً إلى ساعة الدخول، ساعة الخروج، ومدة الاستراحة بالدقائق
+   * حساب ساعات العمل تلقائياً استناداً إلى ساعة الدخول، ساعة الخروج، ومدة الاستراحة بالدقائق.
+   * يدعم تنسيقات متنوعة (HH:MM أو HH:MM:SS) وتغيير اليوم (الخروج في اليوم التالي).
    */
   calculateHours(
     checkIn: string | null | undefined,
@@ -31,62 +32,92 @@ export const pointageService = {
   ): number {
     if (!checkIn || !checkOut) return 0;
 
-    // تنسيق المدخلات قد يكون HH:MM أو HH:MM:SS
-    const [inH, inM] = checkIn.split(':').map(Number);
-    const [outH, outM] = checkOut.split(':').map(Number);
+    try {
+      // استخراج الساعات والدقائق
+      const [inH, inM] = checkIn.split(':').map(Number);
+      const [outH, outM] = checkOut.split(':').map(Number);
 
-    if (isNaN(inH) || isNaN(inM) || isNaN(outH) || isNaN(outM)) return 0;
+      if (isNaN(inH) || isNaN(inM) || isNaN(outH) || isNaN(outM)) return 0;
 
-    // حساب الفارق بالدقائق
-    const inTotalMinutes = inH * 60 + inM;
-    const outTotalMinutes = outH * 60 + outM;
+      // تحويل كامل الوقت إلى دقائق
+      const inTotalMinutes = inH * 60 + inM;
+      const outTotalMinutes = outH * 60 + outM;
 
-    // التعامل مع الخروج في اليوم التالي إذا كانت ساعة الخروج أصغر من ساعة الدخول
-    let diffMinutes = outTotalMinutes - inTotalMinutes;
-    if (diffMinutes < 0) {
-      diffMinutes += 24 * 60; // إضافة يوم كامل بالدقائق
+      // التعامل مع حالة خروج العامل في اليوم التالي
+      let diffMinutes = outTotalMinutes - inTotalMinutes;
+      if (diffMinutes < 0) {
+        diffMinutes += 24 * 60; // إضافة 24 ساعة بالدقائق
+      }
+
+      // طرح مدة الاستراحة وتفادي القيم السالبة
+      const netMinutes = Math.max(0, diffMinutes - (breakMinutes || 0));
+      const hours = netMinutes / 60;
+
+      // تقريب الساعات لأقرب خانتين عشريتين
+      return Math.max(0, Math.round(hours * 100) / 100);
+    } catch (e) {
+      console.error('Error calculating hours:', e);
+      return 0;
     }
-
-    const netMinutes = diffMinutes - (breakMinutes || 0);
-    const hours = netMinutes / 60;
-
-    // إعادة النتيجة برقم عشري مقرب لمرتبتين
-    return Math.max(0, Math.round(hours * 100) / 100);
   },
 
   /**
-   * جلب جميع تسجيلات الحضور للمشروع مع بيانات العمال
+   * جلب جميع تسجيلات الحضور مع إمكانية التصفية حسب المشروع (متوافق مع الكود القديم)
    */
   async getByProjectId(projectId: string) {
+    return this.getAll(projectId);
+  },
+
+  /**
+   * جلب جميع تسجيلات الحضور مع تصفية اختيارية حسب المعرف
+   */
+  async getAll(projectId?: string) {
+    return this.getAllPointages({ projectId });
+  },
+
+  /**
+   * دالة متطورة وموحدة لجلب جميع تسجيلات الحضور مع خيارات تصفية متعددة
+   */
+  async getAllPointages(filters?: { projectId?: string; location?: string; limit?: number }) {
     const supabase = createClient();
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('daily_pointage')
       .select(`
-      *,
-      pointage_workers (
         *,
-        worker:workers!pointage_workers_worker_id_fkey (
-          id,
-          full_name,
-          job_title,
-          photo_url
+        pointage_workers (
+          *,
+          worker:workers!pointage_workers_worker_id_fkey (
+            id,
+            full_name,
+            job_title,
+            photo_url
+          )
+        ),
+        pointage_equipment (
+          *,
+          equipment:equipment(*)
         )
-      ),
-      pointage_equipment (
-        *,
-        equipment:equipment(*)
-      )
-    `)
-      .eq('project_id', projectId)
+      `)
       .order('pointage_date', { ascending: false });
 
+    if (filters?.projectId) {
+      query = query.eq('project_id', filters.projectId);
+    }
+    if (filters?.location) {
+      query = query.eq('location', filters.location);
+    }
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+
+    const { data, error } = await query;
+
     if (error) {
-      console.error('Error fetching pointages:', error);
+      console.error('Error fetching pointages in getAllPointages:', error);
       throw error;
     }
 
-    // Map nested worker relation into flat worker_name / job_title fields
     return (data || []).map((p: any) => ({
       ...p,
       pointage_workers: (p.pointage_workers || []).map((pw: any) => ({
@@ -103,7 +134,100 @@ export const pointageService = {
   },
 
   /**
-   * جلب تسجيل حضور لليوم بالمعرّف مع بيانات العمال
+   * جلب تسجيلات الحضور لنطاق تاريخي (جدولة أسبوعية)
+   */
+  async getWeekPointages(
+    startDate: string,
+    endDate: string,
+    projectId?: string
+  ) {
+    const supabase = createClient();
+
+    let query = supabase
+      .from('daily_pointage')
+      .select(`
+        *,
+        pointage_workers (
+          *,
+          worker:workers!pointage_workers_worker_id_fkey (
+            id,
+            full_name,
+            job_title,
+            photo_url
+          )
+        )
+      `)
+      .gte('pointage_date', startDate)
+      .lte('pointage_date', endDate)
+      .order('pointage_date', { ascending: true });
+
+    if (projectId && projectId !== 'all') {
+      if (projectId === 'general') {
+        query = query.is('project_id', null);
+      } else {
+        query = query.eq('project_id', projectId);
+      }
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching week pointages:', error);
+      throw error;
+    }
+
+    return (data || []).map((p: any) => ({
+      ...p,
+      pointage_workers: (p.pointage_workers || []).map((pw: any) => ({
+        ...pw,
+        worker_name: pw.worker?.full_name || '',
+        job_title: pw.worker?.job_title || '',
+        photo_url: pw.worker?.photo_url || null,
+      })),
+    }));
+  },
+
+  /**
+   * جلب تسجيلات حضور اليوم للوضع العام أو المشروعات المفتوحة
+   */
+  async getTodayPointages() {
+    const today = new Date().toISOString().split('T')[0];
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('daily_pointage')
+      .select(`
+        *,
+        pointage_workers (
+          *,
+          worker:workers!pointage_workers_worker_id_fkey (
+            id,
+            full_name,
+            job_title,
+            photo_url
+          )
+        )
+      `)
+      .eq('pointage_date', today)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching today pointages:', error);
+      throw error;
+    }
+
+    return (data || []).map((p: any) => ({
+      ...p,
+      pointage_workers: (p.pointage_workers || []).map((pw: any) => ({
+        ...pw,
+        worker_name: pw.worker?.full_name || '',
+        job_title: pw.worker?.job_title || ''
+      }))
+    }));
+  },
+
+  /**
+   * جلب تسجيل حضور بالمعرّف مع بيانات العمال
    */
   async getById(id: string): Promise<Pointage | null> {
     const { data, error } = await supabase
@@ -113,8 +237,8 @@ export const pointageService = {
         pointage_workers (
           *,
           worker:workers!pointage_workers_worker_id_fkey (
-  id, full_name, job_title, photo_url
-)
+            id, full_name, job_title, photo_url
+          )
         ),
         pointage_equipment (*)
       `)
@@ -138,27 +262,32 @@ export const pointageService = {
   },
 
   /**
-   * جلب تسجيل حضور لمشروع وتاريخ محدد مع تفاصيل الربط (Joins) الكاملة للعمال
+   * جلب تسجيل حضور لمشروع/موقع وتاريخ محدد
    */
-  /**
-  * جلب تسجيل حضور لمشروع وتاريخ محدد
-  */
-  async getPointageByDate(projectId: string, date: string): Promise<Pointage | null> {
-    const { data, error } = await supabase
+  async getPointageByDate(date: string, projectId?: string, location?: string): Promise<Pointage | null> {
+    let query = supabase
       .from('daily_pointage')
       .select(`
         *,
         pointage_workers (
           *,
           worker:workers!pointage_workers_worker_id_fkey (
-  id, full_name, job_title, photo_url
-)
+            id, full_name, job_title, photo_url
+          )
         ),
         pointage_equipment (*)
       `)
-      .eq('project_id', projectId)
-      .eq('pointage_date', date)
-      .maybeSingle();
+      .eq('pointage_date', date);
+
+    if (projectId) {
+      query = query.eq('project_id', projectId);
+    } else if (location) {
+      query = query.eq('location', location).is('project_id', null);
+    } else {
+      query = query.is('project_id', null);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       console.error('Error fetching pointage by date:', error);
@@ -176,6 +305,266 @@ export const pointageService = {
       }))
     } as Pointage;
   },
+
+  /**
+   * تسجيل دخول سريع لعامل (Clock In)
+   */
+  async clockIn(
+    workerId: string,
+    options?: { projectId?: string; location?: string; notes?: string }
+  ): Promise<PointageWorker> {
+    const today = new Date().toISOString().split('T')[0];
+    // صيغة الوقت HH:MM
+    const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    // 1. جلب أو إنشاء رأس الحضور لليوم والموقع/المشروع المحدد
+    let pointage = await this.getPointageByDate(today, options?.projectId, options?.location);
+    
+    if (!pointage) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const pointageHeader = {
+        project_id: options?.projectId || null,
+        location: options?.location || null,
+        pointage_date: today,
+        notes: options?.notes || null,
+        created_by: user?.id || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const { data, error } = await supabase
+        .from('daily_pointage')
+        .insert(pointageHeader)
+        .select()
+        .single();
+        
+      if (error) {
+        logSupabaseError('Error creating pointage header in clockIn', error);
+        throw error;
+      }
+      pointage = data;
+    }
+
+    // 2. التحقق من وجود العامل مسجلاً مسبقاً في تفاصيل هذا الحضور
+    const { data: existingWorker, error: workerError } = await supabase
+      .from('pointage_workers')
+      .select('*')
+      .eq('pointage_id', pointage!.id)
+      .eq('worker_id', workerId)
+      .maybeSingle();
+
+    if (workerError) {
+      logSupabaseError('Error finding worker in clockIn', workerError);
+      throw workerError;
+    }
+
+    if (existingWorker) {
+      // إذا لم يكن وقت الدخول مسجلاً، نقوم بتحديثه
+      if (!existingWorker.check_in_time) {
+        const { data: updated, error: updateError } = await supabase
+          .from('pointage_workers')
+          .update({ check_in_time: nowTime, status: 'present' })
+          .eq('id', existingWorker.id)
+          .select()
+          .single();
+        if (updateError) throw updateError;
+        return updated as PointageWorker;
+      }
+      return existingWorker as PointageWorker;
+    }
+
+    // 3. إضافة سجل حضور جديد للعامل
+    const payload = {
+      pointage_id: pointage!.id,
+      worker_id: workerId,
+      status: 'present',
+      check_in_time: nowTime,
+      check_out_time: null,
+      break_duration_minutes: 0,
+      hours_worked: 0
+    };
+
+    const { data, error: insertError } = await supabase
+      .from('pointage_workers')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (insertError) {
+      logSupabaseError('Error inserting worker pointage in clockIn', insertError);
+      throw insertError;
+    }
+
+    return data as PointageWorker;
+  },
+
+  /**
+   * تسجيل خروج سريع لعامل (Clock Out) مع حساب الساعات تلقائياً
+   */
+  async clockOut(
+    workerId: string,
+    options?: { projectId?: string; location?: string }
+  ): Promise<PointageWorker> {
+    const today = new Date().toISOString().split('T')[0];
+    const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    // 1. جلب جلسة الحضور
+    const pointage = await this.getPointageByDate(today, options?.projectId, options?.location);
+    if (!pointage) {
+      throw new Error('No pointage session found for today.');
+    }
+
+    // 2. البحث عن العامل في الجلسة الحالية
+    const { data: existingWorker, error: workerError } = await supabase
+      .from('pointage_workers')
+      .select('*')
+      .eq('pointage_id', pointage.id)
+      .eq('worker_id', workerId)
+      .maybeSingle();
+
+    if (workerError) {
+      logSupabaseError('Error finding worker in clockOut', workerError);
+      throw workerError;
+    }
+
+    if (!existingWorker) {
+      throw new Error('Worker has not clocked in today.');
+    }
+
+    // 3. حساب ساعات العمل وتحديث السجل
+    const checkIn = existingWorker.check_in_time;
+    const hours = this.calculateHours(checkIn, nowTime, existingWorker.break_duration_minutes || 0);
+
+    const { data: updated, error: updateError } = await supabase
+      .from('pointage_workers')
+      .update({
+        check_out_time: nowTime,
+        hours_worked: hours,
+      })
+      .eq('id', existingWorker.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      logSupabaseError('Error updating worker in clockOut', updateError);
+      throw updateError;
+    }
+
+    // مزامنة التقرير اليومي إذا كان الحضور مرتبطاً بمشروع
+    if (pointage.project_id) {
+      try {
+        await this.syncToDailyLog(pointage.id);
+      } catch (syncErr) {
+        console.warn('[Pointage Sync] Clock out sync failed:', syncErr);
+      }
+    }
+
+    return updated as PointageWorker;
+  },
+
+  /**
+   * تحديث أو إضافة وردية لعامل في يوم محدد
+   */
+  async upsertWorkerShift(params: {
+    date: string;
+    workerId: string;
+    projectId?: string | null;
+    location?: string | null;
+    status: PointageWorker['status'];
+    checkIn?: string | null;
+    checkOut?: string | null;
+    breakMinutes?: number;
+  }): Promise<PointageWorker> {
+    let pointage = await this.getPointageByDate(
+      params.date,
+      params.projectId ?? undefined,
+      params.location ?? undefined
+    );
+
+    if (!pointage) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase
+        .from('daily_pointage')
+        .insert({
+          project_id: params.projectId || null,
+          location: params.location || null,
+          pointage_date: params.date,
+          created_by: user?.id || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        logSupabaseError('Error creating pointage header in upsertWorkerShift', error);
+        throw error;
+      }
+      pointage = { ...data, pointage_workers: [] } as Pointage;
+    }
+
+    const breakMin = params.breakMinutes || 0;
+    let hours = 0;
+    if (params.status !== 'absent') {
+      hours = this.calculateHours(params.checkIn, params.checkOut, breakMin);
+      if (hours === 0) {
+        if (params.status === 'half_day') hours = 4;
+        else if (params.status === 'overtime') hours = 10;
+        else hours = 8;
+      }
+    }
+
+    const payload = {
+      status: params.status,
+      check_in_time: params.status === 'absent' ? null : (params.checkIn || null),
+      check_out_time: params.status === 'absent' ? null : (params.checkOut || null),
+      break_duration_minutes: breakMin,
+      hours_worked: hours,
+    };
+
+    const existing = (pointage.pointage_workers || []).find(
+      (pw) => pw.worker_id === params.workerId
+    );
+
+    if (existing?.id) {
+      const { data, error } = await supabase
+        .from('pointage_workers')
+        .update(payload)
+        .eq('id', existing.id)
+        .select()
+        .single();
+      if (error) {
+        logSupabaseError('Error updating worker shift', error);
+        throw error;
+      }
+
+      if (pointage.project_id) {
+        try {
+          await this.syncToDailyLog(pointage.id);
+        } catch (syncErr) {
+          console.warn('[Pointage Sync] upsertWorkerShift sync failed:', syncErr);
+        }
+      }
+
+      return data as PointageWorker;
+    }
+
+    const result = await this.addWorker(pointage.id, {
+      worker_id: params.workerId,
+      ...payload,
+    });
+
+    if (pointage.project_id) {
+      try {
+        await this.syncToDailyLog(pointage.id);
+      } catch (syncErr) {
+        console.warn('[Pointage Sync] upsertWorkerShift sync failed:', syncErr);
+      }
+    }
+
+    return result;
+  },
+
   /**
    * إضافة حضور لعامل منفرد (دعم check_in_time و check_out_time)
    */
@@ -217,18 +606,19 @@ export const pointageService = {
   /**
    * حفظ تسجيل حضور كامل (الرأس والتفاصيل للعمال)
    */
-  async save(dto: CreatePointageDto): Promise<Pointage> {
+  async save(dto: any): Promise<Pointage> {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       throw new Error('You must be logged in to save pointage.');
     }
 
-    // تحقق من تسجيل حضور قائم لنفس التاريخ
-    const existing = await this.getPointageByDate(dto.project_id, dto.pointage_date);
+    // تحقق من تسجيل حضور قائم لنفس التاريخ (والمشروع/الموقع)
+    const existing = await this.getPointageByDate(dto.pointage_date, dto.project_id, dto.location);
     const pointageId = dto.id || existing?.id;
 
     const pointageHeader = {
-      project_id: dto.project_id,
+      project_id: dto.project_id || null,
+      location: dto.location || null,
       pointage_date: dto.pointage_date,
       notes: dto.notes || null,
       equipment_used: dto.equipment_used || [],
@@ -282,9 +672,21 @@ export const pointageService = {
 
     // إدخال تفاصيل عمال الحضور الجدد
     if (dto.pointage_workers && dto.pointage_workers.length > 0) {
-      const workersPayload = dto.pointage_workers.map(w => {
+      const workersPayload = dto.pointage_workers.map((w: any) => {
         // حساب ساعات العمل التلقائي
         const calculatedHours = this.calculateHours(w.check_in_time, w.check_out_time, w.break_duration_minutes);
+        
+        let finalHours = 0;
+        if (w.status === 'absent') {
+          finalHours = 0;
+        } else if (w.hours_worked !== undefined && w.hours_worked !== null) {
+          finalHours = w.hours_worked;
+        } else if (calculatedHours > 0) {
+          finalHours = calculatedHours;
+        } else {
+          finalHours = 8.0; // افتراضي إذا لم يتوفر أي شيء
+        }
+
         return {
           pointage_id: finalPointageId,
           worker_id: w.worker_id,
@@ -292,7 +694,7 @@ export const pointageService = {
           check_in_time: w.check_in_time || null,
           check_out_time: w.check_out_time || null,
           break_duration_minutes: w.break_duration_minutes || 0,
-          hours_worked: w.hours_worked !== undefined && w.status === 'overtime' ? w.hours_worked : (w.status === 'absent' ? 0 : calculatedHours || w.hours_worked || 8.0)
+          hours_worked: finalHours
         };
       });
 
@@ -306,11 +708,13 @@ export const pointageService = {
       }
     }
 
-    // محاولة مزامنة تسجيل الحضور كتقرير يومي (Daily Log)
-    try {
-      await this.syncToDailyLog(finalPointageId!);
-    } catch (syncErr) {
-      console.warn('[Pointage Sync] Could not sync to daily logs table:', syncErr);
+    // محاولة مزامنة تسجيل الحضور كتقرير يومي (Daily Log) إذا كان تابعاً لمشروع
+    if (dto.project_id) {
+      try {
+        await this.syncToDailyLog(finalPointageId!);
+      } catch (syncErr) {
+        console.warn('[Pointage Sync] Could not sync to daily logs table:', syncErr);
+      }
     }
 
     // جلب وحفظ النتيجة النهائية بالربط
@@ -324,7 +728,7 @@ export const pointageService = {
    */
   async syncToDailyLog(pointageId: string): Promise<void> {
     const pointage = await this.getById(pointageId);
-    if (!pointage) return;
+    if (!pointage || !pointage.project_id) return;
 
     // تحقق مما إذا كان هناك تقرير يومي لنفس التاريخ
     const { data: existingLog } = await supabase
@@ -335,7 +739,7 @@ export const pointageService = {
       .maybeSingle();
 
     // تجهيز مصفوفة العمال بتنسيق JSON لـ daily_logs
-    const workersPresentJson = pointage.pointage_workers.map(pw => ({
+    const workersPresentJson = pointage.pointage_workers.map((pw: any) => ({
       worker_id: pw.worker_id,
       worker_name: pw.worker_name,
       job_title: pw.job_title,
@@ -396,9 +800,10 @@ export const pointageService = {
   /**
    * رفع صورة مرفقة
    */
-  async uploadPhoto(file: File, projectId: string): Promise<string> {
+  async uploadPhoto(file: File, projectId?: string): Promise<string> {
     const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `daily-logs/${projectId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const folder = projectId ? `daily-logs/${projectId}` : `daily-logs/general`;
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
     const { data, error } = await supabase.storage
       .from('project-files')
@@ -422,16 +827,23 @@ export const pointageService = {
   /**
    * الاشتراك بالتغيرات الفورية
    */
-  subscribe(projectId: string, callback: () => void) {
+  subscribe(callback: () => void, projectId?: string) {
+    let filter = undefined;
+    if (projectId) {
+      filter = `project_id=eq.${projectId}`;
+    }
+
+    const channelName = projectId ? `daily-pointage-channel-${projectId}` : `daily-pointage-channel-general`;
+
     const channel = supabase
-      .channel(`daily-pointage-channel-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'daily_pointage',
-          filter: `project_id=eq.${projectId}`,
+          filter: filter,
         },
         () => callback()
       )
@@ -440,5 +852,5 @@ export const pointageService = {
     return () => {
       supabase.removeChannel(channel);
     };
-  },
+  }
 };
