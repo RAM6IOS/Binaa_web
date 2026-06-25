@@ -5,394 +5,290 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Sun,
-  Cloud,
-  CloudRain,
-  CloudSnow,
-  Wind,
-  Thermometer,
-  Users,
-  Truck,
-  Clock,
-  Pencil,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  ImageIcon,
+  Calendar, Thermometer, Users, Truck, Ruler, Package,
+  ImageIcon, ChevronDown, ChevronUp, Pencil, Trash2,
   AlertTriangle,
   StickyNote,
-  CalendarDays,
-  FileText,
-  Loader2,
+  Loader2
 } from "lucide-react";
-import { DailyLog, WeatherCondition } from "@/lib/types/daily-logs";
-import { AddDailyLogDialog } from "./AddDailyLogDialog";
-import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
+import { format } from "date-fns";
+import { ar, fr } from "date-fns/locale";
+import { DailyLog } from "@/lib/types/daily-logs";
 import { AttachmentsList } from "./AttachmentsList";
+import { attachmentsService } from "@/lib/services/attachments-service";
+// استيراد مكون الديالوج هنا مهم جداً
+import { AddDailyLogDialog } from "./AddDailyLogDialog";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { Download, FileDown } from "lucide-react";
+
 
 interface DailyLogCardProps {
   log: DailyLog;
   isAr: boolean;
   projectId: string;
-  onEdit?: () => void;
+  onEdit?: () => void; // هذا سيصبح لإعادة تحميل البيانات بعد النجاح
   onDelete: (id: string) => void;
 }
 
-const weatherConfig: Record<WeatherCondition, { icon: React.ReactNode; labelAr: string; labelFr: string; bgColor: string; textColor: string; borderColor: string }> = {
-  sunny: {
-    icon: <Sun className="w-4 h-4" />,
-    labelAr: "مشمس",
-    labelFr: "Ensoleillé",
-    bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
-    textColor: "text-yellow-600 dark:text-yellow-400",
-    borderColor: "border-yellow-200 dark:border-yellow-900/40",
-  },
-  cloudy: {
-    icon: <Cloud className="w-4 h-4" />,
-    labelAr: "غائم",
-    labelFr: "Nuageux",
-    bgColor: "bg-slate-50 dark:bg-slate-800/40",
-    textColor: "text-slate-500 dark:text-slate-400",
-    borderColor: "border-slate-200 dark:border-slate-700",
-  },
-  rainy: {
-    icon: <CloudRain className="w-4 h-4" />,
-    labelAr: "ممطر",
-    labelFr: "Pluvieux",
-    bgColor: "bg-blue-50 dark:bg-blue-950/20",
-    textColor: "text-blue-600 dark:text-blue-400",
-    borderColor: "border-blue-200 dark:border-blue-900/40",
-  },
-  stormy: {
-    icon: <CloudSnow className="w-4 h-4" />,
-    labelAr: "عاصف",
-    labelFr: "Orageux",
-    bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    textColor: "text-purple-600 dark:text-purple-400",
-    borderColor: "border-purple-200 dark:border-purple-900/40",
-  },
-  windy: {
-    icon: <Wind className="w-4 h-4" />,
-    labelAr: "رياح",
-    labelFr: "Venteux",
-    bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
-    textColor: "text-cyan-600 dark:text-cyan-400",
-    borderColor: "border-cyan-200 dark:border-cyan-900/40",
-  },
-  foggy: {
-    icon: <Cloud className="w-4 h-4" />,
-    labelAr: "ضبابي",
-    labelFr: "Brumeux",
-    bgColor: "bg-gray-50 dark:bg-gray-800/40",
-    textColor: "text-gray-500 dark:text-gray-400",
-    borderColor: "border-gray-200 dark:border-gray-700",
-  },
-};
-
 export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLogCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [attachments, setAttachments] = useState<any[]>([]);
   const [isAttachmentsLoading, setIsAttachmentsLoading] = useState(false);
 
+  const locale = isAr ? ar : fr;
+  const formattedDate = format(new Date(log.log_date), "EEEE dd MMMM yyyy", { locale });
+
   useEffect(() => {
-    if (!expanded || !log?.id) {
-      setAttachments([]);
-      setIsAttachmentsLoading(false);
-      return;
-    }
-
+    if (!expanded) return;
     setIsAttachmentsLoading(true);
-
     attachmentsService.getAttachmentsByEntity('daily_log', log.id)
-      .then((data) => {
-        setAttachments(data || []);
-      })
-      .catch((err) => {
-        console.error("=== FULL ATTACHMENTS FETCH ERROR ===");
-        console.error("Error:", err);
-        console.error("Message:", err?.message);
-        console.error("Details:", err?.details);
-        setAttachments([]);
-      })
-      .finally(() => {
-        setIsAttachmentsLoading(false);
-      });
-  }, [expanded, log?.id]);   // ← أضف ? هنا
-  const weather = weatherConfig[log.weather_condition] ?? weatherConfig.sunny;
+      .then(setAttachments)
+      .catch(console.error)
+      .finally(() => setIsAttachmentsLoading(false));
+  }, [expanded, log.id]);
 
-  const formattedDate = new Date(log.log_date + "T00:00:00").toLocaleDateString(
-    isAr ? "ar-DZ" : "fr-FR",
-    { weekday: "long", year: "numeric", month: "long", day: "numeric" }
-  );
-
-  const totalWorkerHours = (log.workers_present || []).reduce(
-    (acc, w) => acc + (w.hours_worked || 0),
-    0
-  );
+  const totalWorkers = log.workers_present?.length || 0;
+  const totalEquipment = log.equipment_used?.length || 0;
+  const totalQuantities = log.quantities?.length || 0;
+  const totalMaterials = log.materials?.length || 0;
 
   return (
-    <>
-      <Card className={`border-2 ${weather.borderColor} shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden`}>
-        {/* Card Top Bar */}
-        <div className={`${weather.bgColor} px-5 py-4 flex flex-wrap gap-3 items-center justify-between`}>
-          {/* Date + Weather */}
+    <Card className="overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all shadow-sm">
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-slate-400" />
-              <span className="font-bold text-slate-800 dark:text-white text-sm">{formattedDate}</span>
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-950 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-6 h-6 text-orange-600" />
             </div>
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${weather.bgColor} ${weather.textColor} border ${weather.borderColor}`}>
-              {weather.icon}
-              {isAr ? weather.labelAr : weather.labelFr}
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-bold ${weather.textColor}`}>
-              <Thermometer className="w-3.5 h-3.5" />
-              {log.temperature}°C
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <AddDailyLogDialog
-              isAr={isAr}
-              projectId={projectId}
-              log={log}
-              onSuccess={onEdit}
-              trigger={
-                <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50">
-                  <Pencil className="w-3.5 h-3.5" />
-                  {isAr ? "تعديل" : "Modifier"}
-                </Button>
-              }
-            />
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50"
-              onClick={() => onDelete(log.id)}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              {isAr ? "حذف" : "Supprimer"}
-            </Button>
-          </div>
-        </div>
-
-        <CardContent className="p-5 space-y-4">
-          {/* Quick stats row */}
-          <div className="flex flex-wrap gap-3">
-            {(log.workers_present || []).length > 0 && (
-              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-200 dark:border-emerald-900/40">
-                <Users className="w-3.5 h-3.5" />
-                {(log.workers_present || []).length} {isAr ? "عامل" : "ouvriers"}
-                <span className="text-emerald-500 dark:text-emerald-500 mx-1">·</span>
-                <Clock className="w-3.5 h-3.5" />
-                {totalWorkerHours}h
-              </div>
-            )}
-            {(log.equipment_used || []).length > 0 && (
-              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 dark:border-blue-900/40">
-                <Truck className="w-3.5 h-3.5" />
-                {(log.equipment_used || []).length} {isAr ? "معدة" : "équipements"}
-              </div>
-            )}
-            {(log.photos || []).length > 0 && (
-              <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-purple-200 dark:border-purple-900/40">
-                <ImageIcon className="w-3.5 h-3.5" />
-                {(log.photos || []).length} {isAr ? "صورة" : "photo(s)"}
-              </div>
-            )}
-          </div>
-
-          {/* Work Summary */}
-          <div>
-            <p className="text-sm font-semibold text-slate-500 mb-1.5">
-              {isAr ? "ملخص الأعمال:" : "Résumé des travaux:"}
-            </p>
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3">
-              {log.work_summary || (isAr ? "لا يوجد ملخص." : "Aucun résumé.")}
-            </p>
-          </div>
-
-          {/* Expand/Collapse Button */}
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors"
-          >
-            {expanded
-              ? isAr ? "إخفاء التفاصيل" : "Masquer les détails"
-              : isAr ? "عرض التفاصيل الكاملة" : "Voir les détails complets"}
-            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Expanded Section */}
-          {expanded && (
-            <div className="space-y-5 pt-2 border-t border-slate-100 dark:border-slate-800">
-
-              {/* Problems */}
-              {log.problems_faced && (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-xl p-4">
-                  <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    {isAr ? "المشاكل والعقبات" : "Problèmes rencontrés"}
-                  </p>
-                  <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                    {log.problems_faced}
-                  </p>
+            <div>
+              <p className="font-semibold text-xl">{formattedDate}</p>
+              <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                <div className="flex items-center gap-1">
+                  <Thermometer className="w-4 h-4 text-red-500" />
+                  {log.temperature}°C
                 </div>
-              )}
-
-              {/* Notes */}
-              {log.notes && (
-                <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <StickyNote className="w-3.5 h-3.5" />
-                    {isAr ? "ملاحظات إضافية" : "Notes supplémentaires"}
-                  </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {log.notes}
-                  </p>
-                </div>
-              )}
-
-              {/* Workers */}
-              {(log.workers_present || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-emerald-500" />
-                    {isAr ? "العمال الحاضرون" : "Ouvriers présents"}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {(log.workers_present || []).map((w, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-3 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/30"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-400 text-xs font-bold flex-shrink-0">
-                            {(w.worker_name || "?").charAt(0).toUpperCase()}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold text-slate-800 dark:text-white truncate">{w.worker_name}</p>
-                            {w.job_title && (
-                              <p className="text-[10px] text-slate-400 truncate">{w.job_title}</p>
-                            )}
-                          </div>
-                        </div>
-                        <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[10px] flex-shrink-0 gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {w.hours_worked}h
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Equipment */}
-              {(log.equipment_used || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Truck className="w-3.5 h-3.5 text-blue-500" />
-                    {isAr ? "المعدات المستخدمة" : "Équipements utilisés"}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {(log.equipment_used || []).map((e, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-3 px-3 py-2 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/30"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 flex-shrink-0">
-                            <Truck className="w-3.5 h-3.5" />
-                          </div>
-                          <p className="text-xs font-semibold text-slate-800 dark:text-white truncate">
-                            {e.equipment_name}
-                          </p>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px] flex-shrink-0 gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {e.usage_hours}h
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Photos Grid */}
-              {(log.photos || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <ImageIcon className="w-3.5 h-3.5 text-purple-500" />
-                    {isAr ? "الصور الميدانية" : "Photos de terrain"}
-                  </p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                    {(log.photos || []).map((photo, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setLightboxSrc(photo.url)}
-                        className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 group hover:shadow-lg transition-all"
-                      >
-                        <img
-                          src={photo.url}
-                          alt={photo.caption || `صورة ${idx + 1}`}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Attachments Section */}
-              <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-orange-500" />
-                  {isAr ? "المرفقات والمستندات" : "Pièces jointes & Documents"}
-                </p>
-                {isAttachmentsLoading ? (
-                  <div className="flex items-center gap-2 text-slate-400 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
-                    <span className="text-xs">{isAr ? "جاري تحميل المرفقات..." : "Chargement..."}</span>
-                  </div>
-                ) : (
-                  <AttachmentsList
-                    attachments={attachments}
-                    isAr={isAr}
-                    readOnly={true}
-                  />
+                <Badge variant="outline" className="capitalize">
+                  {log.weather_condition === "sunny" ? (isAr ? "مشمس" : "Sunny") : log.weather_condition}
+                </Badge>
+                {log.overall_progress !== undefined && (
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none">
+                    {log.overall_progress}%
+                  </Badge>
                 )}
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
 
-      {/* Lightbox */}
-      {lightboxSrc && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4 animate-in fade-in"
-          onClick={() => setLightboxSrc(null)}
-        >
-          <button
-            className="absolute top-4 right-4 text-white/70 hover:text-white w-10 h-10 rounded-full bg-white/10 flex items-center justify-center transition-colors"
-            onClick={() => setLightboxSrc(null)}
-          >
-            ✕
-          </button>
-          <img
-            src={lightboxSrc}
-            alt="صورة ميدانية"
-            className="max-w-full max-h-full rounded-xl shadow-2xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="flex items-center gap-2">
+            {/* الحل: نقوم بتغليف زر القلم بداخل الديالوج */}
+            <AddDailyLogDialog
+              isAr={isAr}
+              projectId={projectId}
+              log={log} // نمرر الـ log هنا ليتحول الوضع إلى "تعديل"
+              onSuccess={onEdit} // تحديث البيانات عند الحفظ
+              trigger={
+                <Button variant="ghost" size="icon" className="hover:bg-slate-100">
+                  <Pencil className="w-4 h-4 text-slate-600" />
+                </Button>
+              }
+            />
+
+            <Button variant="ghost" size="icon" onClick={() => onDelete(log.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+              <Trash2 className="w-4 h-4" />
+            </Button>
+
+          </div>
         </div>
-      )}
-    </>
+
+        {/* العمل المنجز */}
+        <div className="mb-5">
+          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+            {log.work_summary}
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <StatBox icon={<Users className="w-4 h-4" />} color="emerald" count={totalWorkers} label={isAr ? "عامل" : "Ouvriers"} />
+          <StatBox icon={<Truck className="w-4 h-4" />} color="blue" count={totalEquipment} label={isAr ? "معدة" : "Engins"} />
+          <StatBox icon={<Ruler className="w-4 h-4" />} color="purple" count={totalQuantities} label={isAr ? "كمية" : "Métré"} />
+          <StatBox icon={<Package className="w-4 h-4" />} color="amber" count={totalMaterials} label={isAr ? "مادة" : "Articles"} />
+        </div>
+
+        {/* Expand Button */}
+        <Button
+          variant="ghost"
+          className="w-full text-slate-500 hover:text-slate-900 border-t border-slate-50 dark:border-slate-800 rounded-none h-12"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? (isAr ? "إخفاء التفاصيل" : "Cacher") : (isAr ? "عرض التفاصيل الكاملة" : "Voir plus")}
+          {expanded ? <ChevronUp className="mr-2 w-4 h-4" /> : <ChevronDown className="mr-2 w-4 h-4" />}
+        </Button>
+
+        {/* Expanded Content */}
+        {expanded && (
+          <div className="mt-4 pt-4 space-y-6 animate-in fade-in duration-300">
+            {/* هنا نضع تفاصيل العمال، المعدات، الكميات بنفس طريقتك السابقة */}
+            {/* Expanded Content */}
+            {expanded && (
+              <div className="mt-4 pt-4 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+
+                {/* 1. المشاكل والملحوظات (تظهر في البداية لأهميتها) */}
+                {(log.problems_faced || log.notes) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-6">
+                    {log.problems_faced && (
+                      <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30">
+                        <h4 className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-2 mb-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          {isAr ? "المشاكل التي واجهتها" : "Problèmes rencontrés"}
+                        </h4>
+                        <p className="text-sm text-red-800 dark:text-red-200">{log.problems_faced}</p>
+                      </div>
+                    )}
+                    {log.notes && (
+                      <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+                          <StickyNote className="w-4 h-4" />
+                          {isAr ? "ملاحظات إضافية" : "Notes"}
+                        </h4>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{log.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. تفاصيل العمال */}
+                {totalWorkers > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-bold flex items-center gap-2 text-emerald-600 uppercase tracking-wider">
+                      <Users className="w-4 h-4" />
+                      {isAr ? "تفاصيل العمال الحاضرين" : "Détails du personnel"}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                      {log.workers_present?.map((w, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 rounded-lg border bg-white dark:bg-slate-900">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold uppercase">
+                              {w.worker_name.charAt(0)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold truncate max-w-[120px]">{w.worker_name}</p>
+                              <p className="text-[10px] text-slate-500">{w.job_title}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] px-1 h-5 font-mono">
+                            {w.hours_worked}h
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. تفاصيل المعدات */}
+                {totalEquipment > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-sm font-bold flex items-center gap-2 text-blue-600 uppercase tracking-wider">
+                      <Truck className="w-4 h-4" />
+                      {isAr ? "تفاصيل استخدام المعدات" : "Utilisation des engins"}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {log.equipment_used?.map((e, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 rounded-lg border bg-white dark:bg-slate-900">
+                          <div className="flex items-center gap-2 text-xs font-semibold">
+                            <span className="p-1 bg-blue-50 text-blue-600 rounded">#</span>
+                            {e.equipment_name}
+                          </div>
+                          <Badge variant="outline" className="text-[10px] font-mono">
+                            {e.usage_hours}h {isAr ? "تشغيل" : "Service"}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. تفاصيل الكميات المنجزة (L'unité d'œuvre) */}
+                {totalQuantities > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-sm font-bold flex items-center gap-2 text-purple-600 uppercase tracking-wider">
+                      <Ruler className="w-4 h-4" />
+                      {isAr ? "قياس الأعمال المنجزة" : "Métrés réalisés"}
+                    </h4>
+                    <div className="space-y-2">
+                      {log.quantities?.map((q, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/10 border border-purple-100 dark:border-purple-900/20">
+                          <span className="text-sm font-medium">{q.description}</span>
+                          <span className="text-sm font-bold text-purple-700 dark:text-purple-400">
+                            {q.achieved_quantity} <span className="text-xs font-normal opacity-80">{q.unit}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. تفاصيل استهلاك المواد */}
+                {totalMaterials > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-sm font-bold flex items-center gap-2 text-amber-600 uppercase tracking-wider">
+                      <Package className="w-4 h-4" />
+                      {isAr ? "جرد استهلاك المواد" : "Consommation matériaux"}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {log.materials?.map((m, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30">
+                          <span className="text-xs font-bold">{m.material_name}</span>
+                          <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-0">
+                            {m.quantity} {m.unit}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. المرفقات والصور */}
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-slate-700">
+                    <ImageIcon className="w-4 h-4" />
+                    {isAr ? "الصور والمستندات الملحقة" : "Attachments & Médias"}
+                  </h4>
+                  {isAttachmentsLoading ? (
+                    <div className="flex items-center gap-2 py-4">
+                      <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+                      <p className="text-xs text-slate-500">{isAr ? "جاري تحميل المرفقات..." : "Chargement..."}</p>
+                    </div>
+                  ) : (
+                    <AttachmentsList attachments={attachments} isAr={isAr} readOnly />
+                  )}
+                </div>
+
+              </div>
+            )}
+            {/* ... */}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// مكون مساعد لتنسيق الصناديق الإحصائية
+function StatBox({ icon, color, count, label }: { icon: any, color: string, count: number, label: string }) {
+  const colors: any = {
+    emerald: "bg-emerald-50 text-emerald-600",
+    blue: "bg-blue-50 text-blue-600",
+    purple: "bg-purple-50 text-purple-600",
+    amber: "bg-amber-50 text-amber-600"
+  };
+
+  return (
+    <div className={`${colors[color]} dark:bg-slate-900/40 rounded-xl p-3 flex flex-col items-center justify-center`}>
+      <div className="mb-1">{icon}</div>
+      <p className="font-bold text-lg leading-tight">{count}</p>
+      <p className="text-[10px] uppercase font-bold opacity-80 tracking-wider">{label}</p>
+    </div>
   );
 }

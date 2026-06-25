@@ -85,12 +85,20 @@ export default function DailyLogsPage({
     [projectId, isAr]
   );
 
+
   useEffect(() => {
     fetchData();
-    const unsubscribe = dailyLogService.subscribe(projectId, () => fetchData(true));
-    return unsubscribe;
-  }, [fetchData, projectId]);
 
+    const unsubscribePromise = dailyLogService.subscribe(projectId, () => fetchData(true));
+
+
+    return () => {
+
+      if (typeof unsubscribePromise === 'function') {
+        unsubscribePromise();
+      }
+    };
+  }, [fetchData, projectId]);
   const handleDelete = async (id: string) => {
     const confirmed = confirm(
       isAr ? "هل أنت متأكد من حذف هذا التقرير؟" : "Confirmer la suppression de ce rapport?"
@@ -321,8 +329,8 @@ export default function DailyLogsPage({
                   ? "ابدأ بإضافة أول تقرير يومي لهذا المشروع لتوثيق سير العمل."
                   : "Commencez par ajouter le premier rapport journalier pour ce projet."
                 : isAr
-                ? "لا توجد تقارير مطابقة للبحث. حاول تغيير معايير التصفية."
-                : "Aucun rapport ne correspond à votre recherche. Modifiez vos filtres."}
+                  ? "لا توجد تقارير مطابقة للبحث. حاول تغيير معايير التصفية."
+                  : "Aucun rapport ne correspond à votre recherche. Modifiez vos filtres."}
             </p>
           </div>
           {logs.length === 0 && (
