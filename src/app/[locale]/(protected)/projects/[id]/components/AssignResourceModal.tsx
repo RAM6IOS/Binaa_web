@@ -27,10 +27,10 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [availableResources, setAvailableResources] = useState<any[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  
+
   // Assignment specific data
   const [assignedRole, setAssignedRole] = useState("");
   const [hours, setHours] = useState("8");
@@ -68,9 +68,9 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
       return;
     }
 
-    setSelectedIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(i => i !== id) 
+    setSelectedIds(prev =>
+      prev.includes(id)
+        ? prev.filter(i => i !== id)
         : [...prev, id]
     );
   };
@@ -116,25 +116,25 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
       <DialogTrigger asChild>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
-          {isAr 
-            ? (type === 'worker' ? 'تعيين عمال' : 'إضافة عتاد') 
+          {isAr
+            ? (type === 'worker' ? 'تعيين عمال' : 'إضافة عتاد')
             : (type === 'worker' ? 'Assigner ouvriers' : 'Ajouter équipement')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] flex flex-col h-[85vh]">
         <DialogHeader>
           <DialogTitle>
-            {isAr 
-              ? (type === 'worker' ? 'تعيين عمال للمشروع' : 'تخصيص عتاد للمشروع') 
+            {isAr
+              ? (type === 'worker' ? 'تعيين عمال للمشروع' : 'تخصيص عتاد للمشروع')
               : (type === 'worker' ? 'Assigner des ouvriers' : 'Affecter un équipement')}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex-1 flex flex-col min-h-0 py-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              placeholder={isAr ? 'ابحث...' : 'Rechercher...'} 
+            <Input
+              placeholder={isAr ? 'ابحث...' : 'Rechercher...'}
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -153,8 +153,8 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
             ) : (
               <div className="divide-y">
                 {filtered.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className={cn(
                       "p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition-colors",
                       selectedIds.includes(item.id) && "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500"
@@ -174,8 +174,8 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
                           {type === 'worker' ? item.full_name : item.name}
                         </div>
                         <div className="text-xs text-slate-500">
-                          {type === 'worker' 
-                            ? item.job_title 
+                          {type === 'worker'
+                            ? item.job_title
                             : item.type}
                         </div>
                       </div>
@@ -213,14 +213,14 @@ export function AssignResourceModal({ type, projectId, isAr, onSuccess, excludeI
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>{isAr ? 'إلغاء' : 'Annuler'}</Button>
-          <Button 
-            disabled={selectedIds.length === 0 || isSubmitting} 
+          <Button
+            disabled={selectedIds.length === 0 || isSubmitting}
             onClick={handleAssign}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isAr 
-              ? `تأكيد تعيين (${selectedIds.length})` 
+            {isAr
+              ? `تأكيد تعيين (${selectedIds.length})`
               : `Confirmer (${selectedIds.length})`}
           </Button>
         </DialogFooter>
