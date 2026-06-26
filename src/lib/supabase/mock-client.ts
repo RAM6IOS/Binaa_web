@@ -241,6 +241,7 @@ let mockTasksDb: ProjectTask[] = [
     estimated_hours: 120,
     actual_hours: 110,
     order: 0,
+    order_index: 0,
   },
   {
     id: "t-2",
@@ -255,7 +256,7 @@ let mockTasksDb: ProjectTask[] = [
     estimated_hours: 300,
     actual_hours: 180,
     order: 1,
-    dependency_id: "t-1"
+    order_index: 0,
   },
   {
     id: "t-3",
@@ -268,6 +269,7 @@ let mockTasksDb: ProjectTask[] = [
     progress: 0,
     estimated_hours: 500,
     order: 2,
+    order_index: 0,
     dependency_id: "t-2"
   }
 ];
