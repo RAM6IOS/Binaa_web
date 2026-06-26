@@ -1063,7 +1063,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                             <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 select-none z-30 sticky top-0">
                                 {/* Left Sidebar Header */}
                                 <div
-                                    className="w-80 flex-shrink-0 flex items-center justify-between px-6 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-45 h-16"
+                                    className="w-80 flex-shrink-0 flex items-center justify-between px-6 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-40 h-16 shadow-[5px_0_10px_-3px_rgba(0,0,0,0.07)]"
                                     dir={isAr ? "rtl" : "ltr"}
                                 >
                                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -1210,7 +1210,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                 >
                                                     {/* Left Sidebar Sticky Cell (Hierarchical list) */}
                                                     <div
-                                                        className="w-80 flex-shrink-0 flex items-center justify-between px-4 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-900/60 sticky left-0 z-25 h-full"
+                                                        className="w-80 flex-shrink-0 flex items-center justify-between px-4 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800/60 sticky left-0 z-30 h-full shadow-[5px_0_10px_-3px_rgba(0,0,0,0.05)]"
                                                         dir={isAr ? "rtl" : "ltr"}
                                                         onDoubleClick={() => handleDoubleClickTask(task)}
                                                     >
