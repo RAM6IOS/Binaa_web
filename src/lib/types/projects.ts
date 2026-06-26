@@ -43,6 +43,7 @@ export interface ProjectTask {
   created_by?: string;
   order: number; // Keep order for DnD ranking
   dependency_id?: string;
+  order_index: number;
 }
 
 export interface ProjectDocument {
