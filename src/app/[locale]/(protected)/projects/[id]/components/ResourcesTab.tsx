@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState, useMemo } from "react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Truck, Plus, Trash2, Clock, HardHat, Construction, CheckCircle2, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Users, Truck, Plus, Trash2, Clock, HardHat,
+  Construction, Loader2, AlertTriangle, Wallet,
+  Info, ArrowRightLeft, UserMinus
+} from "lucide-react";
 import { projectWorkersService } from "@/lib/services/project-workers-service";
 import { projectEquipmentService } from "@/lib/services/project-equipment-service";
 import { Project, ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
@@ -22,6 +39,16 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
   const [assignedEquipment, setAssignedEquipment] = useState<ProjectEquipment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ─── إدارة حالة الحذف المخصص (Custom Deletion State) ───
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    id: string;
+    type: "worker" | "equipment" | null;
+    name: string;
+  }>({ isOpen: false, id: "", type: null, name: "" });
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const fetchResources = async (silent = false) => {
     if (!silent) setIsLoading(true);
     try {
@@ -29,11 +56,11 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
         projectWorkersService.fetchProjectWorkers(project.id),
         projectEquipmentService.fetchProjectEquipment(project.id)
       ]);
-      setAssignedWorkers(workersData);
-      setAssignedEquipment(equipmentData);
+      setAssignedWorkers(workersData || []);
+      setAssignedEquipment(equipmentData || []);
     } catch (error) {
       console.error("Resources fetch error:", error);
-      toast.error(isAr ? 'فشل في تحميل الموارد. يرجى التحقق من اتصال قاعدة البيانات.' : 'Échec du chargement des ressources. Veuillez vérifier la connexion.');
+      toast.error(isAr ? 'فشل في تحديث قائمة الموارد' : 'Échec de la mise à jour des ressources');
     } finally {
       if (!silent) setIsLoading(false);
     }
@@ -42,14 +69,9 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
   useEffect(() => {
     fetchResources();
 
-    // Subscribe to changes
-    const unsubWorkers = projectWorkersService.subscribe(project.id, () => {
-      fetchResources(true);
-    });
-
-    const unsubEquipment = projectEquipmentService.subscribe(project.id, () => {
-      fetchResources(true);
-    });
+    // الاشتراك في التغييرات اللحظية (Real-time)
+    const unsubWorkers = projectWorkersService.subscribe(project.id, () => fetchResources(true));
+    const unsubEquipment = projectEquipmentService.subscribe(project.id, () => fetchResources(true));
 
     return () => {
       unsubWorkers();
@@ -57,256 +79,148 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
     };
   }, [project.id]);
 
-  const handleRemoveWorker = async (id: string) => {
-    if (confirm(isAr ? 'هل أنت متأكد من إزالة هذا العامل؟' : 'Confirmer la suppression de cet ouvrier?')) {
-      try {
-        await projectWorkersService.remove(id);
-        toast.success(isAr ? 'تمت الإزالة بنجاح' : 'Retiré avec succès');
-        fetchResources();
-      } catch (error) {
-        toast.error(isAr ? 'حدث خطأ ما' : 'Une erreur est survenue');
+  // ─── تنفيذ عملية الحذف ───
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm.id || !deleteConfirm.type) return;
+    setIsDeleting(true);
+
+    try {
+      if (deleteConfirm.type === "worker") {
+        await projectWorkersService.remove(deleteConfirm.id);
+      } else {
+        await projectEquipmentService.remove(deleteConfirm.id);
       }
+      toast.success(isAr ? 'تم سحب المورد من المشروع بنجاح' : 'Ressource retirée avec succès');
+      await fetchResources(true);
+    } catch (error) {
+      toast.error(isAr ? 'حدث خطأ أثناء المحاولة، يرجى إعادة المحاولة' : 'Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirm({ isOpen: false, id: "", type: null, name: "" });
     }
   };
 
-  const handleRemoveEquipment = async (id: string) => {
-    if (confirm(isAr ? 'هل أنت متأكد من إزالة هذا العتاد؟' : 'Confirmer la suppression de cet équipement?')) {
-      try {
-        await projectEquipmentService.remove(id);
-        toast.success(isAr ? 'تمت الإزالة بنجاح' : 'Retiré avec succès');
-        fetchResources();
-      } catch (error) {
-        toast.error(isAr ? 'حدث خطأ ما' : 'Une erreur est survenue');
-      }
-    }
-  };
+  // ─── حسابات الملخص (Stats) ───
+  const stats = useMemo(() => {
+    const workerDailyTotal = assignedWorkers.reduce((acc, pw) => acc + (pw.worker?.daily_rate || 0), 0);
+    return {
+      workerDailyTotal,
+      equipmentCount: assignedEquipment.length,
+      workerCount: assignedWorkers.length
+    };
+  }, [assignedWorkers, assignedEquipment]);
 
-  // Calculate daily cost
-  const totalDailyCost = assignedWorkers.reduce((acc, pw) => {
-    const dailyRate = pw.worker?.daily_rate || 0;
-    return acc + dailyRate;
-  }, 0);
+  if (isLoading && assignedWorkers.length === 0) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center gap-4 text-slate-400">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+        <p className="font-medium animate-pulse">{isAr ? 'جاري تحضير قائمة الموارد...' : 'Préparation des ressources...'}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">{isAr ? 'إجمالي العمال' : 'Total Ouvriers'}</p>
-                <h3 className="text-2xl font-bold mt-1">{assignedWorkers.length}</h3>
-              </div>
-              <Users className="w-8 h-8 text-blue-200 dark:text-blue-900/40" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">{isAr ? 'التكلفة اليومية للعمال' : 'Coût journalier MO'}</p>
-                <h3 className="text-2xl font-bold mt-1">{totalDailyCost.toLocaleString()} <span className="text-sm font-normal">DZD</span></h3>
-              </div>
-              <Plus className="w-8 h-8 text-emerald-200 dark:text-emerald-900/40" />
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10" dir={isAr ? "rtl" : "ltr"}>
 
-        <Card className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-500">{isAr ? 'إجمالي العتاد' : 'Total Équipements'}</p>
-                <h3 className="text-2xl font-bold mt-1">{assignedEquipment.length}</h3>
-              </div>
-              <Truck className="w-8 h-8 text-slate-200 dark:text-slate-800" />
-            </div>
-          </CardContent>
-        </Card>
+      {/* 1. قسم الإحصائيات العلوي (Stats Section) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <StatCard
+          label={isAr ? 'القوى العاملة' : 'Effectif'}
+          value={stats.workerCount}
+          unit={isAr ? 'عامل' : 'ouvrier(s)'}
+          icon={<Users className="w-6 h-6 text-blue-600" />}
+          color="blue"
+        />
+        <StatCard
+          label={isAr ? 'كلفة العمل اليومية' : 'Coût MO/Jour'}
+          value={stats.workerDailyTotal.toLocaleString()}
+          unit="DZD"
+          icon={<Wallet className="w-6 h-6 text-emerald-600" />}
+          color="emerald"
+        />
+        <StatCard
+          label={isAr ? 'العتاد الثقيل' : 'Engins & Matériel'}
+          value={stats.equipmentCount}
+          unit={isAr ? 'قطعة' : 'unité(s)'}
+          icon={<Truck className="w-6 h-6 text-orange-600" />}
+          color="orange"
+        />
       </div>
 
-      {/* Workers Section */}
-      <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b flex flex-row items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
-              <Users className="w-5 h-5" />
+      {/* 2. قسم إدارة العمال (Workers Management) */}
+      <Card className="border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-100/50 dark:shadow-none overflow-hidden rounded-2xl">
+        <CardHeader className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-start">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+                <HardHat className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-bold tracking-tight">{isAr ? 'العمال المخصصون للورشة' : 'Personnel affecté'}</CardTitle>
+                <CardDescription className="text-xs">{isAr ? 'توزيع المهام وساعات العمل اليومية' : 'Distribution des rôles et horaires'}</CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg">{isAr ? 'العمال المخصصون لهذا المشروع' : 'Ouvriers assignés'}</CardTitle>
-              <p className="text-xs text-slate-500">{isAr ? 'قائمة القوى العاملة النشطة في هذا الموقع' : 'Liste des ouvriers travaillant sur ce projet'}</p>
-            </div>
+            <AssignResourceModal
+              type="worker" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)}
+              excludeIds={assignedWorkers.map(aw => aw.worker_id)}
+            />
           </div>
-          <AssignResourceModal 
-            type="worker" 
-            projectId={project.id} 
-            isAr={isAr} 
-            onSuccess={fetchResources}
-            excludeIds={assignedWorkers.map(aw => aw.worker_id)}
-          />
         </CardHeader>
+
         <CardContent className="p-0">
-          {/* Mobile view */}
-          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-            {isLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
-              </div>
-            ) : assignedWorkers.length === 0 ? (
-              <div className="py-12 text-center flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-                  <Users className="w-8 h-8 text-slate-300 dark:text-slate-700" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-medium text-slate-900 dark:text-slate-100">{isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}</p>
-                  <p className="text-xs text-slate-500">{isAr ? 'لم يتم تعيين أي عمال لهذا المشروع بعد.' : 'Aucun ouvrier n\'a encore été affecté à ce projet.'}</p>
-                </div>
-              </div>
-            ) : (
-              assignedWorkers.map((pw) => (
-                <div key={pw.id} className="p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-850 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-800">
-                        {pw.worker?.photo_url ? (
-                          <img src={pw.worker.photo_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <HardHat className="w-5 h-5 text-slate-400" />
-                        )}
-                      </div>
-                      <div>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100 block">{pw.worker?.full_name}</span>
-                        <span className="text-[10px] text-slate-500 uppercase font-medium">{pw.worker?.job_title}</span>
-                      </div>
-                    </div>
-
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 h-8 w-8"
-                      onClick={() => handleRemoveWorker(pw.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <div className="flex justify-between items-center text-xs">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الدور في المشروع' : 'Rôle'}</span>
-                      <Badge variant="outline" className="font-normal bg-blue-50/50 text-blue-700 border-blue-100 dark:bg-blue-955/20 dark:text-blue-400 dark:border-blue-900/30">
-                        {pw.assigned_role}
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-col gap-0.5 items-end">
-                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الاستخدام' : 'Heures'}</span>
-                      <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-350">
-                        <Clock className="w-3.5 h-3.5 text-slate-450" />
-                        {pw.daily_hours}h/{isAr ? 'يوم' : 'j'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/30 p-2 rounded-lg border border-slate-100 dark:border-slate-800 text-xs">
-                    <span className="font-medium text-slate-550">{isAr ? 'التكلفة اليومية' : 'Coût journalier'}</span>
-                    <span className="font-bold text-slate-900 dark:text-slate-100">
-                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[10px] text-slate-500 font-normal">DZD</span>
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Desktop view */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
-                <TableHead>{isAr ? 'العامل' : 'Ouvrier'}</TableHead>
-                <TableHead>{isAr ? 'الدور في المشروع' : 'Rôle'}</TableHead>
-                <TableHead>{isAr ? 'ساعات العمل/يوم' : 'Heures/jour'}</TableHead>
-                <TableHead>{isAr ? 'التكلفة اليومية' : 'Coût/J'}</TableHead>
-                <TableHead className="text-right">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+          <Table className="font-sans">
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50">
+              <TableRow className="text-xs uppercase font-bold text-slate-500">
+                <TableHead className="w-[300px] h-12">{isAr ? 'اسم العامل / التخصص' : 'Ouvrier / Métier'}</TableHead>
+                <TableHead>{isAr ? 'الدور في المشروع' : 'Poste'}</TableHead>
+                <TableHead>{isAr ? 'ساعات اليوم' : 'Quota'}</TableHead>
+                <TableHead>{isAr ? 'الأجر اليومي' : 'Journalier'}</TableHead>
+                <TableHead className="text-right h-12">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {assignedWorkers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-12">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                      <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : assignedWorkers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-16 text-center">
-                    <div className="flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
-                      <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
-                        <Users className="w-8 h-8 text-slate-300" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium text-slate-900">{isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}</p>
-                        <p className="text-sm text-slate-500">{isAr ? 'لم يتم تعيين أي عمال لهذا المشروع بعد.' : 'Aucun ouvrier n\'a encore été affecté à ce projet.'}</p>
-                      </div>
-                      <AssignResourceModal 
-                        type="worker" 
-                        projectId={project.id} 
-                        isAr={isAr} 
-                        onSuccess={fetchResources}
-                        excludeIds={assignedWorkers.map(aw => aw.worker_id)}
-                      />
-                    </div>
+                  <TableCell colSpan={5} className="h-32 text-center text-slate-400 italic">
+                    {isAr ? 'لا يوجد عمال مسجلون لهذا المشروع.' : 'Aucun ouvrier enregistré.'}
                   </TableCell>
                 </TableRow>
               ) : (
                 assignedWorkers.map((pw) => (
-                  <TableRow key={pw.id} className="group">
+                  <TableRow key={pw.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors">
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                          {pw.worker?.photo_url ? (
-                            <img src={pw.worker.photo_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <HardHat className="w-5 h-5 text-slate-400" />
-                          )}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-slate-900 dark:text-slate-100 block">{pw.worker?.full_name}</span>
-                          <span className="text-[11px] text-slate-500 uppercase font-medium tracking-wider">{pw.worker?.job_title}</span>
+                      <div className="flex items-center gap-3 text-start">
+                        <Avatar className="h-10 w-10 border-2 border-white dark:border-slate-800 shadow-sm">
+                          <AvatarImage src={pw.worker?.photo_url} />
+                          <AvatarFallback className="bg-slate-100 text-slate-500 font-bold">{pw.worker?.full_name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 dark:text-slate-100 truncate text-sm">{pw.worker?.full_name}</p>
+                          <p className="text-[11px] text-slate-500 font-medium">{pw.worker?.job_title}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-normal bg-blue-50/50 text-blue-700 border-blue-100">
+                      <Badge variant="outline" className="bg-white dark:bg-slate-900 border-blue-200 text-blue-700 dark:border-blue-900/30 dark:text-blue-400 font-semibold px-2 py-0 h-6 text-[10.5px]">
                         {pw.assigned_role}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm font-medium">
-                        <Clock className="w-4 h-4 text-slate-400" />
+                      <div className="flex items-center gap-2 font-mono font-bold text-slate-700 dark:text-slate-300">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
                         {pw.daily_hours}h
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <span className="font-bold text-slate-900 dark:text-slate-100">
-                        {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[11px] text-slate-500 font-normal ml-1">DZD</span>
-                      </span>
+                    <TableCell className="font-bold text-slate-900 dark:text-slate-100">
+                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[9px] text-slate-400 ml-1 uppercase">dzd</span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-500 hover:bg-red-50"
-                        onClick={() => handleRemoveWorker(pw.id)}
+                      <Button
+                        variant="ghost" size="icon"
+                        className="text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full h-8 w-8"
+                        onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <UserMinus className="w-4 h-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -314,169 +228,67 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
               )}
             </TableBody>
           </Table>
-        </div>
         </CardContent>
       </Card>
 
-      {/* Equipment Section */}
-      <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b flex flex-row items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
-              <Construction className="w-5 h-5" />
+      {/* 3. قسم إدارة العتاد (Equipment Management) */}
+      <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden rounded-2xl mt-10">
+        <CardHeader className="bg-slate-50/40 dark:bg-slate-900/60 border-b flex flex-row items-center justify-between py-6">
+          <div className="flex items-center gap-3 text-start">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl">
+              <Construction className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-lg">{isAr ? 'العتاد المستخدم' : 'Équipement utilisé'}</CardTitle>
-              <p className="text-xs text-slate-500">{isAr ? 'الآلات والمعدات المخصصة لهذا الموقع' : 'Machines et équipements affectés à ce chantier'}</p>
+              <CardTitle className="text-xl font-bold tracking-tight">{isAr ? 'قائمة الآلات والمعدات' : 'Équipements du chantier'}</CardTitle>
             </div>
           </div>
-          <AssignResourceModal 
-            type="equipment" 
-            projectId={project.id} 
-            isAr={isAr} 
-            onSuccess={fetchResources}
+          <AssignResourceModal
+            type="equipment" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)}
             excludeIds={assignedEquipment.map(ae => ae.equipment_id)}
           />
         </CardHeader>
-        <CardContent className="p-0">
-          {/* Mobile view */}
-          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-            {isLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-                <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
-              </div>
-            ) : assignedEquipment.length === 0 ? (
-              <div className="py-12 text-center flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-                  <Construction className="w-8 h-8 text-slate-300 dark:text-slate-700" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-medium text-slate-900 dark:text-slate-100">{isAr ? 'لا يوجد عتاد' : 'Aucun équipement'}</p>
-                  <p className="text-xs text-slate-500">{isAr ? 'لم يتم تخصيص أي عتاد لهذا المشروع بعد.' : 'Aucun équipement n\'a encore été affecté à ce projet.'}</p>
-                </div>
-              </div>
-            ) : (
-              assignedEquipment.map((pe) => (
-                <div key={pe.id} className="p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600">
-                        <Truck className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100 block">{pe.equipment?.name}</span>
-                        <Badge variant="outline" className="font-normal bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 text-[10px] px-1 py-0 h-auto">
-                          {pe.equipment?.type}
-                        </Badge>
-                      </div>
-                    </div>
 
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 h-8 w-8"
-                      onClick={() => handleRemoveEquipment(pe.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-slate-900/30 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الاستخدام' : 'Utilisation'}</span>
-                      <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-355">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {pe.usage_hours_per_day}h/{isAr ? 'يوم' : 'j'}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'تاريخ التعيين' : 'Assigné le'}</span>
-                      <span className="text-slate-600 dark:text-slate-300 font-medium">
-                        {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR') : '-'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Desktop view */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
-                <TableHead>{isAr ? 'العتاد' : 'Équipement'}</TableHead>
-                <TableHead>{isAr ? 'النوع' : 'Type'}</TableHead>
-                <TableHead>{isAr ? 'الاستخدام (ساعة/يوم)' : 'Utilisation/jour'}</TableHead>
-                <TableHead>{isAr ? 'تاريخ التعيين' : 'Assigné le'}</TableHead>
-                <TableHead className="text-right">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50/50 dark:bg-slate-900/40">
+              <TableRow className="text-xs uppercase text-slate-500 font-bold">
+                <TableHead className="w-[300px] h-12">{isAr ? 'الآلة / المعدة' : 'Machine / Type'}</TableHead>
+                <TableHead>{isAr ? 'نظام الاستخدام' : 'Usage / j'}</TableHead>
+                <TableHead>{isAr ? 'تاريخ الدخول' : 'Depuis'}</TableHead>
+                <TableHead className="text-right h-12">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-12">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-                      <p className="text-sm text-slate-500">{isAr ? 'جاري التحميل...' : 'Chargement...'}</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : assignedEquipment.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-16 text-center">
-                    <div className="flex flex-col items-center justify-center max-w-[300px] mx-auto gap-4">
-                      <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
-                        <Construction className="w-8 h-8 text-slate-300" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium text-slate-900">{isAr ? 'لا يوجد عتاد' : 'Aucun équipement'}</p>
-                        <p className="text-sm text-slate-500">{isAr ? 'لم يتم تخصيص أي عتاد لهذا المشروع بعد.' : 'Aucun équipement n\'a encore été affecté à ce projet.'}</p>
-                      </div>
-                      <AssignResourceModal 
-                        type="equipment" 
-                        projectId={project.id} 
-                        isAr={isAr} 
-                        onSuccess={fetchResources}
-                        excludeIds={assignedEquipment.map(ae => ae.equipment_id)}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
+              {assignedEquipment.length === 0 ? (
+                <TableRow><TableCell colSpan={4} className="h-32 text-center text-slate-400 italic font-medium">{isAr ? 'لم يتم تخصيص عتاد حالياً.' : 'Aucun équipement disponible.'}</TableCell></TableRow>
               ) : (
                 assignedEquipment.map((pe) => (
-                  <TableRow key={pe.id} className="group">
+                  <TableRow key={pe.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-                          <Truck className="w-5 h-5" />
+                      <div className="flex items-center gap-3 text-start">
+                        <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm">
+                          <Truck className="w-5 h-5 text-emerald-600" />
                         </div>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">{pe.equipment?.name}</span>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 dark:text-white truncate">{pe.equipment?.name}</p>
+                          <p className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 inline-block uppercase font-bold tracking-tight mt-1">{pe.equipment?.type}</p>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-normal bg-slate-50 text-slate-600 border-slate-200">
-                        {pe.equipment?.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 font-medium">
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        {pe.usage_hours_per_day}h
+                      <div className="flex items-center gap-2 font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-900/20 px-3 py-1 rounded-full w-fit">
+                        <Clock className="w-3.5 h-3.5" />
+                        {pe.usage_hours_per_day}h/j
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-500 text-sm">
-                      {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR') : '-'}
+                    <TableCell className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-tighter">
+                      {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-500 hover:bg-red-50"
-                        onClick={() => handleRemoveEquipment(pe.id)}
+                    <TableCell className="text-right px-6">
+                      <Button
+                        variant="ghost" size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full h-8 w-8"
+                        onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -486,9 +298,91 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
               )}
             </TableBody>
           </Table>
-        </div>
         </CardContent>
       </Card>
+
+      {/* ─── 4. AlertDialog (نظام الحذف والرسائل الاحترافي) ─── */}
+      <AlertDialog
+        open={deleteConfirm.isOpen}
+        onOpenChange={(isOpen) => setDeleteConfirm(prev => ({ ...prev, isOpen }))}
+      >
+        <AlertDialogContent className="sm:max-w-[440px] p-0 border-none overflow-hidden shadow-2xl" dir={isAr ? "rtl" : "ltr"}>
+          {/* Danger Top Section */}
+          <div className="bg-red-50 dark:bg-red-950/20 p-8 flex flex-col items-center gap-4 text-center border-b dark:border-slate-800">
+            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center animate-bounce shadow-inner">
+              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <AlertDialogTitle className="text-2xl font-black text-red-900 dark:text-red-200">
+                {isAr ? "إلغاء التخصيص؟" : "Annuler l'affectation ?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm mt-1.5 font-bold text-red-700/70 dark:text-red-400/70 uppercase">
+                {deleteConfirm.name}
+              </AlertDialogDescription>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl flex gap-3 text-start border dark:border-slate-800">
+              <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                {isAr
+                  ? "تحذير: لن يتم حذف البيانات من سجلات الشركة، ولكن سيتم فك ارتباط العامل/المعدة بهذا المشروع فوراً. سيؤثر هذا على نظام الحضور واليوميات مستقبلاً."
+                  : "Attention: Les données resteront dans la base, mais le lien avec ce chantier sera coupé. Cela affectera le pointage et les futurs rapports."}
+              </p>
+            </div>
+
+            <AlertDialogFooter className="mt-8 flex gap-3 sm:justify-end w-full">
+              <AlertDialogCancel className="h-12 border-slate-200 font-bold bg-white dark:bg-slate-950 flex-1 hover:bg-slate-100" disabled={isDeleting}>
+                {isAr ? "لا، اتركها كما هي" : "Annuler"}
+              </AlertDialogCancel>
+              <Button
+                variant="destructive"
+                className="h-12 font-black flex-1 shadow-lg shadow-red-200 dark:shadow-none"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+              >
+                {isDeleting ? (
+                  <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                ) : (
+                  <ArrowRightLeft className="w-5 h-5 ml-2 opacity-60" />
+                )}
+                {isAr ? "تأكيد فك الارتباط" : "Confirmer"}
+              </Button>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
+  );
+}
+
+// ── المكونات المساعدة لزيادة جمالية الصفحة ──
+
+function StatCard({ label, value, unit, icon, color }: { label: string, value: any, unit: string, icon: any, color: string }) {
+  const styles: any = {
+    blue: "border-blue-100 bg-blue-50/40 text-blue-600 dark:bg-blue-900/10 dark:border-blue-900/30",
+    emerald: "border-emerald-100 bg-emerald-50/40 text-emerald-600 dark:bg-emerald-900/10 dark:border-emerald-900/30",
+    orange: "border-orange-100 bg-orange-50/40 text-orange-600 dark:bg-orange-900/10 dark:border-orange-900/30"
+  };
+
+  return (
+    <Card className={`border-2 border-dashed ${styles[color]} rounded-3xl overflow-hidden transition-transform hover:scale-[1.02] duration-300`}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="text-start">
+            <p className="text-[10px] uppercase font-black opacity-60 tracking-wider mb-1">{label}</p>
+            <div className="flex items-baseline gap-1.5">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-none">{value}</h3>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">{unit}</span>
+            </div>
+          </div>
+          <div className="bg-white/80 dark:bg-slate-900/50 p-2.5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+            {icon}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
