@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ interface AddWorkerDialogProps {
 export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState<Partial<Worker>>({
     full_name: "",
     cin: "",
@@ -67,45 +68,60 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
     e.preventDefault();
     setIsLoading(true);
 
-    const cleanData = { ...formData };
-    
-    // Convert empty strings to null for optional database fields
-    const optionalFields = [
-      'hourly_rate', 
-      'photo_url', 
-      'skills', 
-      'emergency_contact', 
-      'date_of_birth', 
-      'contract_type', 
-      'notes'
-    ];
-
-    optionalFields.forEach(field => {
-      const value = cleanData[field as keyof Worker];
-      if (value === "" || value === undefined || (typeof value === 'number' && isNaN(value))) {
-        (cleanData as any)[field] = null;
-      }
-    });
-
     try {
-      if (worker) {
-        await workersService.update(worker.id, cleanData);
-        toast.success(isAr ? 'تم تحديث بيانات العامل' : 'Ouvrier mis à jour');
-      } else {
-        await workersService.create(cleanData as Omit<Worker, 'id' | 'created_at'>);
-        toast.success(isAr ? 'تم إضافة العامل بنجاح' : 'Ouvrier ajouté avec succès');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error(isAr ? "يجب تسجيل الدخول أولاً" : "Authentication required");
       }
+
+      const cleanData: any = { ...formData };
+
+      // 1. إرفاق معرف المستخدم (مهم جداً لـ RLS)
+      cleanData.user_id = user.id;
+
+      // 2. تنظيف الحقول الاختيارية
+      const optionalFields = ['hourly_rate', 'photo_url', 'skills', 'emergency_contact', 'date_of_birth', 'contract_type', 'notes'];
+      optionalFields.forEach(field => {
+        if (cleanData[field] === "" || cleanData[field] === undefined) {
+          cleanData[field] = null;
+        }
+      });
+
+      // 3. التأكد من الحقول المطلوبة
+      if (!cleanData.full_name || !cleanData.cin || !cleanData.phone || !cleanData.job_title || !cleanData.daily_rate || !cleanData.wilaya) {
+        throw new Error(isAr ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill all required fields");
+      }
+
+      if (worker) {
+        // تحديث
+        await workersService.update(worker.id, cleanData);
+        toast.success(isAr ? 'تم تحديث بيانات العامل بنجاح ✓' : 'Ouvrier mis à jour ✓');
+      } else {
+        // إنشاء
+        await workersService.create(cleanData);
+        toast.success(isAr ? 'تمت إضافة العامل بنجاح ✓' : 'Ouvrier ajouté avec succès ✓');
+      }
+
       setOpen(false);
-      onSuccess();
+      onSuccess?.();
     } catch (error: any) {
-      console.error('Error saving worker:', error);
-      const errorMsg = error?.message || error?.details || (isAr ? 'حدث خطأ أثناء الحفظ' : 'Une erreur est survenue');
-      toast.error(errorMsg);
+      console.error('Binaa DB Error (Full):', error);
+
+      // معالجة أخطاء Supabase الشائعة
+      if (error?.code === "23505") {
+        toast.error(isAr ? "رقم التعريف الوطني (CIN) مسجل مسبقاً" : "CIN déjà enregistré");
+      } else if (error?.code === "42501") {
+        toast.error(isAr ? "غير مصرح به. تحقق من صلاحياتك" : "Permission denied");
+      } else {
+        const msg = error?.message || (isAr ? 'حدث خطأ أثناء الحفظ' : 'Erreur lors de la sauvegarde');
+        toast.error(msg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
   const isEdit = !!worker;
 
   return (
@@ -124,16 +140,16 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4" dir={isAr ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            
+
             {/* Full Name */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="full_name" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الاسم الكامل' : 'Nom complet'}</Label>
-              <Input 
-                id="full_name" 
-                required 
+              <Input
+                id="full_name"
+                required
                 value={formData.full_name || ""}
-                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                placeholder={isAr ? 'مثال: أحمد منصور' : 'Ex: Ahmed Mansouri'} 
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                placeholder={isAr ? 'مثال: أحمد منصور' : 'Ex: Ahmed Mansouri'}
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -141,12 +157,12 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* CIN */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="cin" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'رقم التعريف الوطني (CIN)' : 'CIN'}</Label>
-              <Input 
-                id="cin" 
-                required 
+              <Input
+                id="cin"
+                required
                 value={formData.cin || ""}
-                onChange={(e) => setFormData({...formData, cin: e.target.value})}
-                placeholder="123456789" 
+                onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                placeholder="123456789"
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -154,12 +170,12 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Phone */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="phone" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'رقم الهاتف' : 'Téléphone'}</Label>
-              <Input 
-                id="phone" 
-                required 
+              <Input
+                id="phone"
+                required
                 value={formData.phone || ""}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                placeholder="05xx xx xx xx" 
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="05xx xx xx xx"
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -167,7 +183,7 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Job Title */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="job_title" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'المسمى الوظيفي' : 'Poste'}</Label>
-              <Select value={formData.job_title} onValueChange={(val) => setFormData({...formData, job_title: val})} required>
+              <Select value={formData.job_title} onValueChange={(val) => setFormData({ ...formData, job_title: val })} required>
                 <SelectTrigger className="focus:ring-2 focus:ring-blue-500/20">
                   <SelectValue placeholder={isAr ? "اختر الوظيفة" : "Choisir le poste"} />
                 </SelectTrigger>
@@ -190,13 +206,13 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Daily Rate */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="daily_rate" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الأجر اليومي (دج)' : 'Taux journalier (DZD)'}</Label>
-              <Input 
-                id="daily_rate" 
+              <Input
+                id="daily_rate"
                 type="number"
-                required 
+                required
                 value={formData.daily_rate || ""}
-                onChange={(e) => setFormData({...formData, daily_rate: Number(e.target.value)})}
-                placeholder="4000" 
+                onChange={(e) => setFormData({ ...formData, daily_rate: Number(e.target.value) })}
+                placeholder="4000"
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -204,12 +220,12 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Hourly Rate */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="hourly_rate" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الأجر بالساعة (دج)' : 'Taux horaire (DZD)'}</Label>
-              <Input 
-                id="hourly_rate" 
+              <Input
+                id="hourly_rate"
                 type="number"
                 value={formData.hourly_rate || ""}
-                onChange={(e) => setFormData({...formData, hourly_rate: Number(e.target.value)})}
-                placeholder="500" 
+                onChange={(e) => setFormData({ ...formData, hourly_rate: Number(e.target.value) })}
+                placeholder="500"
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -217,12 +233,12 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Wilaya */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="wilaya" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الولاية' : 'Wilaya'}</Label>
-              <Input 
-                id="wilaya" 
-                required 
+              <Input
+                id="wilaya"
+                required
                 value={formData.wilaya || ""}
-                onChange={(e) => setFormData({...formData, wilaya: e.target.value})}
-                placeholder={isAr ? "وهران، الجزائر..." : "Oran, Alger..."} 
+                onChange={(e) => setFormData({ ...formData, wilaya: e.target.value })}
+                placeholder={isAr ? "وهران، الجزائر..." : "Oran, Alger..."}
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -230,7 +246,7 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Availability */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="availability" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'حالة التوفر' : 'Disponibilité'}</Label>
-              <Select value={formData.availability} onValueChange={(val: WorkerStatus) => setFormData({...formData, availability: val})} required>
+              <Select value={formData.availability} onValueChange={(val: WorkerStatus) => setFormData({ ...formData, availability: val })} required>
                 <SelectTrigger className="focus:ring-2 focus:ring-blue-500/20">
                   <SelectValue placeholder={isAr ? "اختر الحالة" : "Choisir le statut"} />
                 </SelectTrigger>
@@ -246,7 +262,7 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Contract Type */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="contract_type" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'نوع العقد' : 'Type de contrat'}</Label>
-              <Select value={formData.contract_type} onValueChange={(val: ContractType) => setFormData({...formData, contract_type: val})}>
+              <Select value={formData.contract_type} onValueChange={(val: ContractType) => setFormData({ ...formData, contract_type: val })}>
                 <SelectTrigger className="focus:ring-2 focus:ring-blue-500/20">
                   <SelectValue placeholder={isAr ? "اختر نوع العقد" : "Choisir le contrat"} />
                 </SelectTrigger>
@@ -262,11 +278,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Date of Birth */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="date_of_birth" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'تاريخ الميلاد' : 'Date de naissance'}</Label>
-              <Input 
-                id="date_of_birth" 
+              <Input
+                id="date_of_birth"
                 type="date"
                 value={formData.date_of_birth || ""}
-                onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -274,11 +290,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Emergency Contact */}
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="emergency_contact" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'جهة اتصال للطوارئ' : 'Contact d\'urgence'}</Label>
-              <Input 
-                id="emergency_contact" 
+              <Input
+                id="emergency_contact"
                 value={formData.emergency_contact || ""}
-                onChange={(e) => setFormData({...formData, emergency_contact: e.target.value})}
-                placeholder="06xx xx xx xx" 
+                onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
+                placeholder="06xx xx xx xx"
                 className="focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -287,11 +303,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             <div className="space-y-2 col-span-2 md:col-span-1">
               <Label htmlFor="photo_url" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'رابط الصورة' : 'URL de la photo'}</Label>
               <div className="flex items-center gap-2">
-                <Input 
-                  id="photo_url" 
+                <Input
+                  id="photo_url"
                   value={formData.photo_url || ""}
-                  onChange={(e) => setFormData({...formData, photo_url: e.target.value})}
-                  placeholder="https://..." 
+                  onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
+                  placeholder="https://..."
                   className="flex-1 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
@@ -300,11 +316,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Skills */}
             <div className="space-y-2 col-span-2">
               <Label htmlFor="skills" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'المهارات والخبرات' : 'Compétences et Expériences'}</Label>
-              <Textarea 
-                id="skills" 
+              <Textarea
+                id="skills"
                 value={formData.skills || ""}
-                onChange={(e) => setFormData({...formData, skills: e.target.value})}
-                placeholder={isAr ? "اذكر المهارات الخاصة بالعامل..." : "Décrire les compétences spécifiques..."} 
+                onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                placeholder={isAr ? "اذكر المهارات الخاصة بالعامل..." : "Décrire les compétences spécifiques..."}
                 className="min-h-[100px] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -312,11 +328,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
             {/* Notes */}
             <div className="space-y-2 col-span-2">
               <Label htmlFor="notes" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'ملاحظات إضافية' : 'Notes supplémentaires'}</Label>
-              <Textarea 
-                id="notes" 
+              <Textarea
+                id="notes"
                 value={formData.notes || ""}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                placeholder={isAr ? "أي ملاحظات أخرى..." : "Autres notes..."} 
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder={isAr ? "أي ملاحظات أخرى..." : "Autres notes..."}
                 className="min-h-[80px] focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
