@@ -121,6 +121,25 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
     // ─── إدارة حالة الحذف الاحترافي ───
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    // ─── Mobile View & Sidebar Responsiveness ───
+    const [mobileViewMode, setMobileViewMode] = useState<"list" | "gantt">("list");
+    const [sidebarWidth, setSidebarWidth] = useState(320);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setMobileViewMode(window.innerWidth < 768 ? "list" : "gantt");
+            setSidebarWidth(window.innerWidth < 768 ? 130 : 320);
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSidebarWidth(window.innerWidth < 768 ? 130 : 320);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     // Load tasks, workers, and project details
     const loadTasks = async () => {
         try {
@@ -593,6 +612,11 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
         task: GanttTaskExtended,
         mode: "move" | "resize-start" | "resize-end"
     ) => {
+        // Disable drag-and-drop date modification on mobile/touch view to prevent scrolling gesture conflicts
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+            return;
+        }
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -949,31 +973,59 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                 {/* Header Toolbar - تصميم محسن وأنظف */}
                 <div className="border-b bg-white dark:bg-slate-950 px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-blue-100 dark:bg-blue-950 rounded-2xl">
-                                <SlidersHorizontal className="w-6 h-6 text-blue-600" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full lg:w-auto">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-blue-100 dark:bg-blue-950 rounded-2xl">
+                                    <SlidersHorizontal className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                        {isAr ? "مخطط غانت التفاعلي" : "Gantt Chart"}
+                                    </h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 -mt-0.5">
+                                        {isAr ? "جدولة زمنية، تبعيات، وسحب وإسقاط" : "Timeline, dependencies & drag & drop"}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                                    {isAr ? "مخطط غانت التفاعلي" : "Gantt Chart"}
-                                </h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 -mt-0.5">
-                                    {isAr ? "جدولة زمنية، تبعيات، وسحب وإسقاط" : "Timeline, dependencies & drag & drop"}
-                                </p>
-                            </div>
+
+                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
+                                {visibleTasks.length} {isAr ? "مهمة" : "tâches"}
+                            </Badge>
                         </div>
 
-                        <Badge variant="secondary" className="px-3 py-1 text-sm font-medium">
-                            {visibleTasks.length} {isAr ? "مهمة" : "tâches"}
-                        </Badge>
+                        {/* View Switcher for Mobile Devices */}
+                        <div className="flex md:hidden items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-slate-800 w-full sm:w-64">
+                            <button
+                                type="button"
+                                onClick={() => setMobileViewMode("list")}
+                                className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
+                                    mobileViewMode === "list"
+                                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
+                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                                }`}
+                            >
+                                {isAr ? "قائمة الجدول الزمني" : "Liste"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMobileViewMode("gantt")}
+                                className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
+                                    mobileViewMode === "gantt"
+                                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
+                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                                }`}
+                            >
+                                {isAr ? "مخطط غانت" : "Gantt"}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Controls Group */}
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full lg:w-auto">
 
                         {/* Search */}
-                        <div className="relative w-72">
+                        <div className="relative w-full sm:w-72">
                             <Search className="absolute right-4 top-3 h-4 w-4 text-slate-400" />
                             <Input
                                 placeholder={isAr ? "بحث في المهام..." : "Rechercher une tâche..."}
@@ -985,7 +1037,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                         {/* Status Filter */}
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="h-11 w-40 bg-slate-50 dark:bg-slate-900 border-slate-200">
+                            <SelectTrigger className="h-11 w-full sm:w-40 bg-slate-50 dark:bg-slate-900 border-slate-200">
                                 <SelectValue placeholder={isAr ? "كل الحالات" : "Tous les statuts"} />
                             </SelectTrigger>
                             <SelectContent>
@@ -998,7 +1050,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                         </Select>
 
                         {/* Zoom Controls */}
-                        <div className="flex items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200">
+                        <div className={`items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
                             <Button
                                 variant={zoomLevel === "day" ? "default" : "ghost"}
                                 size="sm"
@@ -1042,7 +1094,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                 });
                                 setIsDialogOpen(true);
                             }}
-                            className="bg-blue-600 hover:bg-blue-700 h-11 px-6 font-semibold shadow-sm flex items-center gap-2 text-sm"
+                            className="bg-blue-600 hover:bg-blue-700 h-11 w-full sm:w-auto px-6 font-semibold shadow-sm flex items-center justify-center gap-2 text-sm"
                         >
                             <Plus className="w-5 h-5" />
                             {isAr ? "إضافة مهمة" : "Nouvelle tâche"}
@@ -1053,7 +1105,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
 
                 {/* Sub Legend Bar */}
-                <div className="border-b px-6 py-2 flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/20">
+                <div className={`border-b px-6 py-2 flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/20 ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
                     <div className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
                         <span>{isAr ? "للقيام بها" : "À faire"}</span>
@@ -1080,9 +1132,186 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                     </div>
                 </div>
 
+                {/* Mobile Timeline List Feed View */}
+                {mobileViewMode === "list" ? (
+                    <div className="md:hidden px-4 py-6 space-y-4 bg-slate-50/50 dark:bg-slate-900/10 min-h-[400px]">
+                        {visibleTasks.length === 0 ? (
+                            <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-950 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-20 text-slate-500" />
+                                <p className="text-sm font-medium">
+                                    {isAr ? "لا توجد مهام مطابقة للمواصفات" : "Aucune tâche disponible"}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 relative before:absolute before:bottom-0 before:top-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800 before:left-4 rtl:before:left-auto rtl:before:right-4">
+                                {visibleTasks.map((item) => {
+                                    const { task, level, hasChildren } = item;
+                                    const isExpanded = expandedTasks[task.id] !== false;
+                                    const workerInitials = task.assigned_worker?.full_name
+                                        ? task.assigned_worker.full_name
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")
+                                            .toUpperCase()
+                                            .substring(0, 2)
+                                        : "";
+
+                                    return (
+                                        <div
+                                            key={task.id}
+                                            className="relative transition-all duration-300 group"
+                                            style={{
+                                                paddingLeft: !isAr ? `${level * 12}px` : "0px",
+                                                paddingRight: isAr ? `${level * 12}px` : "0px"
+                                            }}
+                                        >
+                                            {/* Connecting node marker */}
+                                            <div className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 z-10 border border-white dark:border-slate-950" />
+
+                                            {/* Card */}
+                                            <Card
+                                                className={`bg-white dark:bg-slate-950 border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden ${
+                                                    task.status === "in_progress"
+                                                        ? "border-l-4 border-l-blue-500 shadow-blue-500/5"
+                                                        : task.status === "done"
+                                                        ? "border-l-4 border-l-emerald-500 shadow-emerald-500/5"
+                                                        : task.status === "delayed"
+                                                        ? "border-l-4 border-l-red-500 shadow-red-500/5"
+                                                        : "border-l-4 border-l-slate-400"
+                                                }`}
+                                            >
+                                                <CardContent className="p-4 space-y-3">
+                                                    <div className="flex justify-between items-start gap-2">
+                                                        <div className="space-y-1 flex-1">
+                                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                                {level > 0 && (
+                                                                    <Badge variant="outline" className="text-[9px] px-1 py-0 bg-slate-50 dark:bg-slate-900 border-slate-200">
+                                                                        {isAr ? "مهمة فرعية" : "Sous-tâche"}
+                                                                    </Badge>
+                                                                )}
+                                                                {task.is_milestone && (
+                                                                    <Badge className="text-[9px] px-1.5 py-0 bg-amber-500 hover:bg-amber-600 text-white border-none font-bold">
+                                                                        {isAr ? "🔸 معلم رئيسي" : "🔸 Jalon"}
+                                                                    </Badge>
+                                                                )}
+                                                                <Badge
+                                                                    className={`text-[9px] px-1.5 py-0 rounded font-semibold uppercase ${
+                                                                        task.priority === "urgent"
+                                                                            ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                                                                            : task.priority === "high"
+                                                                            ? "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400"
+                                                                            : task.priority === "low"
+                                                                            ? "bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400"
+                                                                            : "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
+                                                                    }`}
+                                                                >
+                                                                    {isAr ? getPriorityArabic(task.priority) : task.priority}
+                                                                </Badge>
+                                                            </div>
+                                                            
+                                                            <h3
+                                                                onClick={() => handleDoubleClickTask(task)}
+                                                                className="text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 cursor-pointer transition-colors leading-tight"
+                                                            >
+                                                                {task.title}
+                                                            </h3>
+                                                        </div>
+
+                                                        {!task.is_milestone && (
+                                                            <div className="flex-shrink-0 flex items-center justify-center relative w-9 h-9">
+                                                                <svg className="w-full h-full transform -rotate-90">
+                                                                    <circle
+                                                                        cx="18"
+                                                                        cy="18"
+                                                                        r="14"
+                                                                        className="stroke-slate-100 dark:stroke-slate-800"
+                                                                        strokeWidth="2.5"
+                                                                        fill="transparent"
+                                                                    />
+                                                                    <circle
+                                                                        cx="18"
+                                                                        cy="18"
+                                                                        r="14"
+                                                                        className={
+                                                                            task.status === "done"
+                                                                                ? "stroke-emerald-500"
+                                                                                : task.status === "in_progress"
+                                                                                ? "stroke-blue-500"
+                                                                                : task.status === "delayed"
+                                                                                ? "stroke-red-500"
+                                                                                : "stroke-slate-400"
+                                                                        }
+                                                                        strokeWidth="2.5"
+                                                                        fill="transparent"
+                                                                        strokeDasharray={2 * Math.PI * 14}
+                                                                        strokeDashoffset={
+                                                                            2 * Math.PI * 14 - (task.progress / 100) * 2 * Math.PI * 14
+                                                                        }
+                                                                        strokeLinecap="round"
+                                                                    />
+                                                                </svg>
+                                                                <span className="absolute text-[8px] font-black text-slate-800 dark:text-slate-200">
+                                                                    {task.progress}%
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {task.description && (
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 bg-slate-50 dark:bg-slate-900/40 p-2 rounded-lg border border-slate-100 dark:border-slate-800/40 italic">
+                                                            "{task.description}"
+                                                        </p>
+                                                    )}
+
+                                                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-900 text-xs">
+                                                        <div className="flex items-center gap-1 text-slate-500 font-medium">
+                                                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                                            <span>
+                                                                {task.start_date} → {task.due_date}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            {task.assigned_worker ? (
+                                                                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/60 pl-2 pr-1 py-0.5 rounded-full border border-slate-100 dark:border-slate-800">
+                                                                    <Avatar className="w-5 h-5 bg-slate-200 dark:bg-slate-800 text-[8px] font-bold">
+                                                                        <AvatarFallback>{workerInitials}</AvatarFallback>
+                                                                    </Avatar>
+                                                                    <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 max-w-[80px] truncate">
+                                                                        {task.assigned_worker.full_name}
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex items-center gap-1 text-slate-400">
+                                                                    <User className="w-3.5 h-3.5" />
+                                                                    <span className="text-[10px] font-medium">{isAr ? "غير معين" : "Non assigné"}</span>
+                                                                </div>
+                                                            )}
+
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 px-2.5 rounded-lg border-slate-200 hover:bg-slate-100 text-slate-600 dark:text-slate-350 hover:text-blue-600 flex items-center gap-1"
+                                                                onClick={() => handleDoubleClickTask(task)}
+                                                            >
+                                                                <Edit2 className="w-3 h-3" />
+                                                                <span>{isAr ? "تعديل" : "Modifier"}</span>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                ) : null}
+
                 {/* Main Gantt Viewport */}
                 {/* We force dir="ltr" internally for calculations, but layout remains consistent */}
-                <div className="p-0 overflow-hidden relative flex flex-col dir-ltr">
+                <div className={`p-0 overflow-hidden relative flex flex-col dir-ltr ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
                     <div
                         ref={scrollContainerRef}
                         className="overflow-x-auto overflow-y-hidden custom-scrollbar relative w-full"
@@ -1090,16 +1319,17 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                         {/* Horizontal timeline layout */}
                         <div
                             className="flex flex-col relative"
-                            style={{ width: `${320 + totalDays * dayWidth}px` }}
+                            style={{ width: `${sidebarWidth + totalDays * dayWidth}px` }}
                         >
                             {/* 1. Header Grid Row */}
                             <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 select-none z-30 sticky top-0">
                                 {/* Left Sidebar Header */}
                                 <div
-                                    className="w-80 flex-shrink-0 flex items-center justify-between px-6 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-40 h-16 shadow-[5px_0_10px_-3px_rgba(0,0,0,0.07)]"
+                                    className="flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-40 h-16 shadow-[5px_0_10px_-3px_rgba(0,0,0,0.07)]"
                                     dir={isAr ? "rtl" : "ltr"}
+                                    style={{ width: `${sidebarWidth}px` }}
                                 >
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
                                         {isAr ? "الهيكل الهرمي للمهام" : "Structure des tâches"}
                                     </span>
                                 </div>
@@ -1152,7 +1382,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                         {/* Timeline Content Grid - Absolute Columns Background */}
                                         <div
                                             className="absolute top-0 bottom-0 flex pointer-events-none z-0"
-                                            style={{ left: 320, right: 0 }}
+                                            style={{ left: sidebarWidth, right: 0 }}
                                         >
                                             {subHeaderCells.map((cell) => (
                                                 <div
@@ -1176,7 +1406,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                         {/* SVG Overlay for Connections */}
                                         <div
                                             className="absolute top-0 bottom-0 pointer-events-none z-10"
-                                            style={{ left: 320, right: 0, width: `${totalDays * dayWidth}px` }}
+                                            style={{ left: sidebarWidth, right: 0, width: `${totalDays * dayWidth}px` }}
                                         >
                                             <svg className="w-full h-full">
                                                 <defs>
@@ -1243,15 +1473,16 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                 >
                                                     {/* Left Sidebar Sticky Cell (Hierarchical list) */}
                                                     <div
-                                                        className="w-80 flex-shrink-0 flex items-center justify-between px-4 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800/60 sticky left-0 z-30 h-full shadow-[5px_0_10px_-3px_rgba(0,0,0,0.05)]"
+                                                        className="flex-shrink-0 flex items-center justify-between px-2 md:px-4 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800/60 sticky left-0 z-30 h-full shadow-[5px_0_10px_-3px_rgba(0,0,0,0.05)]"
                                                         dir={isAr ? "rtl" : "ltr"}
+                                                        style={{ width: `${sidebarWidth}px` }}
                                                         onDoubleClick={() => handleDoubleClickTask(task)}
                                                     >
                                                         <div
-                                                            className="flex items-center truncate gap-1.5"
+                                                            className="flex items-center truncate gap-1 md:gap-1.5"
                                                             style={{
-                                                                paddingRight: isAr ? `${level * 16}px` : "0px",
-                                                                paddingLeft: !isAr ? `${level * 16}px` : "0px"
+                                                                paddingRight: isAr ? `${level * (sidebarWidth === 130 ? 8 : 16)}px` : "0px",
+                                                                paddingLeft: !isAr ? `${level * (sidebarWidth === 130 ? 8 : 16)}px` : "0px"
                                                             }}
                                                         >
                                                             {/* Collapse Toggle */}
@@ -1295,13 +1526,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                 >
                                                                     {task.title}
                                                                 </span>
-                                                                <span className="text-[9px] text-slate-400 font-medium">
+                                                                <span className="text-[9px] text-slate-400 font-medium hidden md:inline">
                                                                     {task.start_date} → {task.due_date}
                                                                 </span>
                                                             </div>
                                                         </div>
 
-                                                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                        <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
                                                             {/* User avatar */}
                                                             {task.assigned_worker ? (
                                                                 <Tooltip>
