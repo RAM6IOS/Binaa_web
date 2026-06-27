@@ -1,24 +1,29 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, Truck, MapPin, MoreVertical, Settings, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Search, Loader2, Truck, MapPin, MoreVertical, Edit, Trash2, Plus
+} from "lucide-react";
 import { equipmentService } from "@/lib/services/equipment-service";
 import { Equipment } from "@/lib/types/projects";
 import { AddEquipmentDialog } from "@/components/equipment/AddEquipmentDialog";
 import { EquipmentStatusBadge } from "@/components/equipment/EquipmentStatusBadge";
 import { MaintenanceStatusBadge } from "@/components/equipment/MaintenanceStatusBadge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EquipmentListPage({ params }: { params: Promise<{ locale: string }> }) {
   const unwrappedParams = use(params);
@@ -28,12 +33,15 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Filters
+
   const [wilayaFilter, setWilayaFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [maintenanceFilter, setMaintenanceFilter] = useState<string>('all');
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchEquipment = async () => {
     setIsLoading(true);
@@ -51,24 +59,53 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
     fetchEquipment();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(isAr ? 'هل أنت متأكد من حذف هذه المعدة؟' : 'Êtes-vous sûr de vouloir supprimer cet équipement?')) return;
+  const askDelete = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+  useEffect(() => {
+    if (!isDeleteModalOpen) {
+      // ننتظر أجزاء من الثانية لضمان انتهاء أنيميشن الإغلاق
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isDeleteModalOpen]);
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    setIsDeleting(true);
     try {
-      await equipmentService.delete(id);
-      toast.success(isAr ? 'تم حذف المعدات بنجاح' : 'Équipement supprimé avec succès');
-      fetchEquipment(); // Refresh the list
+      // 1. إجراء عملية الحذف في السيرفر
+      await equipmentService.delete(itemToDelete);
+
+      // 2. تحديث الواجهة محلياً لإزالة العنصر
+      setEquipment(prev => prev.filter(item => item.id !== itemToDelete));
+
+      // 3. رسالة نجاح
+      toast.success(isAr ? 'تم حذف العتاد بنجاح ✓' : 'Équipement supprimé avec succès ✓');
+
+      // 4. *** الحل الجذري ***: إغلاق المودال أولاً ومسح معرف الحذف
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+
     } catch (error) {
-      toast.error(isAr ? 'حدث خطأ' : 'Une erreur est survenue');
+      toast.error(isAr ? 'فشل الحذف' : 'Erreur lors de la suppression');
+    } finally {
+      // نضع IsDeleting فقط في الـ finally لضمان توقف اللودر
+      setIsDeleting(false);
     }
   };
-
   const filteredEquipment = equipment.filter(e => {
     const term = searchQuery.toLowerCase();
-    const matchesSearch = (
-      (e.name || '').toLowerCase().includes(term) || 
-      (e.serial_number || '').toLowerCase().includes(term)
-    );
-    
+    const matchesSearch =
+      (e.name || '').toLowerCase().includes(term) ||
+      (e.serial_number || '').toLowerCase().includes(term) ||
+      (e.brand || '').toLowerCase().includes(term) ||
+      (e.model || '').toLowerCase().includes(term);
+
     const matchesWilaya = wilayaFilter === 'all' || e.wilaya === wilayaFilter;
     const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
@@ -81,11 +118,16 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
   const uniqueCategories = Array.from(new Set(equipment.map(e => e.category))).filter(Boolean);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500" dir={isAr ? 'rtl' : 'ltr'}>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
+    <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{isAr ? 'العتاد والمعدات' : 'Équipement & Matériel'}</h2>
-          <p className="text-slate-500 mt-1">{isAr ? 'إدارة المعدات الثقيلة والآلات وتتبع حالتها' : 'Gérer les engins lourds, les machines et suivre leur état'}</p>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            {isAr ? 'العتاد والمعدات' : 'Équipement & Matériel'}
+          </h2>
+          <p className="text-slate-500 mt-1">
+            {isAr ? 'إدارة المعدات الثقيلة وتتبع حالتها' : 'Gérer les engins lourds et suivre leur état'}
+          </p>
         </div>
         <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />
       </div>
@@ -95,18 +137,17 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative flex-1 w-full md:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rtl:right-3 rtl:left-auto" />
-              <input 
-                type="text" 
+              <Input
+                placeholder={isAr ? 'ابحث عن عتاد...' : 'Rechercher...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isAr ? 'ابحث عن عتاد (الاسم، الرقم التسلسلي...)' : 'Rechercher (Nom, SN...)'} 
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-800 rounded-md text-sm rtl:pr-10 rtl:pl-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-transparent"
+                className="pl-10 rtl:pr-10"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder={isAr ? "الولاية" : "Wilaya"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -116,7 +157,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={isAr ? "الفئة" : "Catégorie"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,127 +193,18 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+
+        <CardContent>
           {isLoading ? (
-            <div className="p-4 space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-center space-x-4 space-x-reverse">
-                  <Skeleton className="h-12 w-12 rounded-lg" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/3" />
-                  </div>
-                </div>
-              ))}
+            <div className="p-8 space-y-4">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
             </div>
           ) : (
-            <>
-              {/* Mobile Card View */}
-              <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-                {filteredEquipment.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-2">
-                    <Truck className="w-8 h-8 text-slate-300" />
-                    <p>{isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}</p>
-                  </div>
-                ) : (
-                  filteredEquipment.map((item) => (
-                    <div key={item.id} className="p-4 space-y-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/10">
-                      {/* Top row: Image + Name/Category + Actions */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0 overflow-hidden border border-emerald-100 dark:border-emerald-900/30">
-                            {item.photo_url ? (
-                              <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <Truck className="w-6 h-6 text-emerald-600" />
-                            )}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-900 dark:text-slate-100">{item.name}</h3>
-                            <span className="text-xs text-slate-505 capitalize">{item.category}</span>
-                          </div>
-                        </div>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rtl:text-right">
-                            <AddEquipmentDialog 
-                              isAr={isAr} 
-                              onSuccess={fetchEquipment} 
-                              equipment={item}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer gap-2">
-                                  <Edit className="w-4 h-4" />
-                                  {isAr ? 'تعديل' : 'Modifier'}
-                                </DropdownMenuItem>
-                              }
-                            />
-                            <DropdownMenuItem className="text-red-600 cursor-pointer gap-2" onClick={() => handleDelete(item.id)}>
-                              <Trash2 className="w-4 h-4" />
-                              {isAr ? 'حذف' : 'Supprimer'}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      {/* Middle row: Brand/Model & Serial number */}
-                      <div className="grid grid-cols-2 gap-3 text-xs border-t border-slate-50 dark:border-slate-850 pt-2">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'العلامة / الموديل' : 'Marque / Modèle'}</span>
-                          <span className="font-medium text-slate-800 dark:text-slate-200">
-                            {item.brand} <span className="text-slate-550 text-[10px]">({item.model})</span>
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? 'الرقم التسلسلي' : 'N° Série'}</span>
-                          <code className="text-xs font-mono font-medium text-slate-700 dark:text-slate-350">{item.serial_number}</code>
-                        </div>
-                      </div>
-
-                      {/* Badges/Details row: Statuses & Wilaya */}
-                      <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-lg border border-slate-100/50 dark:border-slate-800/30 items-center">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الولاية' : 'Wilaya'}</span>
-                          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-350 font-medium">
-                            <MapPin className="w-3.5 h-3.5 text-red-500" /> {item.wilaya}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الحالة' : 'Statut'}</span>
-                          <div>
-                            <EquipmentStatusBadge status={item.status} isAr={isAr} />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? 'الصيانة' : 'Maint.'}</span>
-                          <div>
-                            <MaintenanceStatusBadge status={item.maintenance_status} isAr={isAr} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Daily Rate row */}
-                      <div className="flex justify-between items-center bg-emerald-50/30 dark:bg-emerald-950/10 p-2.5 rounded-lg border border-emerald-100/20 dark:border-emerald-900/10">
-                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{isAr ? 'الأجر اليومي' : 'Taux journalier'}</span>
-                        <div className="font-bold text-slate-950 dark:text-slate-50">
-                          {item.daily_rate.toLocaleString()} <span className="text-[10px] text-slate-505 font-normal">DZD</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Desktop Table View */}
-              <div className="hidden md:block overflow-x-auto">
-                <Table>
-                <TableHeader className="bg-slate-50 dark:bg-slate-900 border-y">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[280px]">{isAr ? 'المعدة' : 'Équipement'}</TableHead>
+                    <TableHead>{isAr ? 'المعدة' : 'Équipement'}</TableHead>
                     <TableHead>{isAr ? 'العلامة / الموديل' : 'Marque / Modèle'}</TableHead>
                     <TableHead>{isAr ? 'الرقم التسلسلي' : 'N° Série'}</TableHead>
                     <TableHead>{isAr ? 'الأجر اليومي' : 'Taux/Jour'}</TableHead>
@@ -286,18 +218,16 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                   {filteredEquipment.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-12 text-slate-500">
-                        <div className="flex flex-col items-center gap-2">
-                          <Truck className="w-8 h-8 text-slate-300" />
-                          <p>{isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}</p>
-                        </div>
+                        <Truck className="mx-auto w-10 h-10 text-slate-300 mb-3" />
+                        {isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredEquipment.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 group">
+                      <TableRow key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center overflow-hidden">
                               {item.photo_url ? (
                                 <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
                               ) : (
@@ -305,34 +235,21 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                               )}
                             </div>
                             <div>
-                              <div className="font-semibold text-slate-900 dark:text-slate-100">
-                                {item.name}
-                              </div>
-                              <div className="text-xs text-slate-500 capitalize">{item.category}</div>
+                              <div className="font-semibold">{item.name}</div>
+                              <div className="text-xs text-slate-500">{item.category}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">
-                            <span className="font-medium">{item.brand}</span>
-                            <span className="text-slate-500 ml-1">({item.model})</span>
-                          </div>
+                          {item.brand} <span className="text-slate-400">({item.model})</span>
                         </TableCell>
                         <TableCell>
-                          <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">
-                            {item.serial_number}
-                          </code>
+                          <code className="font-mono text-xs">{item.serial_number}</code>
                         </TableCell>
-                        <TableCell>
-                          <div className="font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                            {item.daily_rate.toLocaleString()} <span className="text-[10px] text-slate-500">DZD</span>
-                          </div>
+                        <TableCell className="font-semibold">
+                          {item.daily_rate.toLocaleString()} <span className="text-xs text-slate-400">DZD</span>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400">
-                            <MapPin className="w-3.5 h-3.5" /> {item.wilaya}
-                          </div>
-                        </TableCell>
+                        <TableCell>{item.wilaya}</TableCell>
                         <TableCell>
                           <EquipmentStatusBadge status={item.status} isAr={isAr} />
                         </TableCell>
@@ -346,10 +263,10 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="rtl:text-right">
-                              <AddEquipmentDialog 
-                                isAr={isAr} 
-                                onSuccess={fetchEquipment} 
+                            <DropdownMenuContent align="end">
+                              <AddEquipmentDialog
+                                isAr={isAr}
+                                onSuccess={fetchEquipment}
                                 equipment={item}
                                 trigger={
                                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer gap-2">
@@ -358,9 +275,9 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                                   </DropdownMenuItem>
                                 }
                               />
-                              <DropdownMenuItem 
-                                className="text-red-600 cursor-pointer gap-2" 
-                                onClick={() => handleDelete(item.id)}
+                              <DropdownMenuItem
+                                className="text-red-600 cursor-pointer gap-2"
+                                onClick={() => askDelete(item.id)}
                               >
                                 <Trash2 className="w-4 h-4" />
                                 {isAr ? 'حذف' : 'Supprimer'}
@@ -374,10 +291,20 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                 </TableBody>
               </Table>
             </div>
-          </>
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        isAr={isAr}
+        title={isAr ? "حذف العتاد" : "Supprimer l'équipement"}
+        description={isAr ? "هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه." : "Cette action est irréversible."}
+      />
     </div>
   );
 }
