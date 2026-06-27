@@ -14,7 +14,6 @@ import { OverviewTab } from "./components/OverviewTab";
 import { TaskBoardTab } from "./components/TaskBoardTab";
 import { ResourcesTab } from "./components/ResourcesTab";
 import { DocumentsTab } from "./components/DocumentsTab";
-import { BudgetTab } from "./components/BudgetTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
@@ -190,12 +189,7 @@ export default function ProjectDetailPage({
             </div>
 
             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase font-bold">{isAr ? 'الميزانية' : 'Budget'}</p>
-                <p className="font-bold text-slate-900 dark:text-white truncate">
-                  {project.budget.toLocaleString()} <span className="text-[10px] font-normal">DZD</span>
-                </p>
-              </div>
+
               <div>
                 <p className="text-[10px] text-slate-500 uppercase font-bold">{isAr ? 'العميل' : 'Client'}</p>
                 <p className="font-bold text-slate-900 dark:text-white truncate" title={project.client_name}>
@@ -226,9 +220,7 @@ export default function ProjectDetailPage({
           <TabsTrigger value="documents" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
             {isAr ? 'الوثائق' : 'Documents'}
           </TabsTrigger>
-          <TabsTrigger value="budget" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-emerald-700 dark:text-emerald-400 data-[state=active]:text-emerald-700">
-            {isAr ? '💰 الميزانية والمالية' : '💰 Budget & Finances'}
-          </TabsTrigger>
+
           <TabsTrigger value="daily-logs" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-orange-600 dark:text-orange-400 data-[state=active]:text-orange-600 flex items-center gap-1.5">
             <BookOpen className="w-4 h-4" />
             {isAr ? 'التقارير اليومية' : 'Rapports journaliers'}
@@ -261,9 +253,7 @@ export default function ProjectDetailPage({
           <DocumentsTab project={project} isAr={isAr} />
         </TabsContent>
 
-        <TabsContent value="budget" className="mt-0 focus-visible:outline-none">
-          <BudgetTab project={project} isAr={isAr} />
-        </TabsContent>
+
 
         <TabsContent value="daily-logs" className="mt-0 focus-visible:outline-none">
           <DailyLogsTab project={project} isAr={isAr} />
