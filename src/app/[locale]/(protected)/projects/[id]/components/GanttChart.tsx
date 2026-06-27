@@ -18,6 +18,7 @@ import { projectWorkersService } from "@/lib/services/project-workers-service";
 import { projectsService } from "@/lib/services/projects-service";
 import { Worker, Project } from "@/lib/types/projects";
 import { toast } from "sonner";
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 import {
     Plus,
     ZoomIn,
@@ -117,6 +118,8 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const dateLocale = isAr ? arDZ : fr;
+    // ─── إدارة حالة الحذف الاحترافي ───
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     // Load tasks, workers, and project details
     const loadTasks = async () => {
@@ -317,6 +320,22 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                 }));
         }
 
+        // ─── منطق الحذف ───
+        const handleConfirmDelete = async () => {
+            if (!activeTask?.id) return;
+            setIsSaving(true);
+            try {
+                await tasksService.delete(activeTask.id);
+                toast.success(isAr ? "تم حذف المهمة بنجاح" : "Tâche supprimée");
+                setIsDeleteModalOpen(false);
+                setIsDialogOpen(false); // نغلق ديالوج التعديل أيضاً
+                loadTasks();
+            } catch (error) {
+                toast.error(isAr ? "فشل حذف المهمة" : "Erreur");
+            } finally {
+                setIsSaving(false);
+            }
+        };
         const result: { task: GanttTaskExtended; level: number; hasChildren: boolean }[] = [];
 
         // Group children
@@ -769,30 +788,29 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
             setIsSaving(false);
         }
     };
-
-    // Handle Delete Task
-    const handleDeleteTask = async () => {
+    // ────── معالجة الحذف الاحترافي ──────
+    const handleDeleteTask = () => {
         if (!activeTask?.id) return;
-        if (
-            !window.confirm(
-                isAr ? "هل أنت متأكد من حذف هذه المهمة نهائياً؟" : "Supprimer définitivement cette tâche ?"
-            )
-        )
-            return;
+        setIsDeleteModalOpen(true);
+    };
 
+    const handleConfirmDelete = async () => {
+        if (!activeTask?.id) return;
         setIsSaving(true);
         try {
             await tasksService.delete(activeTask.id);
             toast.success(isAr ? "تم حذف المهمة بنجاح" : "Tâche supprimée");
-            setIsDialogOpen(false);
-            loadTasks();
+            setIsDeleteModalOpen(false);
+            setIsDialogOpen(false); // إغلاق نافذة التعديل
+            loadTasks(); // إعادة تحميل المهام
         } catch (error) {
-            console.error("Error deleting task:", error);
-            toast.error(isAr ? "فشل حذف المهمة" : "Erreur de suppression");
+            toast.error(isAr ? "فشل حذف المهمة" : "Erreur");
         } finally {
             setIsSaving(false);
         }
     };
+
+
 
     // Color codes based on status and custom picker override
     const getBarColor = (task: GanttTaskExtended) => {
@@ -913,6 +931,21 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
         <TooltipProvider>
             <Card className="animate-in fade-in duration-500 shadow-xl border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 font-sans">
                 {/* Header Toolbar */}
+
+
+                {/* ─── الديالوج الموحد لتأكيد الحذف ─── */}
+                <DeleteConfirmationDialog
+                    isOpen={isDeleteModalOpen}
+                    onOpenChange={setIsDeleteModalOpen}
+                    onConfirm={handleConfirmDelete}
+                    isLoading={isSaving}
+                    isAr={isAr}
+                    title={isAr ? "حذف المهمة من الجدول" : "Supprimer la tâche"}
+                    description={isAr
+                        ? `هل أنت متأكد من حذف المهمة "${activeTask?.title}"؟ هذا الإجراء سيمسح المهمة وتبعاتها من المخطط الزمني.`
+                        : `Êtes-vous sûr de vouloir supprimer "${activeTask?.title}" ? Cette action est irréversible.`}
+                />
+
 
                 {/* Header Toolbar - تصميم محسن وأنظف */}
                 <div className="border-b bg-white dark:bg-slate-950 px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
