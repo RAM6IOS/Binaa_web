@@ -221,8 +221,8 @@ export default function ProjectDetailPage({
             {isAr ? 'الوثائق' : 'Documents'}
           </TabsTrigger>
 
-          <TabsTrigger value="daily-logs" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-orange-600 dark:text-orange-400 data-[state=active]:text-orange-600 flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4" />
+          <TabsTrigger value="daily-logs" className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all">
+
             {isAr ? 'التقارير اليومية' : 'Rapports journaliers'}
           </TabsTrigger>
 
