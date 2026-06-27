@@ -17,7 +17,7 @@ import { DocumentsTab } from "./components/DocumentsTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
-import { PointageTab } from "./components/PointageTab";
+
 
 type ProjectWithJoins = Project & {
   project_documents: ProjectDocument[];
@@ -225,13 +225,7 @@ export default function ProjectDetailPage({
             <BookOpen className="w-4 h-4" />
             {isAr ? 'التقارير اليومية' : 'Rapports journaliers'}
           </TabsTrigger>
-          <TabsTrigger
-            value="pointage"
-            className="pb-4 pt-0 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-semibold transition-all text-emerald-600 dark:text-emerald-400 data-[state=active]:text-emerald-600 flex items-center gap-1.5"
-          >
-            <UserCheck className="w-4 h-4" />
-            {isAr ? 'تسجيل الحضور (Pointage)' : 'Pointage'}
-          </TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 focus-visible:outline-none">
@@ -259,9 +253,7 @@ export default function ProjectDetailPage({
           <DailyLogsTab project={project} isAr={isAr} />
         </TabsContent>
 
-        <TabsContent value="pointage" className="mt-0 focus-visible:outline-none">
-          <PointageTab project={project} isAr={isAr} />
-        </TabsContent>
+
       </Tabs>
     </div>
   );
