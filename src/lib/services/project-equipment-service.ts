@@ -9,6 +9,9 @@ export const projectEquipmentService = {
   },
 
   async fetchProjectEquipment(projectId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("غير مصرح");
+
     const { data, error } = await supabase
       .from('project_equipment')
       .select(`
@@ -16,8 +19,9 @@ export const projectEquipmentService = {
         equipment:equipment(*)
       `)
       .eq('project_id', projectId)
+
       .order('created_at', { ascending: false });
-    
+
     if (error) {
       console.error('Error fetching project equipment:', error);
       throw error;
@@ -26,12 +30,20 @@ export const projectEquipmentService = {
   },
 
   async assign(data: Omit<ProjectEquipment, 'id' | 'assigned_at'>) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("غير مصرح");
+
+    const payload = {
+      ...data,
+      // يمكن إضافة user_id إذا أردت
+    };
+
     const { data: result, error } = await supabase
       .from('project_equipment')
-      .insert([data])
+      .insert([payload])
       .select()
       .single();
-    
+
     if (error) throw error;
     return result;
   },
@@ -41,7 +53,7 @@ export const projectEquipmentService = {
       .from('project_equipment')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
     return true;
   },
@@ -51,16 +63,16 @@ export const projectEquipmentService = {
       .channel(`project-equipment-${projectId}`)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
+        {
+          event: '*',
+          schema: 'public',
           table: 'project_equipment',
           filter: `project_id=eq.${projectId}`
         },
         () => callback()
       )
       .subscribe();
-    
+
     return () => {
       supabase.removeChannel(channel);
     };

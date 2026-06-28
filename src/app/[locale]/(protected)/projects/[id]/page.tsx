@@ -43,6 +43,7 @@ export default function ProjectDetailPage({
     if (!silent) setIsLoading(true);
     setError(null);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { data, error: supabaseError } = await supabase
         .from('projects')
         .select(`
@@ -51,6 +52,7 @@ export default function ProjectDetailPage({
           tasks (*)
         `)
         .eq('id', id)
+        .eq('created_by', user?.id ?? '')
         .single();
 
       if (supabaseError) {

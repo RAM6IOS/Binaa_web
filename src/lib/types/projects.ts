@@ -95,6 +95,7 @@ export type OwnerType = 'company' | 'rented' | 'subcontracted';
 
 export interface Equipment {
   id: string;
+  user_id?: string;
   name: string;
   type: string;
   category: string;

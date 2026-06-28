@@ -6,13 +6,17 @@ const supabase = createClient();
 
 export const workersService = {
   async getAll() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("غير مصرح");
+
     const { data, error } = await supabase
       .from('workers')
       .select('*')
+      .eq('user_id', user.id)   // ← هذا مهم
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data as Worker[];
+    return data;
   },
 
   async getById(id: string) {
