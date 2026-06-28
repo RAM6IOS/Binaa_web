@@ -56,6 +56,7 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .eq('created_by', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -103,7 +104,9 @@ export default function ProjectsListPage({ params }: { params: Promise<{ locale:
     setIsDeleting(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.from('projects').delete().eq('id', itemToDelete);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('غير مصرح');
+      const { error } = await supabase.from('projects').delete().eq('id', itemToDelete).eq('created_by', user.id);
 
       if (error) throw error;
 
