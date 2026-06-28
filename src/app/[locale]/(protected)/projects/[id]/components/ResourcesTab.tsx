@@ -21,13 +21,14 @@ import {
 import {
   Users, Truck, Plus, Trash2, Clock, HardHat,
   Construction, Loader2, AlertTriangle, Wallet,
-  Info, ArrowRightLeft, UserMinus
+  Info, ArrowRightLeft, UserMinus, Calendar
 } from "lucide-react";
 import { projectWorkersService } from "@/lib/services/project-workers-service";
 import { projectEquipmentService } from "@/lib/services/project-equipment-service";
 import { Project, ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
 import { AssignResourceModal } from "./AssignResourceModal";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ResourcesTabProps {
   project: Project;
@@ -39,12 +40,9 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
   const [assignedEquipment, setAssignedEquipment] = useState<ProjectEquipment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ─── إدارة حالة الحذف المخصص (Custom Deletion State) ───
+  // ─── إدارة حالة الحذف ───
   const [deleteConfirm, setDeleteConfirm] = useState<{
-    isOpen: boolean;
-    id: string;
-    type: "worker" | "equipment" | null;
-    name: string;
+    isOpen: boolean; id: string; type: "worker" | "equipment" | null; name: string;
   }>({ isOpen: false, id: "", type: null, name: "" });
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,7 +58,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
       setAssignedEquipment(equipmentData || []);
     } catch (error) {
       console.error("Resources fetch error:", error);
-      toast.error(isAr ? 'فشل في تحديث قائمة الموارد' : 'Échec de la mise à jour des ressources');
+      toast.error(isAr ? 'فشل في تحديث قائمة الموارد' : 'Erreur de mise à jour');
     } finally {
       if (!silent) setIsLoading(false);
     }
@@ -68,39 +66,37 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
 
   useEffect(() => {
     fetchResources();
-
-    // الاشتراك في التغييرات اللحظية (Real-time)
     const unsubWorkers = projectWorkersService.subscribe(project.id, () => fetchResources(true));
     const unsubEquipment = projectEquipmentService.subscribe(project.id, () => fetchResources(true));
-
-    return () => {
-      unsubWorkers();
-      unsubEquipment();
-    };
+    return () => { unsubWorkers(); unsubEquipment(); };
   }, [project.id]);
 
-  // ─── تنفيذ عملية الحذف ───
+  // ─── منع تجمد الصفحة بعد إغلاق المودال ───
+  useEffect(() => {
+    if (!deleteConfirm.isOpen) {
+      const timer = setTimeout(() => { document.body.style.pointerEvents = 'auto'; }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [deleteConfirm.isOpen]);
+
   const handleConfirmDelete = async () => {
     if (!deleteConfirm.id || !deleteConfirm.type) return;
     setIsDeleting(true);
-
     try {
       if (deleteConfirm.type === "worker") {
         await projectWorkersService.remove(deleteConfirm.id);
       } else {
         await projectEquipmentService.remove(deleteConfirm.id);
       }
-      toast.success(isAr ? 'تم سحب المورد من المشروع بنجاح' : 'Ressource retirée avec succès');
-      await fetchResources(true);
-    } catch (error) {
-      toast.error(isAr ? 'حدث خطأ أثناء المحاولة، يرجى إعادة المحاولة' : 'Erreur lors de la suppression');
+      toast.success(isAr ? 'تم سحب المورد بنجاح ✓' : 'Ressource retirée ✓');
+      // الإغلاق الفوري للمودال لمنع التداخل مع التحديث
+      setDeleteConfirm({ isOpen: false, id: "", type: null, name: "" });
+      fetchResources(true);
     } finally {
       setIsDeleting(false);
-      setDeleteConfirm({ isOpen: false, id: "", type: null, name: "" });
     }
   };
 
-  // ─── حسابات الملخص (Stats) ───
   const stats = useMemo(() => {
     const workerDailyTotal = assignedWorkers.reduce((acc, pw) => acc + (pw.worker?.daily_rate || 0), 0);
     return {
@@ -114,275 +110,218 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
     return (
       <div className="py-24 flex flex-col items-center justify-center gap-4 text-slate-400">
         <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-        <p className="font-medium animate-pulse">{isAr ? 'جاري تحضير قائمة الموارد...' : 'Préparation des ressources...'}</p>
+        <p className="font-bold text-xs uppercase tracking-widest animate-pulse">{isAr ? 'جاري مزامنة الموارد...' : 'Synchronisation...'}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10" dir={isAr ? "rtl" : "ltr"}>
 
-      {/* 1. قسم الإحصائيات العلوي (Stats Section) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      {/* 1. قسم الإحصائيات (Stat Grid) - خلفية ملونة للموبايل لسهولة الرؤية تحت الشمس */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
         <StatCard
-          label={isAr ? 'القوى العاملة' : 'Effectif'}
-          value={stats.workerCount}
-          unit={isAr ? 'عامل' : 'ouvrier(s)'}
-          icon={<Users className="w-6 h-6 text-blue-600" />}
-          color="blue"
+          label={isAr ? 'طاقم العمال' : 'Effectif'} value={stats.workerCount} unit={isAr ? 'عامل' : 'ouvrier(s)'}
+          icon={<Users size={20} />} color="blue"
         />
         <StatCard
-          label={isAr ? 'كلفة العمل اليومية' : 'Coût MO/Jour'}
-          value={stats.workerDailyTotal.toLocaleString()}
-          unit="DZD"
-          icon={<Wallet className="w-6 h-6 text-emerald-600" />}
-          color="emerald"
+          label={isAr ? 'إجمالي العتاد' : 'Parc Engins'} value={stats.equipmentCount} unit={isAr ? 'قطعة' : 'unité(s)'}
+          icon={<Truck size={20} />} color="orange"
         />
         <StatCard
-          label={isAr ? 'العتاد الثقيل' : 'Engins & Matériel'}
-          value={stats.equipmentCount}
-          unit={isAr ? 'قطعة' : 'unité(s)'}
-          icon={<Truck className="w-6 h-6 text-orange-600" />}
-          color="orange"
+          label={isAr ? 'كلفة يومية' : 'Budget MO/J'} value={stats.workerDailyTotal.toLocaleString()} unit="DZD"
+          icon={<Wallet size={20} />} color="emerald" className="xs:col-span-2 md:col-span-1"
         />
       </div>
 
-      {/* 2. قسم إدارة العمال (Workers Management) */}
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-100/50 dark:shadow-none overflow-hidden rounded-2xl">
-        <CardHeader className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-start">
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
-                <HardHat className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-bold tracking-tight">{isAr ? 'العمال المخصصون للورشة' : 'Personnel affecté'}</CardTitle>
-                <CardDescription className="text-xs">{isAr ? 'توزيع المهام وساعات العمل اليومية' : 'Distribution des rôles et horaires'}</CardDescription>
-              </div>
-            </div>
-            <AssignResourceModal
-              type="worker" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)}
-              excludeIds={assignedWorkers.map(aw => aw.worker_id)}
-            />
+      {/* 2. قسم العمال - موبايل (Cards) vs ديسكتوب (Table) */}
+      <Card className="border-none md:border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-none overflow-hidden rounded-[24px] md:rounded-3xl">
+        <CardHeader className="bg-slate-50/50 dark:bg-slate-900 border-b p-4 md:p-6 flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 dark:shadow-none"><HardHat size={18} /></div>
+            <CardTitle className="text-lg md:text-xl font-black">{isAr ? 'إدارة القوى العاملة' : 'Personnel Site'}</CardTitle>
           </div>
+          <AssignResourceModal type="worker" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)} excludeIds={assignedWorkers.map(aw => aw.worker_id)} />
         </CardHeader>
 
         <CardContent className="p-0">
-          <Table className="font-sans">
-            <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50">
-              <TableRow className="text-xs uppercase font-bold text-slate-500">
-                <TableHead className="w-[300px] h-12">{isAr ? 'اسم العامل / التخصص' : 'Ouvrier / Métier'}</TableHead>
-                <TableHead>{isAr ? 'الدور في المشروع' : 'Poste'}</TableHead>
-                <TableHead>{isAr ? 'ساعات اليوم' : 'Quota'}</TableHead>
-                <TableHead>{isAr ? 'الأجر اليومي' : 'Journalier'}</TableHead>
-                <TableHead className="text-right h-12">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignedWorkers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-slate-400 italic">
-                    {isAr ? 'لا يوجد عمال مسجلون لهذا المشروع.' : 'Aucun ouvrier enregistré.'}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                assignedWorkers.map((pw) => (
-                  <TableRow key={pw.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors">
-                    <TableCell>
-                      <div className="flex items-center gap-3 text-start">
-                        <Avatar className="h-10 w-10 border-2 border-white dark:border-slate-800 shadow-sm">
-                          <AvatarImage src={pw.worker?.photo_url} />
-                          <AvatarFallback className="bg-slate-100 text-slate-500 font-bold">{pw.worker?.full_name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-900 dark:text-slate-100 truncate text-sm">{pw.worker?.full_name}</p>
-                          <p className="text-[11px] text-slate-500 font-medium">{pw.worker?.job_title}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-white dark:bg-slate-900 border-blue-200 text-blue-700 dark:border-blue-900/30 dark:text-blue-400 font-semibold px-2 py-0 h-6 text-[10.5px]">
-                        {pw.assigned_role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 font-mono font-bold text-slate-700 dark:text-slate-300">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {pw.daily_hours}h
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-bold text-slate-900 dark:text-slate-100">
-                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[9px] text-slate-400 ml-1 uppercase">dzd</span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost" size="icon"
-                        className="text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full h-8 w-8"
-                        onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })}
-                      >
-                        <UserMinus className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          {/* نسخة الموبايل (نظام بطاقات iPhone style) */}
+          <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-900">
+            {assignedWorkers.length === 0 ? <EmptyMobile isAr={isAr} /> : assignedWorkers.map((pw) => (
+              <div key={pw.id} className="p-5 bg-white dark:bg-slate-950 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-3 text-start">
+                    <Avatar className="h-12 w-12 border-2 border-slate-100 shadow-sm">
+                      <AvatarImage src={pw.worker?.photo_url || ''} />
+                      <AvatarFallback className="font-black text-blue-600">{pw.worker?.full_name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-black text-[15px] text-slate-900 dark:text-white leading-none">{pw.worker?.full_name}</p>
+                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-tighter mt-1">{pw.worker?.job_title}</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="text-slate-300 active:text-red-600 h-10 w-10">
+                    <UserMinus size={20} />
+                  </Button>
+                </div>
+                {/* تفاصيل الساعات والراتب في شبكة مصغرة */}
+                <div className="grid grid-cols-3 gap-2">
+                  <DetailBox label={isAr ? "الدور" : "Poste"} value={pw.assigned_role} />
+                  <DetailBox label={isAr ? "الساعات" : "Quota"} value={`${pw.daily_hours}H`} />
+                  <DetailBox label={isAr ? "الأجر" : "Salaire"} value={pw.worker?.daily_rate?.toLocaleString()} highlight />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* نسخة الديسكتوب (الجدول الاحترافي) */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-slate-50/50 dark:bg-slate-900/60 uppercase font-black text-[10px]">
+                <TableRow><TableHead className="ps-6">العامل</TableHead><TableHead>الدور</TableHead><TableHead>ساعات اليوم</TableHead><TableHead>الأجر اليومي</TableHead><TableHead className="text-right pe-6">إجراءات</TableHead></TableRow>
+              </TableHeader>
+              <TableBody>
+                {assignedWorkers.map((pw) => (
+                  <TableRow key={pw.id} className="group transition-colors"><TableCell className="ps-6"><div className="flex items-center gap-3 text-start"><Avatar className="h-9 w-9"><AvatarImage src={pw.worker?.photo_url || ''} /><AvatarFallback>{pw.worker?.full_name?.charAt(0)}</AvatarFallback></Avatar><div><p className="font-bold text-sm">{pw.worker?.full_name}</p><p className="text-[10px] text-slate-500 font-medium">{pw.worker?.job_title}</p></div></div></TableCell><TableCell><Badge variant="outline" className="text-[10px] font-bold border-blue-200 text-blue-700 bg-blue-50/30">{pw.assigned_role}</Badge></TableCell><TableCell className="font-mono font-black">{pw.daily_hours}h</TableCell><TableCell className="font-black">{pw.worker?.daily_rate?.toLocaleString()} dzd</TableCell><TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-600"><Trash2 size={16} /></Button></TableCell></TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
-      {/* 3. قسم إدارة العتاد (Equipment Management) */}
-      <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden rounded-2xl mt-10">
-        <CardHeader className="bg-slate-50/40 dark:bg-slate-900/60 border-b flex flex-row items-center justify-between py-6">
-          <div className="flex items-center gap-3 text-start">
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl">
-              <Construction className="w-6 h-6 text-emerald-600" />
-            </div>
-            <div>
-              <CardTitle className="text-xl font-bold tracking-tight">{isAr ? 'قائمة الآلات والمعدات' : 'Équipements du chantier'}</CardTitle>
-            </div>
+      {/* 3. قسم العتاد - تصميم Card للجوال */}
+      <Card className="border-none md:border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden rounded-[24px] md:rounded-3xl mt-10">
+        <CardHeader className="bg-emerald-50/10 dark:bg-emerald-950/20 border-b border-dashed border-emerald-200 p-4 md:p-6 flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-600 text-white rounded-xl"><Construction size={18} /></div>
+            <CardTitle className="text-lg md:text-xl font-black">{isAr ? 'العتاد الثقيل' : 'Engins & Parc'}</CardTitle>
           </div>
-          <AssignResourceModal
-            type="equipment" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)}
-            excludeIds={assignedEquipment.map(ae => ae.equipment_id)}
-          />
+          <AssignResourceModal type="equipment" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)} excludeIds={assignedEquipment.map(ae => ae.equipment_id)} />
         </CardHeader>
-
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-slate-50/50 dark:bg-slate-900/40">
-              <TableRow className="text-xs uppercase text-slate-500 font-bold">
-                <TableHead className="w-[300px] h-12">{isAr ? 'الآلة / المعدة' : 'Machine / Type'}</TableHead>
-                <TableHead>{isAr ? 'نظام الاستخدام' : 'Usage / j'}</TableHead>
-                <TableHead>{isAr ? 'تاريخ الدخول' : 'Depuis'}</TableHead>
-                <TableHead className="text-right h-12">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignedEquipment.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="h-32 text-center text-slate-400 italic font-medium">{isAr ? 'لم يتم تخصيص عتاد حالياً.' : 'Aucun équipement disponible.'}</TableCell></TableRow>
-              ) : (
-                assignedEquipment.map((pe) => (
-                  <TableRow key={pe.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
-                    <TableCell>
-                      <div className="flex items-center gap-3 text-start">
-                        <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm">
-                          <Truck className="w-5 h-5 text-emerald-600" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-900 dark:text-white truncate">{pe.equipment?.name}</p>
-                          <p className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 inline-block uppercase font-bold tracking-tight mt-1">{pe.equipment?.type}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-900/20 px-3 py-1 rounded-full w-fit">
-                        <Clock className="w-3.5 h-3.5" />
-                        {pe.usage_hours_per_day}h/j
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-tighter">
-                      {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
-                    </TableCell>
-                    <TableCell className="text-right px-6">
-                      <Button
-                        variant="ghost" size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full h-8 w-8"
-                        onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
+        <CardContent className="p-0">
+          <div className="md:hidden">
+            {assignedEquipment.length === 0 ? <EmptyMobile isAr={isAr} /> : assignedEquipment.map((pe) => (
+              <div key={pe.id} className="p-5 border-b flex flex-col gap-4 text-start">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center text-amber-600"><Truck size={22} /></div>
+                    <div>
+                      <p className="font-black text-sm">{pe.equipment?.name}</p>
+                      <Badge variant="secondary" className="text-[8px] px-2 font-black mt-1">{pe.equipment?.type}</Badge>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="text-slate-300"><Trash2 size={18} /></Button>
+                </div>
+                <div className="flex gap-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl">
+                  <div className="flex-1 space-y-1 text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{isAr ? 'الاستعمال' : 'Usage'}</p><div className="flex items-center justify-center gap-1.5 font-black text-blue-600"><Clock size={12} />{pe.usage_hours_per_day}h</div></div>
+                  <div className="flex-1 space-y-1 text-center border-s"><p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{isAr ? 'منذ' : 'Dép'}</p><div className="flex items-center justify-center gap-1.5 font-bold text-slate-500 font-mono text-[10px] uppercase"><Calendar size={12} />{pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar' : 'fr', { day: 'numeric', month: 'short' }) : '-'}</div></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* الديسكتوب يظل جدولاً منظماً */}
+          <div className="hidden md:block">
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50/50 dark:bg-slate-900/40 uppercase font-black text-[10px]">
+                  <TableRow>
+                    <TableHead className="ps-6">المعدة</TableHead>
+                    <TableHead>النوع</TableHead>
+                    <TableHead>الاستخدام اليومي</TableHead>
+                    <TableHead>منذ تاريخ</TableHead>
+                    <TableHead className="text-right pe-6">إجراءات</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {assignedEquipment.map((pe) => (
+                    <TableRow key={pe.id} className="group hover:bg-slate-50/30 transition-colors">
+                      <TableCell className="ps-6 font-bold text-slate-900 dark:text-white">
+                        {pe.equipment?.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[9px] font-black">{pe.equipment?.type}</Badge>
+                      </TableCell>
+                      <TableCell className="font-mono font-black text-blue-600">
+                        {pe.usage_hours_per_day}h/j
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-500 font-bold uppercase tracking-tight">
+                        {pe.assigned_at ? new Date(pe.assigned_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR') : '-'}
+                      </TableCell>
+                      <TableCell className="text-right pe-6">
+                        <Button
+                          variant="ghost" size="icon"
+                          onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })}
+                          className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-600 transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* ─── 4. AlertDialog (نظام الحذف والرسائل الاحترافي) ─── */}
-      <AlertDialog
-        open={deleteConfirm.isOpen}
-        onOpenChange={(isOpen) => setDeleteConfirm(prev => ({ ...prev, isOpen }))}
-      >
-        <AlertDialogContent className="sm:max-w-[440px] p-0 border-none overflow-hidden shadow-2xl" dir={isAr ? "rtl" : "ltr"}>
-          {/* Danger Top Section */}
-          <div className="bg-red-50 dark:bg-red-950/20 p-8 flex flex-col items-center gap-4 text-center border-b dark:border-slate-800">
-            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center animate-bounce shadow-inner">
-              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <AlertDialogTitle className="text-2xl font-black text-red-900 dark:text-red-200">
-                {isAr ? "إلغاء التخصيص؟" : "Annuler l'affectation ?"}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-sm mt-1.5 font-bold text-red-700/70 dark:text-red-400/70 uppercase">
-                {deleteConfirm.name}
-              </AlertDialogDescription>
-            </div>
+      {/* ─── AlertDialog (المودال الاحترافي المشترك) ─── */}
+      <AlertDialog open={deleteConfirm.isOpen} onOpenChange={(val) => setDeleteConfirm(prev => ({ ...prev, isOpen: val }))}>
+        <AlertDialogContent className="sm:max-w-[420px] rounded-[40px] p-0 overflow-hidden shadow-2xl border-none" dir={isAr ? "rtl" : "ltr"}>
+          <div className="bg-red-50 p-8 flex flex-col items-center gap-4 text-center border-b">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center shadow-inner"><AlertTriangle className="text-red-600" size={32} /></div>
+            <AlertDialogTitle className="text-xl font-black">{isAr ? "سحب المورد من المشروع؟" : "Annuler l'affectation ?"}</AlertDialogTitle>
+            <p className="text-xs font-black text-red-600 opacity-60 uppercase">{deleteConfirm.name}</p>
           </div>
-
-          <div className="p-6">
-            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl flex gap-3 text-start border dark:border-slate-800">
-              <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                {isAr
-                  ? "تحذير: لن يتم حذف البيانات من سجلات الشركة، ولكن سيتم فك ارتباط العامل/المعدة بهذا المشروع فوراً. سيؤثر هذا على نظام الحضور واليوميات مستقبلاً."
-                  : "Attention: Les données resteront dans la base, mais le lien avec ce chantier sera coupé. Cela affectera le pointage et les futurs rapports."}
-              </p>
-            </div>
-
-            <AlertDialogFooter className="mt-8 flex gap-3 sm:justify-end w-full">
-              <AlertDialogCancel className="h-12 border-slate-200 font-bold bg-white dark:bg-slate-950 flex-1 hover:bg-slate-100" disabled={isDeleting}>
-                {isAr ? "لا، اتركها كما هي" : "Annuler"}
-              </AlertDialogCancel>
-              <Button
-                variant="destructive"
-                className="h-12 font-black flex-1 shadow-lg shadow-red-200 dark:shadow-none"
-                disabled={isDeleting}
-                onClick={handleConfirmDelete}
-              >
-                {isDeleting ? (
-                  <Loader2 className="w-5 h-5 animate-spin ml-2" />
-                ) : (
-                  <ArrowRightLeft className="w-5 h-5 ml-2 opacity-60" />
-                )}
-                {isAr ? "تأكيد فك الارتباط" : "Confirmer"}
+          <div className="p-8 pt-6">
+            <div className="bg-slate-50 p-4 rounded-2xl flex gap-3 text-start mb-8"><Info size={16} className="text-blue-500 mt-1 shrink-0" /><p className="text-[11px] font-bold leading-relaxed opacity-70">{isAr ? "هذا الإجراء لا يمسح بيانات العامل أو المعدة من نظام الشركة، فقط يتم سحبه من المشروع الحالي وتوقيف حساب كلفته اليومية فيه." : "Cette action ne supprime pas les données, elle détache seulement la ressource du projet en cours."}</p></div>
+            <div className="flex flex-col gap-2 mt-4 sm:flex-row sm:gap-3">
+              <AlertDialogCancel className="h-12 flex-1 rounded-2xl font-black border-slate-100 hover:bg-slate-50 transition-all">{isAr ? "لا، رجوع" : "Non"}</AlertDialogCancel>
+              <Button variant="destructive" className="h-12 flex-1 rounded-2xl font-black shadow-lg shadow-red-200" disabled={isDeleting} onClick={handleConfirmDelete}>
+                {isDeleting ? <Loader2 className="animate-spin" /> : (isAr ? "تأكيد السحب" : "Oui, retirer")}
               </Button>
-            </AlertDialogFooter>
+            </div>
           </div>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   );
 }
 
-// ── المكونات المساعدة لزيادة جمالية الصفحة ──
+// ── المكونات المصغرة (Helper Components) ──
 
-function StatCard({ label, value, unit, icon, color }: { label: string, value: any, unit: string, icon: any, color: string }) {
+function StatCard({ label, value, unit, icon, color, className }: any) {
   const styles: any = {
-    blue: "border-blue-100 bg-blue-50/40 text-blue-600 dark:bg-blue-900/10 dark:border-blue-900/30",
-    emerald: "border-emerald-100 bg-emerald-50/40 text-emerald-600 dark:bg-emerald-900/10 dark:border-emerald-900/30",
-    orange: "border-orange-100 bg-orange-50/40 text-orange-600 dark:bg-orange-900/10 dark:border-orange-900/30"
+    blue: "bg-blue-600 shadow-blue-100",
+    emerald: "bg-emerald-500 shadow-emerald-100",
+    orange: "bg-orange-500 shadow-orange-100"
   };
-
   return (
-    <Card className={`border-2 border-dashed ${styles[color]} rounded-3xl overflow-hidden transition-transform hover:scale-[1.02] duration-300`}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="text-start">
-            <p className="text-[10px] uppercase font-black opacity-60 tracking-wider mb-1">{label}</p>
-            <div className="flex items-baseline gap-1.5">
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-none">{value}</h3>
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">{unit}</span>
-            </div>
-          </div>
-          <div className="bg-white/80 dark:bg-slate-900/50 p-2.5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-            {icon}
-          </div>
+    <div className={`p-4 rounded-[28px] text-white flex items-center justify-between shadow-xl transition-all active:scale-[0.98] ${styles[color]} ${className}`}>
+      <div className="text-start space-y-0.5">
+        <p className="text-[10px] font-black uppercase opacity-60 tracking-wider leading-none">{label}</p>
+        <div className="flex items-baseline gap-1.5">
+          <h3 className="text-2xl font-black tabular-nums">{value}</h3>
+          {unit && <span className="text-[10px] font-bold opacity-60 uppercase">{unit}</span>}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/10">{icon}</div>
+    </div>
+  );
+}
+
+function DetailBox({ label, value, highlight = false }: any) {
+  return (
+    <div className={`${highlight ? 'bg-emerald-50/50' : 'bg-slate-50 dark:bg-slate-900'} p-3 rounded-[18px] border dark:border-slate-800 text-center flex flex-col justify-center min-w-0`}>
+      <span className={`text-[8px] font-black uppercase block mb-0.5 ${highlight ? 'text-emerald-500' : 'text-slate-400'}`}>{label}</span>
+      <p className={`text-[11px] font-black truncate px-0.5 ${highlight ? 'text-emerald-700' : 'text-slate-700 dark:text-slate-300'}`}>{value}</p>
+    </div>
+  );
+}
+
+function EmptyMobile({ isAr }: { isAr: boolean }) {
+  return (
+    <div className="py-20 flex flex-col items-center justify-center grayscale opacity-30"><Construction size={40} /><p className="text-[10px] font-black mt-2 tracking-widest uppercase">{isAr ? "القائمة فارغة" : "Liste Vide"}</p></div>
   );
 }
