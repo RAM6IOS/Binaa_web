@@ -12,10 +12,10 @@ import {
 import { format } from "date-fns";
 import { ar, fr } from "date-fns/locale";
 import { DailyLog } from "@/lib/types/daily-logs";
+import { dailyLogService } from "@/lib/services/daily-log-service";
 import { AttachmentsList } from "./AttachmentsList";
 import { attachmentsService } from "@/lib/services/attachments-service";
 import { AddDailyLogDialog } from "./AddDailyLogDialog";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog"; // تأكد من المسار الصحيح للمكون
 import { toast } from "sonner";
 
@@ -31,6 +31,8 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
   const [expanded, setExpanded] = useState(false);
   const [attachments, setAttachments] = useState<any[]>([]);
   const [isAttachmentsLoading, setIsAttachmentsLoading] = useState(false);
+
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // ─── إدارة حالة الحذف الموحد ───
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -59,6 +61,18 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExportingPDF(true);
+    try {
+      await dailyLogService.generatePDF(log, isAr);
+      toast.success(isAr ? "تم تحميل التقرير PDF" : "PDF téléchargé");
+    } catch (err) {
+      toast.error(isAr ? "فشل إنشاء PDF" : "Échec de la création PDF");
+    } finally {
+      setIsExportingPDF(false);
     }
   };
 
@@ -116,6 +130,16 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
           </div>
 
           <div className="flex items-center gap-2 self-end md:self-start">
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-orange-50 text-slate-400 hover:text-orange-600 rounded-full h-9 w-9"
+              onClick={handleExportPDF}
+              disabled={isExportingPDF}
+            >
+              {isExportingPDF ? <Loader2 className="w-4.5 h-4.5 animate-spin" /> : <FileDown className="w-4.5 h-4.5" />}
+            </Button>
 
             <AddDailyLogDialog
               isAr={isAr}

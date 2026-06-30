@@ -223,7 +223,7 @@ export const dailyLogService = {
     return () => supabase.removeChannel(channel);
   },
   /**
- * تصدير التقرير اليومي إلى PDF (شكل رسمي مشابه لـ "Situation des Travaux")
+ * تصدير التقرير اليومي إلى PDF (شكل رسمي منظم - مع دعم العربية)
  */
   async generatePDF(log: DailyLog, isAr: boolean = true): Promise<void> {
     const { jsPDF } = await import('jspdf');
@@ -233,64 +233,262 @@ export const dailyLogService = {
       format: "a4"
     });
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let y = 20;
+    const pw = doc.internal.pageSize.getWidth();
+    const ph = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pw - 2 * margin;
+    let y = margin;
 
-    // العنوان
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(isAr ? "تقرير يومي للأشغال" : "Rapport Journalier des Travaux", pageWidth / 2, y, { align: "center" });
-    y += 10;
-
-    doc.setFontSize(12);
-    doc.text(`التاريخ: ${log.log_date}`, 20, y);
-    y += 8;
-    doc.text(`درجة الحرارة: ${log.temperature}°C`, 20, y);
-    y += 8;
-    doc.text(`الطقس: ${log.weather_condition}`, 20, y);
-    y += 15;
-
-    // ملخص الأعمال
-    doc.setFont("helvetica", "bold");
-    doc.text(isAr ? "ملخص الأعمال:" : "Résumé des travaux:", 20, y);
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    const summaryLines = doc.splitTextToSize(log.work_summary, 170);
-    doc.text(summaryLines, 20, y);
-    y += summaryLines.length * 6 + 10;
-
-    // الكميات
-    if (log.quantities && log.quantities.length > 0) {
-      doc.setFont("helvetica", "bold");
-      doc.text(isAr ? "الكميات المنجزة:" : "Quantités réalisées:", 20, y);
-      y += 8;
-      doc.setFont("helvetica", "normal");
-
-      log.quantities.forEach(q => {
-        const line = `${q.description} : ${q.achieved_quantity} ${q.unit}`;
-        doc.text(line, 25, y);
-        y += 7;
-      });
-      y += 5;
+    // ─── تحميل الخط العربي ───
+    const arFont = 'NotoSansArabic';
+    const fallbackFont = 'helvetica';
+    const mainFont = isAr ? arFont : fallbackFont;
+    if (isAr) {
+      try {
+        const fontUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansarabic/NotoSansArabic%5Bwdth,wght%5D.ttf';
+        const fontRes = await fetch(fontUrl);
+        const fontBuf = await fontRes.arrayBuffer();
+        const fontB64 = btoa(Array.from(new Uint8Array(fontBuf), (b) => String.fromCharCode(b)).join(''));
+        doc.addFileToVFS('NotoSansArabic.ttf', fontB64);
+        doc.addFont('NotoSansArabic.ttf', arFont, 'normal', 'Identity-H');
+        doc.addFont('NotoSansArabic.ttf', arFont, 'bold', 'Identity-H');
+      } catch {
+        console.warn('Failed to load Arabic font, using helvetica');
+      }
     }
 
-    // المواد
-    if (log.materials && log.materials.length > 0) {
-      doc.setFont("helvetica", "bold");
-      doc.text(isAr ? "المواد المستهلكة:" : "Matériaux consommés:", 20, y);
-      y += 8;
-      doc.setFont("helvetica", "normal");
+    // ─── Helper: تعيين الخط ───
+    const setFont = (style: 'normal' | 'bold' = 'normal') => {
+      doc.setFont(mainFont, style);
+    };
 
-      log.materials.forEach(m => {
-        const line = `${m.material_name} : ${m.quantity} ${m.unit}`;
-        doc.text(line, 25, y);
-        y += 7;
+    // ─── Helper: خط فاصل ───
+    const hr = (yPos: number) => {
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos, pw - margin, yPos);
+    };
+
+    // ─── Helper: عنوان قسم ───
+    const sectionTitle = (title: string, yPos: number) => {
+      setFont('bold');
+      doc.setFontSize(13);
+      doc.setTextColor(220, 120, 30);
+      doc.text(title, margin, yPos);
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      return yPos + 7;
+    };
+
+    // ─── Helper: نص عادي ───
+    const bodyText = (text: string, x: number, yPos: number, fontSize = 10, fontStyle: "bold" | "normal" = "normal") => {
+      setFont(fontStyle);
+      doc.setFontSize(fontSize);
+      doc.setTextColor(50, 50, 50);
+      doc.text(text, x, yPos);
+      return yPos + 6;
+    };
+
+    // ─── Helper: خلية جدول ───
+    const tableRow = (cells: string[], yPos: number, header = false) => {
+      const colW = contentWidth / cells.length;
+      setFont(header ? 'bold' : 'normal');
+      doc.setFontSize(9);
+      cells.forEach((cell, i) => {
+        const x = margin + i * colW;
+        doc.text(cell, x + 1, yPos + 4);
       });
-    }
+      if (header) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(margin, yPos - 2, contentWidth, 7, "F");
+      }
+      hr(yPos + 6);
+      return yPos + 10;
+    };
 
-    // Footer
+    // ================================================================
+    // 1. العنوان الرئيسي
+    // ================================================================
+    setFont('bold');
+    doc.setFontSize(20);
+    doc.setTextColor(30, 30, 30);
+    doc.text(isAr ? "تقرير يومي للأشغال" : "RAPPORT JOURNALIER DES TRAVAUX", pw / 2, y, { align: "center" });
+    y += 4;
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    setFont('normal');
+    doc.text(`${isAr ? "منصة بناء - تقرير رقمي" : "Binaa Platform - Rapport Numérique"}`, pw / 2, y, { align: "center" });
+    y += 8;
+    hr(y);
+    y += 6;
+
+    // ================================================================
+    // 2. المعلومات الأساسية
+    // ================================================================
+    y = sectionTitle(isAr ? "معلومات التقرير" : "INFORMATIONS DU RAPPORT", y);
+
+    const infoLeft = [
+      `${isAr ? "التاريخ" : "Date"}: ${log.log_date}`,
+      `${isAr ? "درجة الحرارة" : "Température"}: ${log.temperature}°C`,
+      `${isAr ? "الطقس" : "Météo"}: ${log.weather_condition}`,
+    ];
+    const infoRight = [
+      log.location_details ? `${isAr ? "الموقع" : "Localisation"}: ${log.location_details}` : null,
+      log.overall_progress > 0 ? `${isAr ? "نسبة الإنجاز" : "Progrès"}: ${log.overall_progress}%` : null,
+      log.estimated_value > 0 ? `${isAr ? "القيمة التقديرية" : "Valeur estimée"}: ${log.estimated_value.toLocaleString()} DZD` : null,
+    ].filter(Boolean);
+
+    setFont('normal');
     doc.setFontSize(10);
-    doc.text(isAr ? "منصة بناء - تقرير يومي" : "Binaa Platform - Rapport Journalier", pageWidth / 2, 280, { align: "center" });
+    doc.setTextColor(50, 50, 50);
+    infoLeft.forEach((line, i) => {
+      doc.text(line, margin, y + i * 6);
+    });
+    infoRight.forEach((line, i) => {
+      if (line) doc.text(line, margin + 90, y + i * 6);
+    });
+    y += Math.max(infoLeft.length, infoRight.length) * 6 + 4;
+    hr(y);
+    y += 8;
+
+    // ================================================================
+    // 3. ملخص الأعمال
+    // ================================================================
+    y = sectionTitle(isAr ? "ملخص الأعمال المنجزة" : "RÉSUMÉ DES TRAVAUX", y);
+    setFont('normal');
+    doc.setFontSize(10);
+    doc.setTextColor(50, 50, 50);
+    const summaryLines = doc.splitTextToSize(log.work_summary || (isAr ? "لا يوجد" : "Aucun"), contentWidth);
+    doc.text(summaryLines, margin, y);
+    y += summaryLines.length * 5 + 6;
+    hr(y);
+    y += 8;
+
+    // ================================================================
+    // 4. الكميات المنجزة
+    // ================================================================
+    if (log.quantities && log.quantities.length > 0) {
+      y = sectionTitle(isAr ? "الكميات المنجزة (Situation des Métrés)" : "QUANTITÉS RÉALISÉES", y);
+      y = tableRow(
+        [isAr ? "بيان الأشغال" : "Désignation", isAr ? "الكمية" : "Qté", isAr ? "الوحدة" : "Unité"],
+        y, true
+      );
+      log.quantities.forEach(q => {
+        y = tableRow([q.description || "-", String(q.achieved_quantity), q.unit], y);
+        if (y > ph - 30) {
+          doc.addPage();
+          y = margin + 10;
+        }
+      });
+      y += 4;
+      hr(y);
+      y += 8;
+    }
+
+    // ================================================================
+    // 5. المواد المستهلكة
+    // ================================================================
+    if (log.materials && log.materials.length > 0) {
+      y = sectionTitle(isAr ? "المواد المستهلكة" : "MATÉRIAUX CONSOMMÉS", y);
+      y = tableRow(
+        [isAr ? "المادة" : "Matériau", isAr ? "الكمية" : "Qté", isAr ? "الوحدة" : "Unité"],
+        y, true
+      );
+      log.materials.forEach(m => {
+        y = tableRow([m.material_name || "-", String(m.quantity), m.unit], y);
+        if (y > ph - 30) {
+          doc.addPage();
+          y = margin + 10;
+        }
+      });
+      y += 4;
+      hr(y);
+      y += 8;
+    }
+
+    // ================================================================
+    // 6. العمال الحاضرون
+    // ================================================================
+    if (log.workers_present && log.workers_present.length > 0) {
+      y = sectionTitle(isAr ? "العمال الحاضرون" : "EFFECTIFS PRÉSENTS", y);
+      y = tableRow(
+        [isAr ? "الاسم" : "Nom", isAr ? "المنصب" : "Poste", isAr ? "ساعات العمل" : "Heures"],
+        y, true
+      );
+      log.workers_present.forEach(w => {
+        y = tableRow([w.worker_name, w.job_title || "-", `${w.hours_worked}H`], y);
+        if (y > ph - 30) {
+          doc.addPage();
+          y = margin + 10;
+        }
+      });
+      y += 4;
+      hr(y);
+      y += 8;
+    }
+
+    // ================================================================
+    // 7. المعدات المستخدمة
+    // ================================================================
+    if (log.equipment_used && log.equipment_used.length > 0) {
+      y = sectionTitle(isAr ? "المعدات المستخدمة" : "ENGINS UTILISÉS", y);
+      y = tableRow(
+        [isAr ? "المعدة" : "Engin", isAr ? "ساعات الاستخدام" : "Heures d'usage"],
+        y, true
+      );
+      log.equipment_used.forEach(e => {
+        y = tableRow([e.equipment_name, `${e.usage_hours} H`], y);
+        if (y > ph - 30) {
+          doc.addPage();
+          y = margin + 10;
+        }
+      });
+      y += 4;
+      hr(y);
+      y += 8;
+    }
+
+    // ================================================================
+    // 8. المشاكل والملاحظات
+    // ================================================================
+    if (log.problems_faced || log.notes) {
+      y = sectionTitle(isAr ? "المشاكل والملاحظات" : "PROBLÈMES & NOTES", y);
+      if (log.problems_faced) {
+        setFont('bold');
+        y = bodyText(`${isAr ? "عقبات:" : "Incidents:"}`, margin, y, 10, "bold");
+        setFont('normal');
+        doc.setFontSize(10);
+        doc.setTextColor(180, 60, 60);
+        const pLines = doc.splitTextToSize(log.problems_faced, contentWidth);
+        doc.text(pLines, margin, y);
+        y += pLines.length * 5 + 4;
+      }
+      if (log.notes) {
+        doc.setTextColor(50, 50, 50);
+        setFont('bold');
+        y = bodyText(`${isAr ? "ملاحظات:" : "Notes:"}`, margin, y, 10, "bold");
+        setFont('normal');
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        const nLines = doc.splitTextToSize(log.notes, contentWidth);
+        doc.text(nLines, margin, y);
+        y += nLines.length * 5 + 4;
+      }
+      hr(y);
+      y += 6;
+    }
+
+    // ================================================================
+    // 9. التذييل
+    // ================================================================
+    setFont('normal');
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    doc.text(
+      `${isAr ? "منصة بناء - تقرير يومي للأشغال" : "Binaa Platform - Rapport Journalier"} | ${log.log_date}`,
+      pw / 2, ph - 10,
+      { align: "center" }
+    );
 
     // حفظ الملف
     const fileName = `تقرير_${log.log_date}.pdf`;
