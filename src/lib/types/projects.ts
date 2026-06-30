@@ -88,6 +88,7 @@ export interface Worker {
   contract_type?: ContractType;
   notes?: string;
   created_at?: string;
+  deleted_at?: string;
 }
 
 export type EquipmentStatus = 'available' | 'in_use' | 'maintenance' | 'out_of_service';
@@ -127,6 +128,7 @@ export interface Equipment {
   warranty_expiry?: string;
   supplier_maintenance_contact?: string;
   created_at?: string;
+  deleted_at?: string;
 }
 
 export interface ProjectWorker {

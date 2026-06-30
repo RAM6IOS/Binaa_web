@@ -43,6 +43,11 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // ─── حالة التعطيل (Soft Delete) ───
+  const [disableInfo, setDisableInfo] = useState<{ id: string; projectCount: number } | null>(null);
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [isDisabling, setIsDisabling] = useState(false);
+
   const fetchEquipment = async () => {
     setIsLoading(true);
     try {
@@ -59,43 +64,61 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
     fetchEquipment();
   }, []);
 
-  const askDelete = (id: string) => {
-    setItemToDelete(id);
-    setIsDeleteModalOpen(true);
-  };
   useEffect(() => {
-    if (!isDeleteModalOpen) {
-      // ننتظر أجزاء من الثانية لضمان انتهاء أنيميشن الإغلاق
+    if (!isDeleteModalOpen && !isDisableModalOpen) {
       const timer = setTimeout(() => {
         document.body.style.pointerEvents = 'auto';
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isDeleteModalOpen]);
+  }, [isDeleteModalOpen, isDisableModalOpen]);
+
+  const askDelete = async (id: string) => {
+    try {
+      const projectCount = await equipmentService.getProjectCount(id);
+      if (projectCount >= 1) {
+        setDisableInfo({ id, projectCount });
+        setIsDisableModalOpen(true);
+      } else {
+        setItemToDelete(id);
+        setIsDeleteModalOpen(true);
+      }
+    } catch {
+      toast.error(isAr ? 'خطأ في التحقق من الارتباطات' : 'Erreur de vérification');
+    }
+  };
 
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
-
     setIsDeleting(true);
     try {
-      // 1. إجراء عملية الحذف في السيرفر
       await equipmentService.delete(itemToDelete);
-
-      // 2. تحديث الواجهة محلياً لإزالة العنصر
       setEquipment(prev => prev.filter(item => item.id !== itemToDelete));
-
-      // 3. رسالة نجاح
       toast.success(isAr ? 'تم حذف العتاد بنجاح ✓' : 'Équipement supprimé avec succès ✓');
-
-      // 4. *** الحل الجذري ***: إغلاق المودال أولاً ومسح معرف الحذف
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
-
     } catch (error) {
       toast.error(isAr ? 'فشل الحذف' : 'Erreur lors de la suppression');
     } finally {
-      // نضع IsDeleting فقط في الـ finally لضمان توقف اللودر
       setIsDeleting(false);
+    }
+  };
+
+  const handleConfirmDisable = async () => {
+    if (!disableInfo) return;
+    setIsDisabling(true);
+    try {
+      await equipmentService.delete(disableInfo.id);
+      setEquipment(prev => prev.filter(item => item.id !== disableInfo.id));
+      toast.warning(isAr
+        ? `تم تعطيل العتاد (مرتبط بـ ${disableInfo.projectCount} مشاريع)`
+        : `Équipement désactivé (lié à ${disableInfo.projectCount} projets)`);
+      setIsDisableModalOpen(false);
+      setDisableInfo(null);
+    } catch (error) {
+      toast.error(isAr ? 'فشل الحذف' : 'Erreur lors de la suppression');
+    } finally {
+      setIsDisabling(false);
     }
   };
   const filteredEquipment = equipment.filter(e => {
@@ -280,7 +303,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                                 onClick={() => askDelete(item.id)}
                               >
                                 <Trash2 className="w-4 h-4" />
-                                {isAr ? 'حذف' : 'Supprimer'}
+                                {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -295,7 +318,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation (Hard Delete) */}
       <DeleteConfirmationDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
@@ -304,6 +327,20 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
         isAr={isAr}
         title={isAr ? "حذف العتاد" : "Supprimer l'équipement"}
         description={isAr ? "هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه." : "Cette action est irréversible."}
+      />
+
+      {/* Disable Confirmation (Soft Delete) */}
+      <DeleteConfirmationDialog
+        isOpen={isDisableModalOpen}
+        onOpenChange={(open) => { if (!open) { setIsDisableModalOpen(false); setDisableInfo(null); } }}
+        onConfirm={handleConfirmDisable}
+        isLoading={isDisabling}
+        isAr={isAr}
+        disableMode
+        title={isAr ? "لا يمكن حذف هذا العتاد" : "Suppression impossible"}
+        description={isAr
+          ? `هذا العتاد مرتبط بـ ${disableInfo?.projectCount || 0} مشاريع. لا يمكن حذفه بالكامل. هل تريد تعطيله (إخفاؤه) بدلاً من ذلك؟ سيختفي من القوائم الرئيسية لكنه سيبقى مرئياً في المشاريع السابقة.`
+          : `Cet équipement est lié à ${disableInfo?.projectCount || 0} projet(s). Impossible de le supprimer. Voulez-vous le désactiver (le masquer) ? Il disparaîtra des listes principales mais restera visible dans les projets précédents.`}
       />
     </div>
   );
