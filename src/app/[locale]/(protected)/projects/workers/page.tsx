@@ -22,7 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog"; // تأكد من المسار
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 import { toast } from "sonner";
 
 export default function WorkersListPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -38,6 +38,14 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // ─── حالة التعطيل (Soft Delete) ───
+  const [disableInfo, setDisableInfo] = useState<{ id: string; projectCount: number } | null>(null);
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [isDisabling, setIsDisabling] = useState(false);
+
+  // ─── حالة التحقق من الارتباطات ───
+  const [isCheckingAssoc, setIsCheckingAssoc] = useState(false);
 
   // Filters
   const [wilayaFilter, setWilayaFilter] = useState<string>('all');
@@ -82,13 +90,26 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
     }
   }, [isDeleteModalOpen]);
 
-  // ─── فتح المودال ───
-  const askDelete = (id: string) => {
-    setItemToDelete(id);
-    setIsDeleteModalOpen(true);
+  // ─── فتح المودال (تحقق من الارتباطات أولاً) ───
+  const askDelete = async (id: string) => {
+    setIsCheckingAssoc(true);
+    try {
+      const projectCount = await workersService.getProjectCount(id);
+      if (projectCount >= 1) {
+        setDisableInfo({ id, projectCount });
+        setIsDisableModalOpen(true);
+      } else {
+        setItemToDelete(id);
+        setIsDeleteModalOpen(true);
+      }
+    } catch {
+      toast.error(isAr ? 'خطأ في التحقق من الارتباطات' : 'Erreur de vérification');
+    } finally {
+      setIsCheckingAssoc(false);
+    }
   };
 
-  // ─── الحذف الفعلي ───
+  // ─── الحذف الفعلي (Hard Delete - بدون مشاريع) ───
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
     setIsDeleting(true);
@@ -96,14 +117,31 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
       await workersService.delete(itemToDelete);
       setWorkers(prev => prev.filter(w => w.id !== itemToDelete));
       toast.success(isAr ? 'تم حذف ملف العامل بنجاح' : 'Ouvrier supprimé ✓');
-
-      // الإغلاق قبل أي شيء
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (error) {
       toast.error(isAr ? 'خطأ في العملية' : 'Erreur');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // ─── التعطيل (Soft Delete - مرتبط بمشاريع) ───
+  const handleConfirmDisable = async () => {
+    if (!disableInfo) return;
+    setIsDisabling(true);
+    try {
+      await workersService.delete(disableInfo.id);
+      setWorkers(prev => prev.filter(w => w.id !== disableInfo.id));
+      toast.warning(isAr
+        ? `تم تعطيل العامل (مرتبط بـ ${disableInfo.projectCount} مشاريع)`
+        : `Ouvrier désactivé (lié à ${disableInfo.projectCount} projets)`);
+      setIsDisableModalOpen(false);
+      setDisableInfo(null);
+    } catch (error) {
+      toast.error(isAr ? 'خطأ في العملية' : 'Erreur');
+    } finally {
+      setIsDisabling(false);
     }
   };
 
@@ -123,7 +161,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
 
-      {/* ─── مودال الحذف الاحترافي ─── */}
+      {/* ─── مودال الحذف الاحترافي (Hard Delete) ─── */}
       <DeleteConfirmationDialog
         isOpen={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
@@ -134,6 +172,20 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
         description={isAr
           ? "هل أنت متأكد؟ سيتم حذف جميع بيانات هذا العامل وتاريخ حضوره وسلفياته نهائياً من قاعدة البيانات العامة للشركة."
           : "Attention: Cela supprimera définitivement le dossier de l'ouvrier, son historique et ses avances de la base globale."}
+      />
+
+      {/* ─── مودال التعطيل (Soft Delete - مرتبط بمشاريع) ─── */}
+      <DeleteConfirmationDialog
+        isOpen={isDisableModalOpen}
+        onOpenChange={(open) => { if (!open) { setIsDisableModalOpen(false); setDisableInfo(null); } }}
+        onConfirm={handleConfirmDisable}
+        isLoading={isDisabling}
+        isAr={isAr}
+        disableMode
+        title={isAr ? "لا يمكن حذف هذا العامل" : "Suppression impossible"}
+        description={isAr
+          ? `هذا العامل مرتبط بـ ${disableInfo?.projectCount || 0} مشاريع. لا يمكن حذفه بالكامل. هل تريد تعطيله (إخفاؤه) بدلاً من ذلك؟ سيختفي من القوائم الرئيسية لكنه سيبقى مرئياً في المشاريع السابقة.`
+          : `Cet ouvrier est lié à ${disableInfo?.projectCount || 0} projet(s). Impossible de le supprimer. Voulez-vous le désactiver (le masquer) ? Il disparaîtra des listes principales mais restera visible dans les projets précédents.`}
       />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
@@ -323,7 +375,7 @@ function ActionMenu({ worker, isAr, refresh, onDeleteClick }: any) {
           onClick={onDeleteClick}
         >
           <Trash2 className="w-3.5 h-3.5" />
-          {isAr ? 'حذف من المنصة' : 'Supprimer définitivement'}
+          {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
