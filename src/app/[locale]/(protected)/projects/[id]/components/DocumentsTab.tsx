@@ -1,10 +1,7 @@
 "use client";
 
-
-import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
-
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
+import Image from "next/image"; // تحسين رقم 1: استيراد مكون الصور المتقدم
 import { Project, ProjectDocument } from "@/lib/types/projects";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +12,6 @@ import {
   Download,
   Trash2,
   Calendar,
-  MapPin,
   Eye,
   User,
   LayoutGrid,
@@ -23,27 +19,33 @@ import {
   FileSpreadsheet,
   FileSignature,
   FileSearch,
-  Plus,
   Loader2
 } from "lucide-react";
 import { UploadDocumentModal } from "./UploadDocumentModal";
 import { documentService } from "@/lib/services/document-service";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
 
 interface Props {
   project: Project & { project_documents?: ProjectDocument[] };
   isAr: boolean;
 }
 
+// ────────────────────────────────────────────
+// مكوّن مساعد لتحويل روابط Supabase لروابط مُصغرة
+// ────────────────────────────────────────────
+const getOptimizedUrl = (url: string, width: number = 400) => {
+  if (!url || !url.includes("supabase.co")) return url;
+  return `${url}?width=${width}&quality=75&resize=contain`;
+};
+
 export function DocumentsTab({ project, isAr }: Props) {
-  // ─── States ───
   const [documents, setDocuments] = useState<ProjectDocument[]>(project.project_documents || []);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loading, setLoading] = useState(false);
 
-  // ─── إدارة حالة الحذف (New) ───
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -59,19 +61,18 @@ export function DocumentsTab({ project, isAr }: Props) {
     init();
   }, [project.id]);
 
-  const refreshDocuments = async () => {
+  const refreshDocuments = useCallback(async () => {
     setLoading(true);
     try {
       const data = await documentService.getProjectDocuments(project.id);
-      setDocuments(data);
+      setDocuments(data || []);
     } catch (error) {
-      console.error("Error fetching documents:", error);
+      console.error("Fetch Error:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [project.id]);
 
-  // ─── منطق الحذف الاحترافي ───
   const askDelete = (id: string) => {
     setItemToDelete(id);
     setDeleteModalOpen(true);
@@ -82,10 +83,8 @@ export function DocumentsTab({ project, isAr }: Props) {
     setIsDeleting(true);
     try {
       await documentService.deleteDocument(itemToDelete);
-      toast.success(isAr ? 'تم حذف الوثيقة بنجاح ✓' : 'Document supprimé ✓');
+      toast.success(isAr ? 'تم حذف الوثيقة بنجاح' : 'Document supprimé ✓');
       setDocuments(prev => prev.filter(doc => doc.id !== itemToDelete));
-    } catch (error) {
-      toast.error(isAr ? 'حدث خطأ أثناء المحاولة' : 'Erreur de suppression');
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
@@ -103,134 +102,80 @@ export function DocumentsTab({ project, isAr }: Props) {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12" dir={isAr ? "rtl" : "ltr"}>
 
-      {/* ─── الحوار المشترك لتأكيد الحذف ─── */}
       <DeleteConfirmationDialog
         isOpen={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
         onConfirm={handleConfirmDelete}
         isLoading={isDeleting}
         isAr={isAr}
-        title={isAr ? "حذف مستند المشروع" : "Supprimer le document"}
-        description={isAr
-          ? "هل أنت متأكد من حذف هذه الوثيقة نهائياً؟ هذا الإجراء سيمسح الملف من مساحة التخزين أيضاً ولا يمكن التراجع عنه."
-          : "Voulez-vous vraiment supprimer ce document ? L'action est irréversible et supprimera le fichier définitivement."}
+        title={isAr ? "حذف مستند المشروع" : "Supprimer"}
+        description={isAr ? "سيتم حذف الملف نهائياً من الورشة." : "Définitif."}
       />
 
       {/* Header Toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-950 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600">
             <FileText className="w-6 h-6" />
           </div>
           <div className="text-start">
-            <h3 className="text-lg font-extrabold tracking-tight">
-              {isAr ? 'خزانة المستندات والوثائق' : 'Gestion documentaire'}
-            </h3>
-            <p className="text-[11px] text-slate-500 font-medium">
-              {isAr ? `يحتوي هذا المشروع على ${documents.length} ملف مشترك` : `${documents.length} fichiers partagés dans ce projet`}
-            </p>
+            <h3 className="text-lg font-black tracking-tight">{isAr ? 'خزانة الوثائق' : 'Documents'}</h3>
+            <p className="text-[10px] text-slate-500 font-bold uppercase">{documents.length} Files</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* View Toggle */}
-          <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-            <Button
-              size="icon" variant="ghost" className={`h-8 w-8 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              size="icon" variant="ghost" className={`h-8 w-8 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('grid')}><LayoutGrid className="w-4 h-4" /></Button>
+            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('list')}><List className="w-4 h-4" /></Button>
           </div>
           <UploadDocumentModal isAr={isAr} projectId={project.id} onSuccess={refreshDocuments} />
         </div>
       </div>
 
-      {/* Content Area */}
-      {loading ? (
-        <div className="py-24 flex flex-col items-center justify-center text-slate-400 gap-3">
-          <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-          <p className="font-bold text-xs uppercase tracking-widest">{isAr ? 'جاري التزامن...' : 'Synchronisation...'}</p>
-        </div>
+      {loading && documents.length === 0 ? (
+        <div className="py-24 flex flex-col items-center justify-center opacity-40"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>
       ) : documents.length === 0 ? (
-        <Card className="py-20 border-dashed border-2 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col items-center justify-center text-center">
-          <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl shadow-sm mb-4 border border-slate-100">
-            <FileSearch className="w-12 h-12 text-slate-200" />
-          </div>
-          <h4 className="font-bold text-slate-800 dark:text-slate-200 text-lg">
-            {isAr ? 'لا توجد وثائق حالياً' : 'Aucun document'}
-          </h4>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto mt-2 font-medium uppercase tracking-tight">
-            {isAr ? 'ابدأ برفع مخططات الموقع أو التقارير الفنية هنا' : 'Veuillez télécharger les plans ou rapports de site'}
-          </p>
+        <Card className="py-24 border-dashed border-2 bg-slate-50/20 flex flex-col items-center justify-center text-center">
+          <FileSearch className="w-12 h-12 text-slate-200 mb-4" />
+          <h4 className="font-bold text-slate-400">{isAr ? 'المجلد فارغ' : 'Dossier Vide'}</h4>
         </Card>
       ) : viewMode === 'grid' ? (
-        /* Grid Mode */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {documents.map((doc) => {
             const isOwner = currentUserId === doc.uploaded_by;
             const isImage = ['image', 'png', 'jpg', 'jpeg', 'webp'].includes(doc.file_type?.toLowerCase());
 
             return (
-              <Card key={doc.id} className="group overflow-hidden border-slate-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 dark:bg-slate-950 flex flex-col rounded-2xl shadow-sm">
+              <Card key={doc.id} className="group overflow-hidden border-slate-200 hover:border-blue-400 transition-all rounded-[28px] flex flex-col">
                 <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden border-b">
                   {isImage ? (
-                    <img src={doc.file_url} alt={doc.file_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    /* تحسين LCP: استخدام Image مع تحديد sizes وروابط مصغرة */
+                    <Image
+                      src={getOptimizedUrl(doc.file_url, 500)} // جلب نسخة 500 بكسل فقط
+                      alt={doc.file_name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 300px"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                   ) : (
-                    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 scale-125">
-                      {getFileIcon(doc.file_type)}
-                    </div>
+                    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">{getFileIcon(doc.file_type)}</div>
                   )}
 
-                  {/* Overlay Actions */}
-                  <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                    <Button size="icon" variant="secondary" className="rounded-full bg-white text-slate-900 shadow-xl hover:scale-110 transition-transform" asChild title={isAr ? "تحميل" : "Télécharger"}>
-                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a>
-                    </Button>
-                    <Button size="icon" variant="secondary" className="rounded-full bg-white text-slate-900 shadow-xl hover:scale-110 transition-transform" asChild title={isAr ? "معاينة" : "Voir"}>
-                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="w-4 h-4" /></a>
-                    </Button>
-                    {isOwner && (
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        className="rounded-full shadow-xl hover:scale-110 transition-transform"
-                        onClick={() => askDelete(doc.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="absolute top-2 right-2">
-                    <Badge className="bg-white/90 text-slate-900 backdrop-blur-md border-0 uppercase text-[9px] font-black tracking-widest shadow-sm">
-                      {doc.file_type}
-                    </Badge>
+                  <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[1px]">
+                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a></Button>
+                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="w-4 h-4" /></a></Button>
+                    {isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-xl" onClick={() => askDelete(doc.id)}><Trash2 className="w-4 h-4" /></Button>}
                   </div>
                 </div>
 
-                <CardContent className="p-4 flex-1 flex flex-col justify-between text-start">
-                  <div>
-                    <h4 className="font-bold text-[13px] text-slate-900 dark:text-slate-100 truncate" title={doc.file_name}>
-                      {doc.file_name}
-                    </h4>
-                    {doc.notes && <p className="text-[10px] text-slate-500 mt-1 line-clamp-1 italic font-medium opacity-80">"{doc.notes}"</p>}
-                  </div>
-
-                  <div className="pt-3 mt-3 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 uppercase tracking-tighter">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}
-                    </div>
-                    {isOwner && <span className="text-[9px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded-full font-black uppercase">{isAr ? "مرفوع قبلك" : "By you"}</span>}
+                <CardContent className="p-4 text-start">
+                  <h4 className="font-bold text-[13px] text-slate-900 dark:text-slate-100 truncate">{doc.file_name}</h4>
+                  <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[9px] font-black text-slate-400 uppercase tabular-nums">
+                    <div className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</div>
+                    {isOwner && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Owner</span>}
                   </div>
                 </CardContent>
               </Card>
@@ -238,53 +183,36 @@ export function DocumentsTab({ project, isAr }: Props) {
           })}
         </div>
       ) : (
-        /* List Mode */
-        <Card className="border-slate-200 overflow-hidden shadow-sm rounded-2xl">
+        <Card className="border-slate-200 overflow-hidden rounded-[24px]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-start" dir={isAr ? "rtl" : "ltr"}>
-              <thead className="bg-slate-50/50 dark:bg-slate-900/60 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b">
-                <tr>
-                  <th className="px-6 py-4">{isAr ? 'الملف' : 'Fichier'}</th>
-                  <th className="px-6 py-4">{isAr ? 'التصنيف' : 'Format'}</th>
-                  <th className="px-6 py-4">{isAr ? 'التاريخ' : 'Date'}</th>
-                  <th className="px-6 py-4 text-center">{isAr ? 'الإجراءات' : 'Actions'}</th>
+              <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b">
+                <tr className="h-12">
+                  <th className="ps-6">الملف</th>
+                  <th>التصنيف</th>
+                  <th>التاريخ</th>
+                  <th className="text-center pe-6">إجراءات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+              <tbody className="divide-y">
                 {documents.map((doc) => (
-                  <tr key={doc.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 text-start">
-                        <div className="p-2 border rounded-lg bg-white dark:bg-slate-800 shadow-sm group-hover:scale-105 transition-transform">
-                          {getFileIcon(doc.file_type)}
+                  <tr key={doc.id} className="group hover:bg-slate-50/50 h-16">
+                    <td className="ps-6 text-start">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-100 flex items-center justify-center bg-white">
+                          {['image', 'png', 'jpg', 'jpeg'].includes(doc.file_type?.toLowerCase()) ? (
+                            <Image
+                              src={getOptimizedUrl(doc.file_url, 100)} // روابط Thumbnails للمنشورات
+                              alt="" fill className="object-cover"
+                            />
+                          ) : getFileIcon(doc.file_type)}
                         </div>
-                        <div className="min-w-0">
-                          <span className="font-bold text-slate-900 dark:text-slate-100 truncate block max-w-[240px]" title={doc.file_name}>{doc.file_name}</span>
-                          <div className="flex items-center gap-1.5 mt-0.5 opacity-60"><User className="w-3 h-3" /><span className="text-[10px] font-bold uppercase">{isAr ? 'مستخدم المنصة' : 'Team User'}</span></div>
-                        </div>
+                        <span className="font-bold text-slate-900 truncate max-w-[200px]">{doc.file_name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="secondary" className="text-[9px] uppercase font-black bg-slate-100 text-slate-500">{doc.file_type}</Badge>
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 text-[10px] font-black uppercase tabular-nums tracking-tighter">
-                      {new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-blue-600 transition-colors" asChild>
-                          <a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a>
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-blue-600 transition-colors" asChild>
-                          <a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="w-4 h-4" /></a>
-                        </Button>
-                        {currentUserId === doc.uploaded_by && (
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100" onClick={() => askDelete(doc.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
+                    <td className="text-[10px] font-black uppercase text-slate-400"><span>{doc.file_type}</span></td>
+                    <td className="font-mono text-[10px] opacity-60 tabular-nums uppercase">{new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</td>
+                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-blue-500"><a href={doc.file_url} target="_blank"><Download size={16} /></a></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => askDelete(doc.id)}><Trash2 size={16} /></Button>}</div></td>
                   </tr>
                 ))}
               </tbody>
