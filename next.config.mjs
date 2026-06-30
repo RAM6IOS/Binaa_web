@@ -1,19 +1,24 @@
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin();
-
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'nqajokbclpujrryttxxm.supabase.co',
+        protocol: "https",
+        hostname: "sazpcswwafnqanbsyhon.supabase.co", // ← نطاق مشروعك
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co", // ← لكل المشاريع
+      },
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
       },
     ],
   },
 };
 
 export default withNextIntl(nextConfig);
-

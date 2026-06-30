@@ -10,6 +10,7 @@ export interface Project {
   start_date: string;
   expected_end_date: string;
   actual_end_date?: string;
+  cover_image?: string;
   status: ProjectStatus;
   budget: number;
   actual_cost: number;
