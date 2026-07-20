@@ -351,7 +351,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             <div className="space-y-3">
               {quantities.map((q, i) => (
                 <div key={i} className="flex flex-col md:flex-row gap-3 items-start border p-4 rounded-xl bg-white shadow-sm relative group">
-                  <button type="button" onClick={() => removeQuantity(i)} className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors">
+                  <button type="button" onClick={() => removeQuantity(i)} className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors" aria-label="Remove item">
                     <Trash2 className="w-4 h-4" />
                   </button>
 

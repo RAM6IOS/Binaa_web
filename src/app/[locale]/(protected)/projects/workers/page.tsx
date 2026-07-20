@@ -354,7 +354,7 @@ function ActionMenu({ worker, isAr, refresh, onDeleteClick }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full hover:bg-white hover:shadow-md transition-all h-9 w-9">
+        <Button variant="ghost" size="icon" className="rounded-full hover:bg-white hover:shadow-md transition-all h-9 w-9" aria-label="Actions">
           <MoreVertical className="w-4 h-4 text-slate-400" />
         </Button>
       </DropdownMenuTrigger>

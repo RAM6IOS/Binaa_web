@@ -111,6 +111,7 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
                       variant="secondary"
                       className="bg-white/90 hover:bg-white"
                       onClick={() => setLightboxSrc(file.file_url)}
+                      aria-label="Preview"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -121,7 +122,7 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
                     className="bg-white/90 hover:bg-white"
                     asChild
                   >
-                    <a href={file.file_url} target="_blank" rel="noopener noreferrer">
+                    <a href={file.file_url} target="_blank" rel="noopener noreferrer" aria-label="Open externally">
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   </Button>

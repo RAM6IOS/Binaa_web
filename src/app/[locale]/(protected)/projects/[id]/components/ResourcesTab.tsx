@@ -167,7 +167,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                       </div>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="text-slate-300">
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="text-slate-300" aria-label="Remove worker">
                     <UserMinus size={18} />
                   </Button>
                 </div>
@@ -222,7 +222,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                     <TableCell><Badge variant="outline" className="border-blue-100 bg-blue-50/30 text-blue-700 font-bold px-3 text-[10px] uppercase">{pw.assigned_role}</Badge></TableCell>
                     <TableCell className="font-mono font-black">{pw.daily_hours}h</TableCell>
                     <TableCell className="font-black text-slate-800">{pw.worker?.daily_rate?.toLocaleString()} <span className="text-[9px] opacity-40 ml-0.5">DZD</span></TableCell>
-                    <TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all rounded-full h-9 w-9"><Trash2 size={16} /></Button></TableCell>
+                    <TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all rounded-full h-9 w-9" aria-label="Remove worker"><Trash2 size={16} /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -257,7 +257,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                     <div className="flex items-center gap-2 mt-0.5"><Clock size={11} className="text-blue-500" /><span className="text-[10px] font-black">{pe.usage_hours_per_day}h/j</span></div>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="text-slate-300 rounded-full h-11 w-11"><Trash2 size={18} /></Button>
+                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="text-slate-300 rounded-full h-11 w-11" aria-label="Remove equipment"><Trash2 size={18} /></Button>
               </div>
             ))}
           </div>
@@ -267,7 +267,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
               <TableHeader className="bg-slate-50/50 uppercase font-black text-[10px]"><TableRow><TableHead className="ps-6">الآلة</TableHead><TableHead>التصنيف</TableHead><TableHead>الاستعمال</TableHead><TableHead className="text-right pe-6">إجراءات</TableHead></TableRow></TableHeader>
               <TableBody>
                 {assignedEquipment.map(pe => (
-                  <TableRow key={pe.id} className="group h-16"><TableCell className="ps-6 text-start"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-orange-50 text-orange-600"><Truck size={16} /></div><div className="font-bold text-sm">{pe.equipment?.name}{pe.equipment?.deleted_at && <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>}</div></div></TableCell><TableCell><Badge variant="secondary" className="text-[9px] font-black">{pe.equipment?.type}</Badge></TableCell><TableCell className="font-mono font-bold text-blue-600 bg-blue-50/30 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell><TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 rounded-full h-8 w-8"><Trash2 size={14} /></Button></TableCell></TableRow>
+                  <TableRow key={pe.id} className="group h-16"><TableCell className="ps-6 text-start"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-orange-50 text-orange-600"><Truck size={16} /></div><div className="font-bold text-sm">{pe.equipment?.name}{pe.equipment?.deleted_at && <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>}</div></div></TableCell><TableCell><Badge variant="secondary" className="text-[9px] font-black">{pe.equipment?.type}</Badge></TableCell><TableCell className="font-mono font-bold text-blue-600 bg-blue-50/30 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell><TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 rounded-full h-8 w-8" aria-label="Remove equipment"><Trash2 size={14} /></Button></TableCell></TableRow>
                 ))}
               </TableBody>
             </Table>
