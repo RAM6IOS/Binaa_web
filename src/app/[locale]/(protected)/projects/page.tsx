@@ -38,7 +38,7 @@ import {
   X,
   Filter,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { projectsService } from "@/lib/services/projects-service";
 import { Project } from "@/lib/types/projects";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
@@ -505,22 +505,8 @@ export default function ProjectsListPage({
   const fetchProjects = useCallback(async () => {
     setIsLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from("projects")
-        .select(
-          "id, name, contract_number, project_type, wilaya, start_date, expected_end_date, status, budget, progress, cover_image, created_at"
-        )
-        .eq("created_by", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setProjects((data as Project[]) || []);
+      const data = await projectsService.getAll();
+      setProjects(data || []);
     } catch {
       toast.error(
         isAr ? "خطأ في جلب بيانات المشاريع" : "Erreur de synchronisation"
@@ -532,16 +518,6 @@ export default function ProjectsListPage({
 
   useEffect(() => {
     fetchProjects();
-    const supabase = createClient();
-    const channel = supabase
-      .channel("projects_db_sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "projects" },
-        () => fetchProjects()
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
   }, [fetchProjects]);
 
   useEffect(() => {
@@ -562,15 +538,7 @@ export default function ProjectsListPage({
     if (!itemToDelete) return;
     setIsDeleting(true);
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("غير مصرح");
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", itemToDelete)
-        .eq("created_by", user.id);
-      if (error) throw error;
+      await projectsService.delete(itemToDelete);
       toast.success(isAr ? "تم حذف المشروع نهائياً ✓" : "Projet supprimé avec succès ✓");
       setProjects((prev) => prev.filter((p) => p.id !== itemToDelete));
     } catch {

@@ -8,6 +8,9 @@ import { GanttChart as ProjectGanttChart } from "./components/GanttChart";
 import { MapPin, Calendar, Loader2, AlertCircle, RefreshCcw, Landmark, MoreHorizontal } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
 import { createClient } from "@/lib/supabase/client";
+import { projectsService } from "@/lib/services/projects-service";
+import { documentsService } from "@/lib/services/documents-service";
+import { tasksService } from "@/lib/services/tasks-service";
 import { useRouter } from "@/i18n/routing";
 import { OverviewTab } from "./components/OverviewTab";
 import { TaskBoardTab } from "./components/TaskBoardTab";
@@ -27,7 +30,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
   const { locale, id } = use(params);
   const isAr = locale === 'ar';
   const router = useRouter();
-  const supabase = createClient();
 
   const [project, setProject] = useState<ProjectWithJoins | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,32 +39,22 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
   const fetchProject = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data, error: supabaseError } = await supabase
-        .from('projects')
-        .select(`*, project_documents (*), tasks (*)`)
-        .eq('id', id)
-        .eq('created_by', user?.id ?? '')
-        .single();
-
-      if (supabaseError) throw supabaseError;
-      setProject(data as ProjectWithJoins);
+      const [projectData, docsData, tasksData] = await Promise.all([
+        projectsService.getById(id),
+        documentsService.getByProjectId(id).catch(() => []),
+        tasksService.getByProjectId(id).catch(() => []),
+      ]);
+      setProject({ ...projectData, project_documents: docsData, tasks: tasksData } as ProjectWithJoins);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [id, supabase]);
+  }, [id]);
 
   useEffect(() => {
     fetchProject();
-    // نظام الاشتراك اللحظي لمنع إعادة تحميل الصفحة كاملة
-    const channel = supabase.channel(`project-${id}`).on('postgres_changes',
-      { event: '*', schema: 'public', table: 'projects', filter: `id=eq.${id}` },
-      () => fetchProject(true)
-    ).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [id, fetchProject, supabase]);
+  }, [id, fetchProject]);
 
   // 2. معالجة روابط الصور لتكون أصغر (Supabase Image Transformation)
   const getOptimizedImage = (url: string) => {

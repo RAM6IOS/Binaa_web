@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { projectsService } from "@/lib/services/projects-service";
 import { Project, ProjectType } from "@/lib/types/projects";
 
 interface Props {
@@ -61,35 +61,18 @@ export function CreateProjectDialog({ isAr, onSuccess, project, trigger }: Props
     e.preventDefault();
     setIsLoading(true);
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error(isAr ? 'يجب تسجيل الدخول أولاً' : 'Vous devez d\'abord vous connecter');
-        return;
-      }
-
       if (project) {
-        const { error } = await supabase
-          .from('projects')
-          .update(formData)
-          .eq('id', project.id);
-        
-        if (error) throw error;
+        const { location_coordinates, ...updateData } = formData;
+        await projectsService.update(project.id, updateData);
         toast.success(isAr ? 'تم تحديث المشروع بنجاح' : 'Projet mis à jour avec succès');
       } else {
         const { location_coordinates, ...insertData } = formData;
-        const { error } = await supabase
-          .from('projects')
-          .insert({
-            ...(insertData as Omit<Project, 'id'>),
-            status: 'planning',
-            actual_cost: 0,
-            progress: 0,
-            created_by: user.id
-          });
-        
-        if (error) throw error;
+        await projectsService.create({
+          ...(insertData as Omit<Project, 'id' | 'created_at' | 'updated_at'>),
+          status: 'planning',
+          actual_cost: 0,
+          progress: 0,
+        } as any);
         toast.success(isAr ? 'تم إنشاء المشروع بنجاح' : 'Projet créé avec succès');
       }
       setOpen(false);

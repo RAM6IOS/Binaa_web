@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { PWAProvider } from "@/components/providers/PWAProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cairo = Cairo({ subsets: ["arabic"], variable: "--font-cairo" });
@@ -27,6 +28,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       default: 'Binaa - Construction Management Platform',
     },
     description: "B2B SaaS platform for public works contractors in Algeria.",
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Binaa",
+    },
   };
 }
 
@@ -59,8 +66,10 @@ export default async function RootLayout({
     <html lang={locale} dir={dir}>
       <body className={`${fontClass} font-sans antialiased bg-background text-foreground`}>
         <NextIntlClientProvider messages={messages}>
-          {children}
-          <Toaster position={locale === 'ar' ? "top-left" : "top-right"} />
+          <PWAProvider>
+            {children}
+            <Toaster position={locale === 'ar' ? "top-left" : "top-right"} />
+          </PWAProvider>
         </NextIntlClientProvider>
       </body>
     </html>
