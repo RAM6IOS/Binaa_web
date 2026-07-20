@@ -20,7 +20,6 @@ import {
   Zap,
   Phone
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,20 +32,6 @@ export default function LandingPage() {
   const params = useParams();
   const locale = params.locale as string;
   const isAr = locale === 'ar';
-
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-700">
@@ -63,12 +48,7 @@ export default function LandingPage() {
 
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial="initial"
-              animate="animate"
-              variants={fadeIn}
-              className="text-right"
-            >
+            <div className="animate-fade-in-up text-right">
               <Badge className="mb-6 bg-blue-50 text-blue-700 border-blue-100 px-4 py-1.5 text-sm font-medium hover:bg-blue-100 transition-colors">
                 مستقبل إدارة الإنشاءات في الجزائر 🇩🇿
               </Badge>
@@ -104,14 +84,9 @@ export default function LandingPage() {
                   <span>دعم فني 24/7</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
+            <div className="animate-fade-in-right relative">
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
                 <Image
                   src="/images/hero_dashboard.png"
@@ -125,7 +100,7 @@ export default function LandingPage() {
               {/* Decorative elements */}
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl" />
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -142,13 +117,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 title: "إدارة المشاريع والجدول الزمني",
@@ -187,7 +156,7 @@ export default function LandingPage() {
                 color: "bg-amber-50 text-amber-600"
               }
             ].map((feature, idx) => (
-              <motion.div key={idx} variants={fadeIn}>
+              <div key={idx} className="animate-fade-in-up" style={{ animationDelay: `${idx * 0.1}s` }}>
                 <Card className="h-full border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 transition-all duration-300 group">
                   <CardContent className="p-8">
                     <div className={`w-14 h-14 ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
@@ -197,9 +166,9 @@ export default function LandingPage() {
                     <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -360,12 +329,7 @@ export default function LandingPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-400/20 rounded-full -ml-32 -mb-32 blur-3xl" />
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="relative z-10 max-w-3xl mx-auto"
-            >
+            <div className="animate-scale-in relative z-10 max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
                 جاهز لتبدأ إدارة مشاريعك بطريقة احترافية؟
               </h2>
@@ -385,7 +349,7 @@ export default function LandingPage() {
               <p className="mt-8 text-sm text-blue-200">
                 لا يلزم بطاقة ائتمان – إعداد سريع في أقل من دقيقتين
               </p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>

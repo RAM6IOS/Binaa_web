@@ -7,7 +7,6 @@ import {
   Menu, 
   X 
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -81,14 +80,7 @@ export function Navbar({ locale }: NavbarProps) {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-b border-slate-100 overflow-hidden"
-          >
+      <div className={`md:hidden bg-white border-b border-slate-100 overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
             <div className="p-4 space-y-4">
               {navLinks.map((link) => (
                 <Link 
@@ -113,9 +105,7 @@ export function Navbar({ locale }: NavbarProps) {
                 </Button>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
     </nav>
   );
 }
