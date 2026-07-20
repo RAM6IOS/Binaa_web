@@ -182,18 +182,6 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   }, [fetchData]);
 
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel("pointage_weekly_realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_pointage" }, fetchData)
-      .on("postgres_changes", { event: "*", schema: "public", table: "pointage_workers" }, fetchData)
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchData]);
-
-  useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
     const update = () => setIsCompact(mq.matches);
     update();

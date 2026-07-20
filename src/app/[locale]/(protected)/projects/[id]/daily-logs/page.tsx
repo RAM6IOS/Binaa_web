@@ -24,7 +24,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
-import { createClient } from "@/lib/supabase/client";
+import { projectsService } from "@/lib/services/projects-service";
 import { dailyLogService } from "@/lib/services/daily-log-service";
 import { DailyLog } from "@/lib/types/daily-logs";
 import { Project } from "@/lib/types/projects";
@@ -45,7 +45,6 @@ export default function DailyLogsPage({
   const { locale, id: projectId } = use(params);
   const isAr = locale === "ar";
   const router = useRouter();
-  const supabase = createClient();
 
   const [project, setProject] = useState<Project | null>(null);
   const [logs, setLogs] = useState<DailyLog[]>([]);
@@ -63,15 +62,7 @@ export default function DailyLogsPage({
       setError(null);
       try {
         const [projectData, logsData] = await Promise.all([
-          supabase
-            .from("projects")
-            .select("id, name, wilaya, client_name, status")
-            .eq("id", projectId)
-            .single()
-            .then(({ data, error }) => {
-              if (error) throw error;
-              return data as Project;
-            }),
+          projectsService.getById(projectId).then((data) => data as Project),
           dailyLogService.getByProjectId(projectId),
         ]);
         setProject(projectData);

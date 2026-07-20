@@ -1,6 +1,8 @@
 import { createClient } from '../supabase/client';
 import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto } from '../types/daily-logs';
 import type { PostgrestError } from '@supabase/supabase-js';
+import { db } from '../db/offline-db';
+import { checkNetworkStatus } from '../utils/network';
 
 const supabase = createClient();
 
@@ -24,110 +26,204 @@ function isMissingColumnError(error: PostgrestError) {
 
 export const dailyLogService = {
   async getByProjectId(projectId: string): Promise<DailyLog[]> {
-    const { data, error } = await supabase
-      .from('daily_logs')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('log_date', { ascending: false });
+    const isOnline = await checkNetworkStatus();
 
-    if (error) {
-      logSupabaseError('Error fetching daily logs', error);
-      throw error;
+    if (isOnline) {
+      try {
+        const { data, error } = await supabase
+          .from('daily_logs')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('log_date', { ascending: false });
+
+        if (error) {
+          logSupabaseError('Error fetching daily logs', error);
+          throw error;
+        }
+
+        const logs = (data || []).map(row => ({
+          ...row,
+          workers_present: row.workers_present || [],
+          equipment_used: row.equipment_used || [],
+          quantities: row.quantities || [],
+          materials: row.materials || [],
+          photos: row.photos || [],
+        })) as DailyLog[];
+
+        // Cache locally (delete old ones and store the fresh ones)
+        await db.daily_logs.where('project_id').equals(projectId).delete();
+        if (logs.length > 0) {
+          await db.daily_logs.bulkPut(logs);
+        }
+
+        return logs;
+      } catch (err) {
+        console.warn('[DailyLogService] Error fetching from Supabase, falling back to local DB:', err);
+      }
     }
 
-    return (data || []).map(row => ({
-      ...row,
-      workers_present: row.workers_present || [],
-      equipment_used: row.equipment_used || [],
-      quantities: row.quantities || [],
-      materials: row.materials || [],
-      photos: row.photos || [],
-    })) as DailyLog[];
+    // Offline or network error fallback
+    const localLogs = await db.daily_logs
+      .where('project_id')
+      .equals(projectId)
+      .toArray();
+
+    return localLogs.sort((a, b) => b.log_date.localeCompare(a.log_date));
   },
 
   async getById(id: string): Promise<DailyLog | null> {
-    const { data, error } = await supabase
-      .from('daily_logs')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const isOnline = await checkNetworkStatus();
 
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
+    if (isOnline) {
+      try {
+        const { data, error } = await supabase
+          .from('daily_logs')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST116') return null;
+          throw error;
+        }
+
+        const log = {
+          ...data,
+          workers_present: data.workers_present || [],
+          equipment_used: data.equipment_used || [],
+          quantities: data.quantities || [],
+          materials: data.materials || [],
+          photos: data.photos || [],
+        } as DailyLog;
+
+        // Cache locally
+        await db.daily_logs.put(log);
+        return log;
+      } catch (err) {
+        console.warn('[DailyLogService] Error fetching log by ID, falling back to local DB:', err);
+      }
     }
 
-    return {
-      ...data,
-      workers_present: data.workers_present || [],
-      equipment_used: data.equipment_used || [],
-      quantities: data.quantities || [],
-      materials: data.materials || [],
-      photos: data.photos || [],
-    } as DailyLog;
+    return (await db.daily_logs.get(id)) || null;
   },
 
   async create(dto: CreateDailyLogDto): Promise<DailyLog> {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    let userId: string | undefined;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      userId = session.user.id;
+    } else {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (!authError && user) {
+        userId = user.id;
+      }
+    }
+
+    if (!userId) {
       throw new Error('You must be logged in to create a daily log.');
     }
 
-    const basePayload = {
+    const isOnline = await checkNetworkStatus();
+
+    if (isOnline) {
+      const basePayload = {
+        project_id: dto.project_id,
+        log_date: dto.log_date,
+        weather_condition: dto.weather_condition,
+        temperature: dto.temperature,
+        work_summary: dto.work_summary,
+        notes: dto.notes || null,
+        overall_progress: dto.overall_progress ?? 0,
+        created_by: userId,
+      };
+
+      const fullPayload = {
+        ...basePayload,
+        problems_faced: dto.problems_faced || null,
+        workers_present: dto.workers_present || [],
+        equipment_used: dto.equipment_used || [],
+        quantities: dto.quantities || [],
+        materials: dto.materials || [],
+        photos: dto.photos || [],
+      };
+
+      let { data, error } = await supabase
+        .from('daily_logs')
+        .insert(fullPayload)
+        .select()
+        .single();
+
+      // Fallback للأعمدة القديمة
+      if (error && isMissingColumnError(error)) {
+        console.warn('[DailyLog] Falling back to base schema — please run the latest migration.');
+        const result = await supabase
+          .from('daily_logs')
+          .insert(basePayload)
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) {
+        logSupabaseError('Error creating daily log', error);
+        throw toDailyLogError(error, 'Failed to create daily log');
+      }
+
+      const createdLog = {
+        ...data,
+        workers_present: data.workers_present || [],
+        equipment_used: data.equipment_used || [],
+        quantities: data.quantities || [],
+        materials: data.materials || [],
+        photos: data.photos || [],
+      } as DailyLog;
+
+      await db.daily_logs.put(createdLog);
+      return createdLog;
+    }
+
+    // Offline Mode: Generate client UUID and queue sync
+    const logId = crypto.randomUUID();
+    const offlineLog: DailyLog = {
+      id: logId,
       project_id: dto.project_id,
       log_date: dto.log_date,
       weather_condition: dto.weather_condition,
       temperature: dto.temperature,
       work_summary: dto.work_summary,
-      notes: dto.notes || null,
+      problems_faced: dto.problems_faced || undefined,
+      notes: dto.notes || undefined,
       overall_progress: dto.overall_progress ?? 0,
-      created_by: user.id,
-    };
-
-    const fullPayload = {
-      ...basePayload,
-      problems_faced: dto.problems_faced || null,
+      status: dto.status || 'draft',
+      location_details: dto.location_details || undefined,
+      estimated_value: dto.estimated_value ?? 0,
       workers_present: dto.workers_present || [],
       equipment_used: dto.equipment_used || [],
       quantities: dto.quantities || [],
       materials: dto.materials || [],
       photos: dto.photos || [],
+      created_by: userId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    let { data, error } = await supabase
-      .from('daily_logs')
-      .insert(fullPayload)
-      .select()
-      .single();
+    await db.daily_logs.put(offlineLog);
 
-    // Fallback للأعمدة القديمة
-    if (error && isMissingColumnError(error)) {
-      console.warn('[DailyLog] Falling back to base schema — please run the latest migration.');
-      const result = await supabase
-        .from('daily_logs')
-        .insert(basePayload)
-        .select()
-        .single();
-      data = result.data;
-      error = result.error;
-    }
+    await db.queue.add({
+      table: 'daily_logs',
+      action: 'create',
+      targetId: logId,
+      payload: offlineLog,
+      createdAt: Date.now(),
+    });
 
-    if (error) {
-      logSupabaseError('Error creating daily log', error);
-      throw toDailyLogError(error, 'Failed to create daily log');
-    }
-
-    return {
-      ...data,
-      workers_present: data.workers_present || [],
-      equipment_used: data.equipment_used || [],
-      quantities: data.quantities || [],
-      materials: data.materials || [],
-      photos: data.photos || [],
-    } as DailyLog;
+    return offlineLog;
   },
 
   async update(id: string, dto: UpdateDailyLogDto): Promise<DailyLog> {
+    const isOnline = await checkNetworkStatus();
+
     const baseUpdate: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
@@ -147,50 +243,122 @@ export const dailyLogService = {
     if (dto.materials !== undefined) fullUpdate.materials = dto.materials;
     if (dto.photos !== undefined) fullUpdate.photos = dto.photos;
 
-    let { data, error } = await supabase
-      .from('daily_logs')
-      .update(fullUpdate)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error && isMissingColumnError(error)) {
-      console.warn('[DailyLog] Falling back to base schema for update.');
-      const result = await supabase
+    if (isOnline) {
+      let { data, error } = await supabase
         .from('daily_logs')
-        .update(baseUpdate)
+        .update(fullUpdate)
         .eq('id', id)
         .select()
         .single();
-      data = result.data;
-      error = result.error;
+
+      if (error && isMissingColumnError(error)) {
+        console.warn('[DailyLog] Falling back to base schema for update.');
+        const result = await supabase
+          .from('daily_logs')
+          .update(baseUpdate)
+          .eq('id', id)
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) {
+        logSupabaseError('Error updating daily log', error);
+        throw toDailyLogError(error, 'Failed to update daily log');
+      }
+
+      const updatedLog = {
+        ...data,
+        workers_present: data.workers_present || [],
+        equipment_used: data.equipment_used || [],
+        quantities: data.quantities || [],
+        materials: data.materials || [],
+        photos: data.photos || [],
+      } as DailyLog;
+
+      await db.daily_logs.put(updatedLog);
+      return updatedLog;
     }
 
-    if (error) {
-      logSupabaseError('Error updating daily log', error);
-      throw toDailyLogError(error, 'Failed to update daily log');
+    // Offline update path
+    const existing = await db.daily_logs.get(id);
+    if (!existing) {
+      throw new Error('التقرير اليومي غير موجود في التخزين المحلي.');
     }
 
-    return {
-      ...data,
-      workers_present: data.workers_present || [],
-      equipment_used: data.equipment_used || [],
-      quantities: data.quantities || [],
-      materials: data.materials || [],
-      photos: data.photos || [],
+    const offlineUpdatedLog: DailyLog = {
+      ...existing,
+      ...dto,
+      updated_at: new Date().toISOString(),
     } as DailyLog;
+
+    await db.daily_logs.put(offlineUpdatedLog);
+
+    const pendingCreate = await db.queue
+      .where('targetId')
+      .equals(id)
+      .filter(item => item.table === 'daily_logs' && item.action === 'create')
+      .first();
+
+    if (pendingCreate) {
+      pendingCreate.payload = offlineUpdatedLog;
+      await db.queue.put(pendingCreate);
+    } else {
+      await db.queue.add({
+        table: 'daily_logs',
+        action: 'update',
+        targetId: id,
+        payload: fullUpdate,
+        createdAt: Date.now(),
+      });
+    }
+
+    return offlineUpdatedLog;
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('daily_logs')
-      .delete()
-      .eq('id', id);
+    const isOnline = await checkNetworkStatus();
 
-    if (error) throw error;
+    if (isOnline) {
+      const { error } = await supabase
+        .from('daily_logs')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      await db.daily_logs.delete(id);
+      return;
+    }
+
+    // Offline delete path
+    await db.daily_logs.delete(id);
+
+    const pendingCreate = await db.queue
+      .where('targetId')
+      .equals(id)
+      .filter(item => item.table === 'daily_logs' && item.action === 'create')
+      .first();
+
+    if (pendingCreate) {
+      await db.queue.delete(pendingCreate.id!);
+    } else {
+      await db.queue.add({
+        table: 'daily_logs',
+        action: 'delete',
+        targetId: id,
+        payload: null,
+        createdAt: Date.now(),
+      });
+    }
   },
 
   async uploadPhoto(file: File, projectId: string): Promise<string> {
+    const isOnline = await checkNetworkStatus();
+    if (!isOnline) {
+      throw new Error('تحميل الصور يتطلب اتصالاً نشطاً بالإنترنت.');
+    }
+
     const ext = file.name.split('.').pop() || 'jpg';
     const fileName = `daily-logs/${projectId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 

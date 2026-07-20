@@ -11,7 +11,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
-import { createClient } from "@/lib/supabase/client";
+import { projectsService } from "@/lib/services/projects-service";
 import { Project } from "@/lib/types/projects";
 import { GanttChart } from "../components/GanttChart";
 
@@ -28,7 +28,6 @@ export default function PlanningPage({
   const { locale, id: projectId } = use(params);
   const isAr = locale === "ar";
   const router = useRouter();
-  const supabase = createClient();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +37,7 @@ export default function PlanningPage({
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: supabaseError } = await supabase
-        .from("projects")
-        .select("id, name, wilaya, client_name, status")
-        .eq("id", projectId)
-        .single();
-
-      if (supabaseError) throw supabaseError;
+      const data = await projectsService.getById(projectId);
       setProject(data as Project);
     } catch (err: any) {
       setError(err?.message || (isAr ? "حدث خطأ في تحميل بيانات المشروع" : "Erreur de chargement"));
