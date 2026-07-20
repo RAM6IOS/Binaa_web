@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar, fr } from "date-fns/locale";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
@@ -330,32 +329,20 @@ export function NotificationDropdown({ locale }: { locale: string }) {
         className="relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-all rounded-full w-10 h-10 flex items-center justify-center"
       >
         <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-        <AnimatePresence>
-          {unreadCount > 0 && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1"
-            >
-              <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] min-w-5 h-5 px-1 flex items-center justify-center border-2 border-white dark:border-slate-900 rounded-full">
-                {unreadCount > 9 ? "+9" : unreadCount}
-              </Badge>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {unreadCount > 0 && (
+          <div className={`absolute -top-1 -right-1 transition-transform duration-200 ${unreadCount > 0 ? 'scale-100' : 'scale-0'}`}>
+            <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] min-w-5 h-5 px-1 flex items-center justify-center border-2 border-white dark:border-slate-900 rounded-full">
+              {unreadCount > 9 ? "+9" : unreadCount}
+            </Badge>
+          </div>
+        )}
       </Button>
 
       {/* القائمة المنسدلة */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+      {isOpen && (
+          <div
             dir={isAr ? "rtl" : "ltr"}
-            className={`absolute top-12 ${isAr ? "left-0" : "right-0"} w-80 sm:w-96 max-h-[500px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 flex flex-col`}
+            className={`absolute top-12 ${isAr ? "left-0" : "right-0"} w-80 sm:w-96 max-h-[500px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 flex flex-col animate-fade-in`}
           >
             {/* رأس القائمة */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
@@ -416,16 +403,11 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                  <AnimatePresence initial={false}>
                     {notifications.map((notification) => {
                       const config = getNotificationConfig(notification.type);
                       return (
-                        <motion.div
+                        <div
                           key={notification.id}
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
                           className={`p-4 transition-all hover:bg-slate-50/70 dark:hover:bg-slate-800/20 relative group border-r-4 ${notification.is_read
                               ? "border-r-transparent"
                               : "border-r-blue-500 bg-blue-50/20 dark:bg-blue-950/5"
@@ -489,10 +471,9 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                               </Button>
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
-                  </AnimatePresence>
                 </div>
               )}
             </div>
@@ -503,9 +484,8 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                 {isAr ? "منصة بناء لإدارة مشاريع الإنشاءات" : "Binaa - Construction Project Management"}
               </span>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </div>
   );
 }

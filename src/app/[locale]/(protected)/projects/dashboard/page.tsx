@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { AreaChart } from "@/components/ui/area-chart";
 import { CopySlash, AlertTriangle, CheckCircle2, Factory, Loader2, AlertCircle, Users, HardHat, Construction } from "lucide-react";
 import { projectsService } from "@/lib/services/projects-service";
 import { workersService } from "@/lib/services/workers-service";
@@ -157,56 +157,15 @@ export default function DashboardPage({ params }: { params: Promise<{ locale: st
             </CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData.length > 0 ? chartData : [{month: 'Jan', budget: 0, spent: 0}]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorBudget" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorSpent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis 
-                  dataKey="month" 
-                  stroke="#888888" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false} 
-                />
-                <YAxis 
-                  stroke="#888888" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  tickFormatter={(value) => `${value}M`} 
-                />
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.5} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="budget" 
-                  stroke="#3b82f6" 
-                  strokeWidth={2}
-                  fillOpacity={1} 
-                  fill="url(#colorBudget)" 
-                  name={isAr ? 'الميزانية' : 'Budget'}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="spent" 
-                  stroke="#ef4444" 
-                  strokeWidth={2}
-                  fillOpacity={1} 
-                  fill="url(#colorSpent)" 
-                  name={isAr ? 'الإنفاق' : 'Dépenses'}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <AreaChart
+              data={chartData.length > 0 ? chartData : [{month: 'Jan', budget: 0, spent: 0}]}
+              series={[
+                { key: "budget", color: "#3b82f6", name: isAr ? 'الميزانية' : 'Budget' },
+                { key: "spent", color: "#ef4444", name: isAr ? 'الإنفاق' : 'Dépenses' },
+              ]}
+              xKey="month"
+              height={350}
+            />
           </CardContent>
         </Card>
 
