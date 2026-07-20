@@ -115,7 +115,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
                   value={editProgress}
                   onChange={(e) => setEditProgress(Number(e.target.value))}
                 />
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600" onClick={() => handleUpdate('progress', editProgress)}>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600" onClick={() => handleUpdate('progress', editProgress)} aria-label="Confirm">
                    <Check className="w-4 h-4" />
                 </Button>
               </div>

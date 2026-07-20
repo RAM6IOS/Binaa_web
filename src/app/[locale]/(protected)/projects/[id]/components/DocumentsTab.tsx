@@ -128,8 +128,8 @@ export function DocumentsTab({ project, isAr }: Props) {
 
         <div className="flex items-center gap-3">
           <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('grid')}><LayoutGrid className="w-4 h-4" /></Button>
-            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('list')}><List className="w-4 h-4" /></Button>
+            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('grid')} aria-label="Grid view"><LayoutGrid className="w-4 h-4" /></Button>
+            <Button size="icon" variant="ghost" className={`h-8 w-8 ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`} onClick={() => setViewMode('list')} aria-label="List view"><List className="w-4 h-4" /></Button>
           </div>
           <UploadDocumentModal isAr={isAr} projectId={project.id} onSuccess={refreshDocuments} />
         </div>
@@ -165,9 +165,9 @@ export function DocumentsTab({ project, isAr }: Props) {
                   )}
 
                   <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[1px]">
-                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a></Button>
-                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="w-4 h-4" /></a></Button>
-                    {isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-xl" onClick={() => askDelete(doc.id)}><Trash2 className="w-4 h-4" /></Button>}
+                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="Download"><Download className="w-4 h-4" /></a></Button>
+                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="View"><Eye className="w-4 h-4" /></a></Button>
+                    {isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-xl" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 className="w-4 h-4" /></Button>}
                   </div>
                 </div>
 
@@ -212,7 +212,7 @@ export function DocumentsTab({ project, isAr }: Props) {
                     </td>
                     <td className="text-[10px] font-black uppercase text-slate-400"><span>{doc.file_type}</span></td>
                     <td className="font-mono text-[10px] opacity-60 tabular-nums uppercase">{new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</td>
-                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-blue-500"><a href={doc.file_url} target="_blank"><Download size={16} /></a></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => askDelete(doc.id)}><Trash2 size={16} /></Button>}</div></td>
+                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-blue-500"><a href={doc.file_url} target="_blank" aria-label="Download"><Download size={16} /></a></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 size={16} /></Button>}</div></td>
                   </tr>
                 ))}
               </tbody>

@@ -137,6 +137,7 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
               className="hover:bg-orange-50 text-slate-400 hover:text-orange-600 rounded-full h-9 w-9"
               onClick={handleExportPDF}
               disabled={isExportingPDF}
+              aria-label={isAr ? "تصدير PDF" : "Exporter PDF"}
             >
               {isExportingPDF ? <Loader2 className="w-4.5 h-4.5 animate-spin" /> : <FileDown className="w-4.5 h-4.5" />}
             </Button>
@@ -147,7 +148,7 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
               log={log}
               onSuccess={onEdit}
               trigger={
-                <Button variant="ghost" size="icon" className="hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-full h-9 w-9">
+                <Button variant="ghost" size="icon" className="hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-full h-9 w-9" aria-label={isAr ? "تعديل" : "Modifier"}>
                   <Pencil className="w-4.5 h-4.5" />
                 </Button>
               }
@@ -157,7 +158,8 @@ export function DailyLogCard({ log, isAr, projectId, onEdit, onDelete }: DailyLo
               variant="ghost"
               size="icon"
               className="hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full h-9 w-9"
-              onClick={() => setDeleteModalOpen(true)} // فتح المودال الموحد
+              onClick={() => setDeleteModalOpen(true)}
+              aria-label={isAr ? "حذف" : "Supprimer"}
             >
               <Trash2 className="w-4.5 h-4.5" />
             </Button>

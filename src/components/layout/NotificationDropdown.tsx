@@ -327,6 +327,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
         className="relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-all rounded-full w-10 h-10 flex items-center justify-center"
+        aria-label={isAr ? "الإشعارات" : "Notifications"}
       >
         <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         {unreadCount > 0 && (
@@ -372,6 +373,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                   size="icon"
                   onClick={() => setIsOpen(false)}
                   className="w-7 h-7 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  aria-label={isAr ? "إغلاق" : "Fermer"}
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -455,7 +457,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                                   size="icon"
                                   onClick={(e) => handleMarkAsRead(notification.id, e)}
                                   className="w-7 h-7 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
-                                  title={isAr ? "تحديد كمقروء" : "Marquer comme lu"}
+                                  aria-label={isAr ? "تحديد كمقروء" : "Marquer comme lu"}
                                 >
                                   <Check className="w-4 h-4" />
                                 </Button>
@@ -465,7 +467,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                                 size="icon"
                                 onClick={(e) => handleDeleteNotification(notification.id, e)}
                                 className="w-7 h-7 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
-                                title={isAr ? "حذف الإشعار" : "Supprimer"}
+                                aria-label={isAr ? "حذف الإشعار" : "Supprimer"}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>

@@ -69,9 +69,10 @@ export function Navbar({ locale }: NavbarProps) {
           {/* Mobile Menu Toggle & Language Switcher */}
           <div className="flex md:hidden items-center gap-2">
             <LanguageSwitcher />
-            <button 
+            <button
               className="p-3 text-slate-600 rounded-md hover:bg-slate-100 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
             >
               {isMenuOpen ? <X /> : <Menu />}
             </button>

@@ -89,6 +89,7 @@ export function AuthNavbar() {
             <button
               className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

@@ -134,7 +134,7 @@ export function SecuritySettings({ locale }: { locale: string }) {
                   </div>
                 </div>
                 {!session.is_current && (
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600">
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600" aria-label={isAr ? "تسجيل الخروج" : "Déconnexion"}>
                     <LogOut className="w-4 h-4" />
                   </Button>
                 )}

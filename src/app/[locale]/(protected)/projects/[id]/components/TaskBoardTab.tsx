@@ -68,7 +68,7 @@ function SortableTaskCard({ task, isAr, workers, projectId, onRefresh }: { task:
           <h4 className="text-sm font-bold leading-tight truncate max-w-[180px]">{task.title}</h4>
         </div>
         <AddTaskDialog isAr={isAr} projectId={projectId} onSuccess={onRefresh} task={task} trigger={
-          <button className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg"><Edit2 className="w-3 h-3" /></button>
+          <button className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg" aria-label="Edit task"><Edit2 className="w-3 h-3" /></button>
         } />
       </div>
       <div className="space-y-3 pl-7">
@@ -205,8 +205,8 @@ export function TaskBoardTab({ project, isAr }: { project: Project, isAr: boolea
 
         <div className="flex items-center gap-3">
           <div className="flex bg-white border dark:bg-slate-900 p-1 rounded-xl shadow-sm">
-            <button onClick={() => setView('kanban')} className={`p-2 rounded-lg transition-all ${view === 'kanban' ? 'bg-slate-100 text-blue-600' : 'text-slate-400'}`}><LayoutGrid className="w-4 h-4" /></button>
-            <button onClick={() => setView('list')} className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-slate-100 text-blue-600' : 'text-slate-400'}`}><List className="w-4 h-4" /></button>
+            <button onClick={() => setView('kanban')} className={`p-2 rounded-lg transition-all ${view === 'kanban' ? 'bg-slate-100 text-blue-600' : 'text-slate-400'}`} aria-label="Kanban view"><LayoutGrid className="w-4 h-4" /></button>
+            <button onClick={() => setView('list')} className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-slate-100 text-blue-600' : 'text-slate-400'}`} aria-label="List view"><List className="w-4 h-4" /></button>
           </div>
           <AddTaskDialog isAr={isAr} projectId={project.id} onSuccess={() => refreshData(true)} />
         </div>
