@@ -3,6 +3,7 @@
 import { Attachment } from '../services/attachments-service';
 
 export type WeatherCondition = 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy' | 'foggy';
+export type SiteStatus = 'active' | 'inactive' | 'in_progress' | 'delayed' | 'completed';
 
 // ── القوى العاملة ──
 export interface DailyLogWorker {
@@ -52,7 +53,9 @@ export interface DailyLog {
   project_id: string;
   log_date: string;              // YYYY-MM-DD
   weather_condition: WeatherCondition;
-  temperature: number;           // بالدرجة المئوية
+  temperature: number;           // درجة الحرارة القصوى (بالدرجة المئوية)
+  temperature_min?: number;      // درجة الحرارة الدنيا (بالدرجة المئوية)
+  site_status: SiteStatus;       // حالة الورشة
   work_summary: string;
   problems_faced?: string;
   notes?: string;

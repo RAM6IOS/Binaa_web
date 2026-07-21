@@ -345,6 +345,7 @@ export default function DailyLogsPage({
             <DailyLogCard
               key={log.id}
               log={log}
+              project={project!}
               isAr={isAr}
               projectId={projectId}
               onEdit={() => fetchData(true)}

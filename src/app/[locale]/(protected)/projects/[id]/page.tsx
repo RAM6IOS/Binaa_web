@@ -150,7 +150,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
         <div className="pt-6">
           <TabsContent value="overview"><OverviewTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} /></TabsContent>
           <TabsContent value="tasks"><TaskBoardTab project={project} isAr={isAr} /></TabsContent>
-          <TabsContent value="daily-logs"><DailyLogsTab project={project} isAr={isAr} /></TabsContent>
+          <TabsContent value="daily-logs"><DailyLogsTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} /></TabsContent>
           <TabsContent value="gantt" className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><ResourcesTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="documents"><DocumentsTab project={project} isAr={isAr} /></TabsContent>

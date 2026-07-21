@@ -31,9 +31,10 @@ import { toast } from "sonner";
 interface DailyLogsTabProps {
   project: Project;
   isAr: boolean;
+  onRefresh?: () => void;
 }
 
-export function DailyLogsTab({ project, isAr }: DailyLogsTabProps) {
+export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [needsMigration, setNeedsMigration] = useState(false);
@@ -90,6 +91,7 @@ export function DailyLogsTab({ project, isAr }: DailyLogsTabProps) {
       await dailyLogService.delete(id);
       setLogs((prev) => prev.filter((l) => l.id !== id));
       toast.success(isAr ? "تم حذف التقرير بنجاح" : "Rapport supprimé");
+      onRefresh?.();
     } catch {
       toast.error(isAr ? "فشل الحذف" : "Échec de suppression");
     }
@@ -145,7 +147,7 @@ export function DailyLogsTab({ project, isAr }: DailyLogsTabProps) {
         <AddDailyLogDialog
           isAr={isAr}
           projectId={project.id}
-          onSuccess={() => fetchLogs(true)}
+          onSuccess={() => { fetchLogs(true); onRefresh?.(); }}
           trigger={
             <Button size="lg" className="gap-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
               <Plus className="w-5 h-5" />
@@ -167,9 +169,10 @@ export function DailyLogsTab({ project, isAr }: DailyLogsTabProps) {
             <DailyLogCard
               key={log.id}
               log={log}
+              project={project}
               isAr={isAr}
               projectId={project.id}
-              onEdit={() => fetchLogs(true)}
+              onEdit={() => { fetchLogs(true); onRefresh?.(); }}
               onDelete={handleDelete}
             />
           ))}
