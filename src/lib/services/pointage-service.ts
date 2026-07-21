@@ -756,7 +756,8 @@ export const pointageService = {
       notes: pointage.notes,
       work_summary: 'تسجيل الحضور اليومي للمشروع (تحديث تلقائي)',
       weather_condition: 'sunny',
-      temperature: 25
+      temperature: 25,
+      temperature_min: 15
     };
 
     if (existingLog) {

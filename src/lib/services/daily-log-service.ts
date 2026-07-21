@@ -24,6 +24,18 @@ function isMissingColumnError(error: PostgrestError) {
   return error.code === 'PGRST204' || error.message?.includes('column');
 }
 
+async function syncProjectProgress(projectId: string, progress: number) {
+  if (progress <= 0) return;
+  try {
+    await supabase
+      .from('projects')
+      .update({ progress, updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+  } catch (err) {
+    console.warn('[DailyLog] Failed to sync project progress:', err);
+  }
+}
+
 export const dailyLogService = {
   async getByProjectId(projectId: string): Promise<DailyLog[]> {
     const isOnline = await checkNetworkStatus();
@@ -131,6 +143,8 @@ export const dailyLogService = {
         log_date: dto.log_date,
         weather_condition: dto.weather_condition,
         temperature: dto.temperature,
+        temperature_min: dto.temperature_min ?? null,
+        site_status: dto.site_status || 'active',
         work_summary: dto.work_summary,
         notes: dto.notes || null,
         overall_progress: dto.overall_progress ?? 0,
@@ -180,6 +194,12 @@ export const dailyLogService = {
       } as DailyLog;
 
       await db.daily_logs.put(createdLog);
+
+      // ربط نسبة التقدم مع المشروع
+      if (createdLog.overall_progress > 0) {
+        await syncProjectProgress(dto.project_id, createdLog.overall_progress);
+      }
+
       return createdLog;
     }
 
@@ -191,6 +211,8 @@ export const dailyLogService = {
       log_date: dto.log_date,
       weather_condition: dto.weather_condition,
       temperature: dto.temperature,
+      temperature_min: dto.temperature_min,
+      site_status: dto.site_status || 'active',
       work_summary: dto.work_summary,
       problems_faced: dto.problems_faced || undefined,
       notes: dto.notes || undefined,
@@ -218,6 +240,22 @@ export const dailyLogService = {
       createdAt: Date.now(),
     });
 
+    // ربط نسبة التقدم مع المشروع (محلياً)
+    if (offlineLog.overall_progress > 0) {
+      const existingProject = await db.projects.get(dto.project_id);
+      if (existingProject) {
+        const updatedProject = { ...existingProject, progress: offlineLog.overall_progress, updated_at: new Date().toISOString() };
+        await db.projects.put(updatedProject);
+        await db.queue.add({
+          table: 'projects',
+          action: 'update',
+          targetId: dto.project_id,
+          payload: { progress: offlineLog.overall_progress },
+          createdAt: Date.now(),
+        });
+      }
+    }
+
     return offlineLog;
   },
 
@@ -231,6 +269,8 @@ export const dailyLogService = {
     if (dto.log_date !== undefined) baseUpdate.log_date = dto.log_date;
     if (dto.weather_condition !== undefined) baseUpdate.weather_condition = dto.weather_condition;
     if (dto.temperature !== undefined) baseUpdate.temperature = dto.temperature;
+    if (dto.temperature_min !== undefined) baseUpdate.temperature_min = dto.temperature_min;
+    if (dto.site_status !== undefined) baseUpdate.site_status = dto.site_status;
     if (dto.work_summary !== undefined) baseUpdate.work_summary = dto.work_summary;
     if (dto.notes !== undefined) baseUpdate.notes = dto.notes;
     if (dto.overall_progress !== undefined) baseUpdate.overall_progress = dto.overall_progress;
@@ -278,6 +318,12 @@ export const dailyLogService = {
       } as DailyLog;
 
       await db.daily_logs.put(updatedLog);
+
+      // ربط نسبة التقدم مع المشروع
+      if (updatedLog.overall_progress > 0) {
+        await syncProjectProgress(updatedLog.project_id, updatedLog.overall_progress);
+      }
+
       return updatedLog;
     }
 
@@ -312,6 +358,22 @@ export const dailyLogService = {
         payload: fullUpdate,
         createdAt: Date.now(),
       });
+    }
+
+    // ربط نسبة التقدم مع المشروع (محلياً)
+    if (offlineUpdatedLog.overall_progress > 0) {
+      const existingProject = await db.projects.get(offlineUpdatedLog.project_id);
+      if (existingProject) {
+        const updatedProject = { ...existingProject, progress: offlineUpdatedLog.overall_progress, updated_at: new Date().toISOString() };
+        await db.projects.put(updatedProject);
+        await db.queue.add({
+          table: 'projects',
+          action: 'update',
+          targetId: offlineUpdatedLog.project_id,
+          payload: { progress: offlineUpdatedLog.overall_progress },
+          createdAt: Date.now(),
+        });
+      }
     }
 
     return offlineUpdatedLog;
@@ -497,8 +559,15 @@ export const dailyLogService = {
 
     const infoLeft = [
       `${isAr ? "التاريخ" : "Date"}: ${log.log_date}`,
-      `${isAr ? "درجة الحرارة" : "Température"}: ${log.temperature}°C`,
+      `${isAr ? "درجة الحرارة" : "Température"}: ${log.temperature}°C${log.temperature_min != null ? ` / ${log.temperature_min}°C` : ''}`,
       `${isAr ? "الطقس" : "Météo"}: ${log.weather_condition}`,
+      `${isAr ? "حالة الورشة" : "État du chantier"}: ${
+        log.site_status === 'active' ? (isAr ? "نشطة" : "Active") :
+        log.site_status === 'in_progress' ? (isAr ? "في تقدم" : "En cours") :
+        log.site_status === 'delayed' ? (isAr ? "مؤجلة" : "Retardée") :
+        log.site_status === 'inactive' ? (isAr ? "متوقفة" : "Inactive") :
+        (isAr ? "مكتملة" : "Terminée")
+      }`,
     ];
     const infoRight = [
       log.location_details ? `${isAr ? "الموقع" : "Localisation"}: ${log.location_details}` : null,

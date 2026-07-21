@@ -12,14 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import {
   Plus, Loader2, Calendar, Thermometer, Sun, Cloud, CloudRain, Wind, CloudSnow,
-  Users, Truck, ImagePlus, X, FileText, AlertTriangle, StickyNote, Ruler, Package, Trash2, CheckCircle, MapPin, Activity, CreditCard
+  Users, Truck, ImagePlus, X, FileText, AlertTriangle, StickyNote, Ruler, Package, Trash2, CheckCircle, MapPin, Activity, CreditCard, HardHat
 } from "lucide-react";
 import { toast } from "sonner";
 import { dailyLogService } from "@/lib/services/daily-log-service";
 import { projectWorkersService } from "@/lib/services/project-workers-service";
 import { projectEquipmentService } from "@/lib/services/project-equipment-service";
+import { projectsService } from "@/lib/services/projects-service";
 import {
-  DailyLog, WeatherCondition, DailyLogWorker, DailyLogEquipment,
+  DailyLog, WeatherCondition, SiteStatus, DailyLogWorker, DailyLogEquipment,
   DailyLogPhoto, DailyLogMaterial, DailyLogQuantity
 } from "@/lib/types/daily-logs";
 import { ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
@@ -45,6 +46,8 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
     log_date: new Date().toISOString().split("T")[0],
     weather_condition: "sunny" as WeatherCondition,
     temperature: 25,
+    temperature_min: 15,
+    site_status: "active" as SiteStatus,
     work_summary: "",
     problems_faced: "",
     notes: "",
@@ -63,6 +66,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   const [projectWorkers, setProjectWorkers] = useState<ProjectWorker[]>([]);
   const [projectEquipment, setProjectEquipment] = useState<ProjectEquipment[]>([]);
   const [isResourcesLoading, setIsResourcesLoading] = useState(false);
+  const [projectProgress, setProjectProgress] = useState<number>(0);
 
   const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
   const [pendingFiles, setPendingFiles] = useState<any[]>([]);
@@ -95,12 +99,14 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
     const fetchResources = async () => {
       setIsResourcesLoading(true);
       try {
-        const [workersRes, equipmentRes] = await Promise.all([
+        const [workersRes, equipmentRes, projectRes] = await Promise.all([
           projectWorkersService.getByProjectId(projectId),
           projectEquipmentService.fetchProjectEquipment(projectId),
+          projectsService.getById(projectId),
         ]);
         setProjectWorkers(workersRes);
         setProjectEquipment(equipmentRes);
+        if (projectRes) setProjectProgress(projectRes.progress || 0);
       } catch (err) {
         console.error(err);
       } finally {
@@ -115,6 +121,8 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
         log_date: log.log_date,
         weather_condition: log.weather_condition,
         temperature: log.temperature,
+        temperature_min: log.temperature_min ?? 15,
+        site_status: log.site_status || "active",
         work_summary: log.work_summary,
         problems_faced: log.problems_faced || "",
         notes: log.notes || "",
@@ -134,6 +142,8 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
         log_date: new Date().toISOString().split("T")[0],
         weather_condition: "sunny",
         temperature: 25,
+        temperature_min: 15,
+        site_status: "active",
         work_summary: "",
         problems_faced: "",
         notes: "",
@@ -314,9 +324,83 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             {/* نسبة التقدم الفني */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><Activity className="w-4 h-4 text-purple-500" /> {isAr ? "تقدم الإنجاز (%)" : "Progrès (%)"}</Label>
-              <Input type="number" min={0} max={100} value={formData.overall_progress} onChange={(e) => setFormData({ ...formData, overall_progress: Number(e.target.value) })} />
+              <div className="flex items-center gap-2">
+                <Input type="number" min={0} max={100} value={formData.overall_progress} onChange={(e) => setFormData({ ...formData, overall_progress: Number(e.target.value) })} />
+                {projectProgress > 0 && (
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                    {isAr ? `الحالي: ${projectProgress}%` : `Actuel: ${projectProgress}%`}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-400">{isAr ? "سيتم تحديث تقدم المشروع تلقائياً" : "Le progrès du projet sera mis à jour automatiquement"}</p>
+            </div>
+
+            {/* حالة الورشة */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><HardHat className="w-4 h-4 text-amber-500" /> {isAr ? "حالة الورشة" : "État du chantier"}</Label>
+              <Select value={formData.site_status} onValueChange={(v: any) => setFormData({ ...formData, site_status: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">🟢 {isAr ? "نشطة" : "Active"}</SelectItem>
+                  <SelectItem value="in_progress">🔵 {isAr ? "في تقدم" : "En cours"}</SelectItem>
+                  <SelectItem value="delayed">🟡 {isAr ? "مؤجلة" : "Retardée"}</SelectItem>
+                  <SelectItem value="inactive">🔴 {isAr ? "متوقفة" : "Inactive"}</SelectItem>
+                  <SelectItem value="completed">✅ {isAr ? "مكتملة" : "Terminée"}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+
+          {/* الأحوال الجوية */}
+          <div className="bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+            <h3 className="font-bold text-sm flex items-center gap-2 mb-4 text-blue-700 dark:text-blue-300">
+              <Sun className="w-4 h-4" /> {isAr ? "الأحوال الجوية" : "Météo"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* حالة الطقس */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2"><Cloud className="w-4 h-4 text-blue-500" /> {isAr ? "حالة الطقس" : "Condition"}</Label>
+                <Select value={formData.weather_condition} onValueChange={(v: any) => setFormData({ ...formData, weather_condition: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sunny">☀️ {isAr ? "مشمس" : "Ensoleillé"}</SelectItem>
+                    <SelectItem value="cloudy">☁️ {isAr ? "غائم" : "Nuageux"}</SelectItem>
+                    <SelectItem value="rainy">🌧️ {isAr ? "ممطر" : "Pluvieux"}</SelectItem>
+                    <SelectItem value="stormy">⛈️ {isAr ? "عاصف" : "Orageux"}</SelectItem>
+                    <SelectItem value="windy">💨 {isAr ? "عالي الرياح" : "Venteux"}</SelectItem>
+                    <SelectItem value="foggy">🌫️ {isAr ? "ضبابي" : "Brumeux"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* درجة الحرارة القصوى */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-red-500" /> {isAr ? "الحرارة القصوى" : "Temp. Max"}</Label>
+                <Input
+                  type="number"
+                  placeholder="35"
+                  value={formData.temperature}
+                  onChange={(e) => setFormData({ ...formData, temperature: Number(e.target.value) })}
+                />
+              </div>
+
+              {/* درجة الحرارة الدنيا */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-blue-500" /> {isAr ? "الحرارة الدنيا" : "Temp. Min"}</Label>
+                <Input
+                  type="number"
+                  placeholder="15"
+                  value={formData.temperature_min}
+                  onChange={(e) => setFormData({ ...formData, temperature_min: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Work Summary */}
           <div className="space-y-2">
             <Label>{isAr ? "ملخص الأعمال *" : "Résumé des travaux *"}</Label>
