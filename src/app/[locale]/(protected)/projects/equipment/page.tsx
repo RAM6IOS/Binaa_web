@@ -170,7 +170,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
 
             <div className="flex flex-wrap items-center gap-2">
               <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-full sm:w-[130px]">
                   <SelectValue placeholder={isAr ? "الولاية" : "Wilaya"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,7 +180,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px]">
                   <SelectValue placeholder={isAr ? "الفئة" : "Catégorie"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,7 +190,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-full sm:w-[120px]">
                   <SelectValue placeholder={isAr ? "الحالة" : "Statut"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,7 +203,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               </Select>
 
               <Select value={maintenanceFilter} onValueChange={setMaintenanceFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder={isAr ? "حالة الصيانة" : "Maintenance"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,31 +222,30 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
             <div className="p-8 space-y-4">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
             </div>
+          ) : filteredEquipment.length === 0 ? (
+            <div className="text-center py-12 text-slate-500">
+              <Truck className="mx-auto w-10 h-10 text-slate-300 mb-3" />
+              {isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{isAr ? 'المعدة' : 'Équipement'}</TableHead>
-                    <TableHead>{isAr ? 'العلامة / الموديل' : 'Marque / Modèle'}</TableHead>
-                    <TableHead>{isAr ? 'الرقم التسلسلي' : 'N° Série'}</TableHead>
-                    <TableHead>{isAr ? 'الأجر اليومي' : 'Taux/Jour'}</TableHead>
-                    <TableHead>{isAr ? 'الولاية' : 'Wilaya'}</TableHead>
-                    <TableHead>{isAr ? 'الحالة' : 'Statut'}</TableHead>
-                    <TableHead>{isAr ? 'الصيانة' : 'Maint.'}</TableHead>
-                    <TableHead className="text-right">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEquipment.length === 0 ? (
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12 text-slate-500">
-                        <Truck className="mx-auto w-10 h-10 text-slate-300 mb-3" />
-                        {isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}
-                      </TableCell>
+                      <TableHead>{isAr ? 'المعدة' : 'Équipement'}</TableHead>
+                      <TableHead>{isAr ? 'العلامة / الموديل' : 'Marque / Modèle'}</TableHead>
+                      <TableHead>{isAr ? 'الرقم التسلسلي' : 'N° Série'}</TableHead>
+                      <TableHead>{isAr ? 'الأجر اليومي' : 'Taux/Jour'}</TableHead>
+                      <TableHead>{isAr ? 'الولاية' : 'Wilaya'}</TableHead>
+                      <TableHead>{isAr ? 'الحالة' : 'Statut'}</TableHead>
+                      <TableHead>{isAr ? 'الصيانة' : 'Maint.'}</TableHead>
+                      <TableHead className="text-right">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
                     </TableRow>
-                  ) : (
-                    filteredEquipment.map((item) => (
+                  </TableHeader>
+                  <TableBody>
+                    {filteredEquipment.map((item) => (
                       <TableRow key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -309,11 +308,85 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {filteredEquipment.map((item) => (
+                  <div key={item.id} className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-11 h-11 rounded-lg bg-emerald-50 flex items-center justify-center overflow-hidden shrink-0">
+                          {item.photo_url ? (
+                            <img src={item.photo_url} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Truck className="w-5 h-5 text-emerald-600" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{item.name}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{item.brand} ({item.model})</p>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <AddEquipmentDialog
+                            isAr={isAr}
+                            onSuccess={fetchEquipment}
+                            equipment={item}
+                            trigger={
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer gap-2">
+                                <Edit className="w-4 h-4" />
+                                {isAr ? 'تعديل' : 'Modifier'}
+                              </DropdownMenuItem>
+                            }
+                          />
+                          <DropdownMenuItem
+                            className="text-red-600 cursor-pointer gap-2"
+                            onClick={() => askDelete(item.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            {isAr ? 'حذف' : 'Supprimer'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <EquipmentStatusBadge status={item.status} isAr={isAr} />
+                      <MaintenanceStatusBadge status={item.maintenance_status} isAr={isAr} />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
+                        <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "الأجر/يوم" : "Taux/Jour"}</p>
+                        <p className="text-xs font-mono font-bold">{item.daily_rate.toLocaleString()} <span className="text-[8px]">DZD</span></p>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
+                        <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "الولاية" : "Wilaya"}</p>
+                        <p className="text-xs font-bold">{item.wilaya}</p>
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
+                        <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "الفئة" : "Catégorie"}</p>
+                        <p className="text-xs font-bold truncate">{item.category}</p>
+                      </div>
+                    </div>
+
+                    {item.serial_number && (
+                      <p className="text-[10px] text-slate-400 font-mono">{isAr ? "الرقم التسلسلي" : "N° Série"}: {item.serial_number}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

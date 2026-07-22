@@ -43,12 +43,12 @@ function TaskStatusBadge({ status, isAr }: { status: TaskStatus, isAr: boolean }
 function KanbanColumn({ id, title, count, children }: { id: string, title: string, count: number, children: React.ReactNode }) {
   const { setNodeRef } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className="flex-1 min-w-[300px] bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col border border-slate-200 dark:border-slate-800">
+    <div ref={setNodeRef} className="flex-1 min-w-0 md:min-w-[300px] bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl p-4 flex flex-col border border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between mb-5">
         <h3 className="font-bold text-xs text-slate-500 uppercase tracking-widest">{title}</h3>
         <Badge variant="outline" className="bg-white dark:bg-slate-800 font-black">{count}</Badge>
       </div>
-      <div className="flex-1 flex flex-col gap-3 min-h-[400px]">{children}</div>
+      <div className="flex-1 flex flex-col gap-3 min-h-[200px] md:min-h-[400px]">{children}</div>
     </div>
   );
 }
@@ -214,7 +214,7 @@ export function TaskBoardTab({ project, isAr }: { project: Project, isAr: boolea
 
       <CardContent className="px-0">
         {view === 'kanban' ? (
-          <div className="flex flex-col lg:flex-row gap-5 min-h-[600px] overflow-x-auto pb-6 custom-scrollbar">
+          <div className="flex flex-col lg:flex-row gap-5 min-h-[400px] lg:min-h-[600px] overflow-x-auto pb-6 custom-scrollbar">
             <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={(e) => setActiveTask(tasks.find(t => t.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
               {columns.map(col => {
                 const columnTasks = tasks.filter(t => t.status === col.id);
@@ -236,7 +236,7 @@ export function TaskBoardTab({ project, isAr }: { project: Project, isAr: boolea
               })}
               <DragOverlay>
                 {activeTask ? (
-                  <div className="bg-white p-4 rounded-xl shadow-2xl border-2 border-blue-500 scale-105 -rotate-2 w-[280px]">
+                  <div className="bg-white p-4 rounded-xl shadow-2xl border-2 border-blue-500 scale-105 -rotate-2 w-[260px] sm:w-[280px]">
                     <h4 className="text-xs font-black truncate">{activeTask.title}</h4>
                     <div className="w-full bg-slate-100 h-1 rounded-full mt-3"><div className="bg-blue-600 h-full" style={{ width: `${activeTask.progress}%` }} /></div>
                   </div>

@@ -62,7 +62,7 @@ export default function RFQWizardPage({ params }: { params: Promise<{ locale: st
                   <option>{isAr ? 'تأجير معدات' : 'Location de matériel'}</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="space-y-2">
                   <label className="text-sm font-medium">{isAr ? 'الميزانية التقديرية (دج)' : 'Budget estimé (DZD)'}</label>
                   <input type="number" className="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" />
