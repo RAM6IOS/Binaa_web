@@ -19,6 +19,7 @@ import { DocumentsTab } from "./components/DocumentsTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
+import { MetresTab } from "./components/MetresTab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ProjectWithJoins = Project & {
@@ -132,6 +133,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
               { id: 'overview', label: isAr ? 'نظرة عامة' : 'Aperçu' },
               { id: 'tasks', label: isAr ? 'لوحة المهام' : 'Tâches' },
               { id: 'daily-logs', label: isAr ? 'التقارير اليومية' : 'Situations' },
+              { id: 'metres', label: isAr ? 'الكميات المنجزة' : 'Métrés' },
               { id: 'gantt', label: isAr ? 'الجدول الزمني' : 'Gantt' },
               { id: 'resources', label: isAr ? 'العمال والعتاد' : 'Resources' },
               { id: 'documents', label: isAr ? 'الوثائق' : 'Documents' },
@@ -151,6 +153,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="overview"><OverviewTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} /></TabsContent>
           <TabsContent value="tasks"><TaskBoardTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="daily-logs"><DailyLogsTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} /></TabsContent>
+          <TabsContent value="metres"><MetresTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="gantt" className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><ResourcesTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="documents"><DocumentsTab project={project} isAr={isAr} /></TabsContent>
