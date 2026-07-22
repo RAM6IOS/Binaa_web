@@ -36,6 +36,7 @@ export interface DailyLogQuantity {
   achieved_quantity: number;     // الكمية المنجزة فعلياً
   bpu_item?: string;             // رقم البند من Bordereau
   unit_price?: number;           // السعر الوحدي
+  contract_item_id?: string;     // ربط مع بند العقد في contract_items
 }
 
 // ── استهلاك المواد ──

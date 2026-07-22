@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
-  Plus, Loader2, Calendar, Thermometer, Sun, Cloud, CloudRain, Wind, CloudSnow,
-  Users, Truck, ImagePlus, X, FileText, AlertTriangle, StickyNote, Ruler, Package, Trash2, CheckCircle, MapPin, Activity, CreditCard, HardHat
+  Plus, Loader2, Calendar, Thermometer, Sun, Cloud,
+  Users, Truck, ImagePlus, X, FileText, Ruler, Package, Trash2,
+  CheckCircle, MapPin, Activity, HardHat,
 } from "lucide-react";
 import { toast } from "sonner";
 import { dailyLogService } from "@/lib/services/daily-log-service";
@@ -24,8 +26,11 @@ import {
   DailyLogPhoto, DailyLogMaterial, DailyLogQuantity
 } from "@/lib/types/daily-logs";
 import { ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
+import { ContractItem } from "@/lib/types/metres";
+import { contractItemsService } from "@/lib/services/contract-items-service";
 import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
 import { AttachmentsList } from "./AttachmentsList";
+
 
 interface Props {
   isAr: boolean;
@@ -36,6 +41,8 @@ interface Props {
 }
 
 const units = ["m³", "m²", "ml", "kg", "t", "unité", "lot", "m", "m³/j"];
+
+
 
 export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: Props) {
   const [open, setOpen] = useState(false);
@@ -65,6 +72,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
   const [projectWorkers, setProjectWorkers] = useState<ProjectWorker[]>([]);
   const [projectEquipment, setProjectEquipment] = useState<ProjectEquipment[]>([]);
+  const [contractItems, setContractItems] = useState<ContractItem[]>([]);
   const [isResourcesLoading, setIsResourcesLoading] = useState(false);
   const [projectProgress, setProjectProgress] = useState<number>(0);
 
@@ -75,10 +83,17 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ────── Quantities Functions ──────
-  const addQuantity = () => setQuantities([...quantities, { description: "", unit: "m³", achieved_quantity: 0 }]);
+  const addQuantity = () => setQuantities([...quantities, { description: "", unit: "m³", achieved_quantity: 0, contract_item_id: "" }]);
   const updateQuantity = (index: number, field: keyof DailyLogQuantity, value: any) => {
     const updated = [...quantities];
     updated[index] = { ...updated[index], [field]: value };
+    // Auto-fill unit + description from contract item
+    if (field === "contract_item_id" && value) {
+      const item = contractItems.find(ci => ci.id === value);
+      if (item) {
+        updated[index] = { ...updated[index], unit: item.unit, description: item.designation };
+      }
+    }
     setQuantities(updated);
   };
   const removeQuantity = (index: number) => setQuantities(quantities.filter((_, i) => i !== index));
@@ -99,13 +114,15 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
     const fetchResources = async () => {
       setIsResourcesLoading(true);
       try {
-        const [workersRes, equipmentRes, projectRes] = await Promise.all([
+        const [workersRes, equipmentRes, projectRes, contractItemsRes] = await Promise.all([
           projectWorkersService.getByProjectId(projectId),
           projectEquipmentService.fetchProjectEquipment(projectId),
           projectsService.getById(projectId),
+          contractItemsService.getByProjectId(projectId).catch(() => []),
         ]);
         setProjectWorkers(workersRes);
         setProjectEquipment(equipmentRes);
+        setContractItems(contractItemsRes);
         if (projectRes) setProjectProgress(projectRes.progress || 0);
       } catch (err) {
         console.error(err);
@@ -419,70 +436,113 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             </div>
           </div>
 
-          {/* Quantities */}
-          {/* Quantities - قسم الكميات المطور ليكون Situation */}
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {/* قسم الكميات المنجزة اليوم */}
+          {/* ══════════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b pb-2">
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <Ruler className="w-5 h-5 text-orange-600" />
-                {isAr ? "بيان الأشغال المنجزة (Métré)" : "Situation des Métrés"}
+                {isAr ? "الكميات المنجزة اليوم" : "Quantités réalisées aujourd'hui"}
               </h3>
               <Button type="button" variant="outline" size="sm" onClick={addQuantity} className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                <Plus className="w-4 h-4 ml-1" /> {isAr ? "إضافة بند" : "Ajouter article"}
+                <Plus className="w-4 h-4 ml-1" /> {isAr ? "إضافة بند" : "Ajouter"}
               </Button>
             </div>
 
-            <div className="space-y-3">
-              {quantities.map((q, i) => (
-                <div key={i} className="flex flex-col md:flex-row gap-3 items-start border p-4 rounded-xl bg-white shadow-sm relative group">
-                  <button type="button" onClick={() => removeQuantity(i)} className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors" aria-label="Remove item">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-
-                  {/* وصف البند (تمهيداً للـ Article ID) */}
-                  <div className="flex-1 w-full space-y-1">
-                    <Label className="text-[10px] text-slate-400">{isAr ? "بيان البند / الأشغال" : "Désignation"}</Label>
-                    <Input
-                      placeholder={isAr ? "مثال: حفر القواعد أو صب الخرسانة" : "Désignation des travaux"}
-                      value={q.description}
-                      onChange={(e) => updateQuantity(i, 'description', e.target.value)}
-                    />
-                  </div>
-
-                  {/* الكمية */}
-                  <div className="w-full md:w-24 space-y-1">
-                    <Label className="text-[10px] text-slate-400">{isAr ? "الكمية" : "Qté"}</Label>
-                    <Input type="number" value={q.achieved_quantity} onChange={(e) => updateQuantity(i, 'achieved_quantity', Number(e.target.value))} />
-                  </div>
-
-                  {/* الوحدة */}
-                  <div className="w-full md:w-32 space-y-1">
-                    <Label className="text-[10px] text-slate-400">{isAr ? "الوحدة" : "Unité"}</Label>
-                    <Select value={q.unit} onValueChange={(v) => updateQuantity(i, 'unit', v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* خانة القيمة المالية التقديرية */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl flex items-center justify-between border border-blue-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-600 rounded-lg text-white"><CreditCard className="w-4 h-4" /></div>
-                <div>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 font-bold">{isAr ? "القيمة التقديرية للأشغال المنجزة (دج)" : "Valeur estimée des travaux (DZD)"}</p>
-                  <p className="text-[10px] text-blue-500">{isAr ? "لحساب الـ Situation تلقائياً" : "Pour calcul automatique"}</p>
-                </div>
+            {quantities.length === 0 && (
+              <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded-xl">
+                <Ruler className="mx-auto w-8 h-8 mb-2 opacity-30" />
+                <p className="text-sm">{isAr ? "لم تُسجَّل كمية بعد" : "Aucune quantité"}</p>
+                <p className="text-[10px]">{isAr ? "اضغط \"إضافة بند\" لبدء التسجيل" : "Cliquez \"Ajouter\" pour commencer"}</p>
               </div>
-              <Input
-                type="number"
-                className="w-40 bg-white border-blue-200 text-right font-bold text-blue-600"
-                placeholder="0.00"
-                value={formData.estimated_value}
-                onChange={(e) => setFormData({ ...formData, estimated_value: Number(e.target.value) })}
-              />
+            )}
+
+            <div className="space-y-3">
+              {quantities.map((q, i) => {
+                const cid = (q as any).contract_item_id;
+                const linkedItem = cid ? contractItems.find(ci => ci.id === cid) : null;
+                const todayAmount = linkedItem && q.achieved_quantity > 0
+                  ? q.achieved_quantity * linkedItem.unit_price
+                  : 0;
+
+                return (
+                  <div key={i} className="border rounded-xl p-3 relative group bg-white shadow-sm border-slate-200">
+                    <button type="button" onClick={() => removeQuantity(i)}
+                      className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    {/* السطر الأول: البند + الكمية */}
+                    <div className="flex flex-col md:flex-row gap-3 items-start">
+                      {/* البند (Dropdown) */}
+                      <div className="flex-1 w-full space-y-1">
+                        <Label className="text-[10px] text-slate-400 font-bold">
+                          {isAr ? "البند" : "Article"}
+                        </Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={(q as any).contract_item_id || ""}
+                            onValueChange={(v) => updateQuantity(i, 'contract_item_id', v)}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder={isAr ? "اختر بند..." : "Choisir..."} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {contractItems.map(ci => (
+                                <SelectItem key={ci.id} value={ci.id}>
+                                  {ci.item_number} - {ci.designation}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                        </div>
+                      </div>
+
+                      {/* الكمية المنجزة */}
+                      <div className="w-full md:w-32 space-y-1">
+                        <Label className="text-[10px] text-slate-400 font-bold">
+                          {isAr ? "الكمية المنجزة" : "Qté réalisée"}
+                        </Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={q.achieved_quantity || ""}
+                          onChange={(e) => updateQuantity(i, 'achieved_quantity', Number(e.target.value))}
+                          className="font-bold text-blue-600"
+                        />
+                      </div>
+
+                      {/* الوحدة (تلقائي من البند) */}
+                      <div className="w-full md:w-20 space-y-1">
+                        <Label className="text-[10px] text-slate-400">{isAr ? "الوحدة" : "Unité"}</Label>
+                        <div className="h-9 flex items-center px-3 bg-slate-50 border rounded-md text-sm font-bold text-slate-600">
+                          {q.unit || "-"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* السطر الثاني: ملاحظات (اختياري) */}
+                    <div className="mt-2">
+                      <Input
+                        placeholder={isAr ? "ملاحظات (اختياري)" : "Notes (optionnel)"}
+                        value={(q as any).notes || ""}
+                        onChange={(e) => updateQuantity(i, 'notes' as any, e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    {/* المبلغ المحسوب */}
+                    {todayAmount > 0 && (
+                      <div className="mt-2 text-[10px] font-bold text-green-600">
+                        {q.achieved_quantity} {q.unit} × {linkedItem!.unit_price.toLocaleString()} = {todayAmount.toLocaleString()} DZD
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
           {/* Materials */}

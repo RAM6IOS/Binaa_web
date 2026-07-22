@@ -3,6 +3,7 @@ import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto } from '../types/daily-l
 import type { PostgrestError } from '@supabase/supabase-js';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { CreateMetreDto } from '../types/metres';
 
 const supabase = createClient();
 
@@ -33,6 +34,49 @@ async function syncProjectProgress(projectId: string, progress: number) {
       .eq('id', projectId);
   } catch (err) {
     console.warn('[DailyLog] Failed to sync project progress:', err);
+  }
+}
+
+async function saveMetresFromQuantities(
+  projectId: string,
+  dailyLogId: string | null,
+  logDate: string,
+  quantities: DailyLog['quantities']
+) {
+  if (!quantities || quantities.length === 0) return;
+
+  const linkedQuantities = quantities.filter(q => (q as any).contract_item_id);
+  if (linkedQuantities.length === 0) return;
+
+  try {
+    // Delete existing metres for this daily log to avoid duplicates
+    if (dailyLogId) {
+      await supabase
+        .from('metres')
+        .delete()
+        .eq('daily_log_id', dailyLogId);
+    }
+
+    const metresPayload: CreateMetreDto[] = linkedQuantities.map(q => ({
+      project_id: projectId,
+      daily_log_id: dailyLogId,
+      contract_item_id: (q as any).contract_item_id,
+      log_date: logDate,
+      achieved_quantity: q.achieved_quantity,
+      notes: q.description || undefined,
+    }));
+
+    if (metresPayload.length > 0) {
+      const { error } = await supabase
+        .from('metres')
+        .insert(metresPayload);
+
+      if (error) {
+        console.warn('[DailyLog] Failed to save metres:', error.message);
+      }
+    }
+  } catch (err) {
+    console.warn('[DailyLog] Failed to save metres:', err);
   }
 }
 
@@ -200,6 +244,9 @@ export const dailyLogService = {
         await syncProjectProgress(dto.project_id, createdLog.overall_progress);
       }
 
+      // حفظ الكميات المرتبطة ببنود العقد في جدول metres
+      await saveMetresFromQuantities(dto.project_id, createdLog.id, createdLog.log_date, createdLog.quantities);
+
       return createdLog;
     }
 
@@ -322,6 +369,11 @@ export const dailyLogService = {
       // ربط نسبة التقدم مع المشروع
       if (updatedLog.overall_progress > 0) {
         await syncProjectProgress(updatedLog.project_id, updatedLog.overall_progress);
+      }
+
+      // تحديث الكميات المرتبطة ببنود العقد
+      if (dto.quantities !== undefined) {
+        await saveMetresFromQuantities(updatedLog.project_id, updatedLog.id, updatedLog.log_date, updatedLog.quantities);
       }
 
       return updatedLog;
