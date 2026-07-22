@@ -144,7 +144,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className={`sm:max-w-[${mode === 'bulk' ? '900px' : '550px'}] max-h-[90vh] overflow-y-auto`}>
+      <DialogContent className={mode === 'bulk' ? 'sm:max-w-[900px] max-h-[90vh] overflow-y-auto' : 'sm:max-w-[550px] max-h-[90vh] overflow-y-auto'}>
         <DialogHeader className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-500 text-white">
           <DialogTitle className="text-xl flex items-center gap-2">
             <Ruler className="w-5 h-5" />
@@ -178,7 +178,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
 
         {mode === "single" ? (
           <form onSubmit={handleSingleSubmit} className="p-6 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-xs font-bold">
                   <span className="text-red-500">*</span>
@@ -218,7 +218,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-bold">{isAr ? "الكمية الاتفاقية" : "Quantité contractuelle"}</Label>
                 <Input

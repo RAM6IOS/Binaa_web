@@ -235,7 +235,8 @@ export function MetresTab({ project, isAr }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50 dark:bg-slate-900/60">
@@ -301,6 +302,79 @@ export function MetresTab({ project, isAr }: Props) {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            {items.map((item, idx) => (
+              <div key={item.id} className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+                {/* Top: designation + delete */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.designation}</p>
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                      {isAr ? "بند رقم" : "Art"} {item.item_number}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-slate-300 hover:text-red-500 shrink-0"
+                    onClick={() => handleDeleteItem(item.id)}
+                    disabled={deletingId === item.id}
+                  >
+                    {deletingId === item.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* Key stats: achieved qty + progress */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-lg font-black text-blue-600">{item.total_achieved.toLocaleString()}</span>
+                      <span className="text-[10px] text-slate-400 font-bold">{item.unit}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">{isAr ? "المنجز" : "Réalisé"}</p>
+                  </div>
+                  <div className="w-24">
+                    <div className="flex items-center gap-1.5">
+                      <Progress value={item.progress_percent} className="h-2 flex-1" />
+                      <span className={`text-[10px] font-bold ${
+                        item.progress_percent >= 100 ? 'text-green-600' :
+                        item.progress_percent >= 50 ? 'text-blue-600' :
+                        item.progress_percent > 0 ? 'text-amber-600' : 'text-slate-400'
+                      }`}>
+                        {item.progress_percent}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Details row */}
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
+                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "العقدية" : "Contractuelle"}</p>
+                    <p className="text-xs font-mono font-bold">{item.quantity.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-1.5">
+                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المبلغ" : "Montant"}</p>
+                    <p className="text-xs font-mono font-bold text-green-600">{item.achieved_amount.toLocaleString()} <span className="text-[8px]">DZD</span></p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
+                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المتبقي" : "Reste"}</p>
+                    <p className="text-xs font-mono font-bold text-red-500">
+                      {item.remaining_quantity > 0 ? item.remaining_quantity.toLocaleString() : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500 inline" />
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* ─── Table Footer Totals ─── */}
