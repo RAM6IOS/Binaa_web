@@ -22,6 +22,7 @@ import {
   Loader2
 } from "lucide-react";
 import { UploadDocumentModal } from "./UploadDocumentModal";
+import { DocumentPreviewModal } from "./DocumentPreviewModal";
 import { documentService } from "@/lib/services/document-service";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -50,6 +51,9 @@ export function DocumentsTab({ project, isAr }: Props) {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [previewDoc, setPreviewDoc] = useState<ProjectDocument | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -76,6 +80,22 @@ export function DocumentsTab({ project, isAr }: Props) {
   const askDelete = (id: string) => {
     setItemToDelete(id);
     setDeleteModalOpen(true);
+  };
+
+  const openPreview = (doc: ProjectDocument) => {
+    setPreviewDoc(doc);
+    setPreviewOpen(true);
+  };
+
+  const handlePreviewDelete = (id: string) => {
+    setDocuments((prev) => prev.filter((d) => d.id !== id));
+    setPreviewOpen(false);
+    setPreviewDoc(null);
+  };
+
+  const handlePreviewUpdate = (updated: ProjectDocument) => {
+    setDocuments((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+    setPreviewDoc(updated);
   };
 
   const handleConfirmDelete = async () => {
@@ -166,15 +186,32 @@ export function DocumentsTab({ project, isAr }: Props) {
 
                   <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[1px]">
                     <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="Download"><Download className="w-4 h-4" /></a></Button>
-                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="View"><Eye className="w-4 h-4" /></a></Button>
+                    <Button size="icon" variant="secondary" className="rounded-full bg-white shadow-xl" onClick={() => openPreview(doc)} aria-label="Preview"><Eye className="w-4 h-4" /></Button>
                     {isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-xl" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 className="w-4 h-4" /></Button>}
                   </div>
                 </div>
 
                 <CardContent className="p-4 text-start">
                   <h4 className="font-bold text-[13px] text-slate-900 dark:text-slate-100 truncate">{doc.file_name}</h4>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {doc.document_type && (
+                      <Badge variant="outline" className="text-[9px] font-bold bg-blue-50 text-blue-600 border-blue-200">
+                        {doc.document_type}
+                      </Badge>
+                    )}
+                    {doc.document_category && (
+                      <Badge variant="outline" className="text-[9px] font-bold bg-slate-100 text-slate-600 border-slate-200">
+                        {doc.document_category}
+                      </Badge>
+                    )}
+                  </div>
                   <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[9px] font-black text-slate-400 uppercase tabular-nums">
-                    <div className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {doc.document_date
+                        ? new Date(doc.document_date).toLocaleDateString(isAr ? 'ar' : 'fr')
+                        : new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}
+                    </div>
                     {isOwner && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Owner</span>}
                   </div>
                 </CardContent>
@@ -189,7 +226,8 @@ export function DocumentsTab({ project, isAr }: Props) {
               <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b">
                 <tr className="h-12">
                   <th className="ps-6">الملف</th>
-                  <th>التصنيف</th>
+                  <th>نوع الوثيقة</th>
+                  <th>الفئة</th>
                   <th>التاريخ</th>
                   <th className="text-center pe-6">إجراءات</th>
                 </tr>
@@ -210,9 +248,10 @@ export function DocumentsTab({ project, isAr }: Props) {
                         <span className="font-bold text-slate-900 truncate max-w-[200px]">{doc.file_name}</span>
                       </div>
                     </td>
-                    <td className="text-[10px] font-black uppercase text-slate-400"><span>{doc.file_type}</span></td>
-                    <td className="font-mono text-[10px] opacity-60 tabular-nums uppercase">{new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</td>
-                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-blue-500"><a href={doc.file_url} target="_blank" aria-label="Download"><Download size={16} /></a></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 size={16} /></Button>}</div></td>
+                    <td className="text-[10px] font-black uppercase text-slate-400"><span>{doc.document_type || doc.file_type}</span></td>
+                    <td className="text-[10px] font-black uppercase text-slate-400"><span>{doc.document_category || '-'}</span></td>
+                    <td className="font-mono text-[10px] opacity-60 tabular-nums uppercase">{doc.document_date ? new Date(doc.document_date).toLocaleDateString(isAr ? 'ar' : 'fr') : new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</td>
+                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-blue-500"><a href={doc.file_url} target="_blank" aria-label="Download"><Download size={16} /></a></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600" onClick={() => openPreview(doc)} aria-label="Preview"><Eye size={16} /></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 size={16} /></Button>}</div></td>
                   </tr>
                 ))}
               </tbody>
@@ -220,6 +259,15 @@ export function DocumentsTab({ project, isAr }: Props) {
           </div>
         </Card>
       )}
+      <DocumentPreviewModal
+        document={previewDoc}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        isAr={isAr}
+        isOwner={currentUserId === previewDoc?.uploaded_by}
+        onDelete={handlePreviewDelete}
+        onUpdate={handlePreviewUpdate}
+      />
     </div>
   );
 }

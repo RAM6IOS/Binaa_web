@@ -4,6 +4,9 @@ export interface ProjectDocument {
   file_name: string;
   file_url: string;
   file_type: string;
+  document_type?: string;
+  document_date?: string;
+  document_category?: string;
   uploaded_by?: string;
   uploaded_at: string;
   notes?: string;
