@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { PWAProvider } from "@/components/providers/PWAProvider";
+import { PWAProviderLoader } from "@/components/providers/PWAProviderLoader";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cairo = Cairo({ subsets: ["arabic"], variable: "--font-cairo" });
@@ -66,10 +66,10 @@ export default async function RootLayout({
     <html lang={locale} dir={dir}>
       <body className={`${fontClass} font-sans antialiased bg-background text-foreground`}>
         <NextIntlClientProvider messages={messages}>
-          <PWAProvider>
+          <PWAProviderLoader>
             {children}
             <Toaster position={locale === 'ar' ? "top-left" : "top-right"} />
-          </PWAProvider>
+          </PWAProviderLoader>
         </NextIntlClientProvider>
       </body>
     </html>

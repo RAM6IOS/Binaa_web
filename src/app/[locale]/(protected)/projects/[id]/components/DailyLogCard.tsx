@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,9 @@ import { AttachmentsList } from "./AttachmentsList";
 import { attachmentsService } from "@/lib/services/attachments-service";
 import { AddDailyLogDialog } from "./AddDailyLogDialog";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
-import { DailyLogPDFDownload } from "@/components/daily-log/DailyLogPDF";
 import { toast } from "sonner";
+
+const DailyLogPDFDownload = dynamic(() => import("@/components/daily-log/DailyLogPDF").then(m => m.DailyLogPDFDownload), { ssr: false });
 
 interface DailyLogCardProps {
   log: DailyLog;
