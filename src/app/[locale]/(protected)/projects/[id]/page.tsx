@@ -1,26 +1,27 @@
 "use client";
 
-import { use, useEffect, useState, useCallback, Suspense } from "react";
+import { use, useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { GanttChart as ProjectGanttChart } from "./components/GanttChart";
-import { MapPin, Calendar, Loader2, AlertCircle, RefreshCcw, Landmark, MoreHorizontal } from "lucide-react";
+import { MapPin, Calendar, Loader2, AlertCircle, RefreshCcw, Landmark } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
-import { createClient } from "@/lib/supabase/client";
 import { projectsService } from "@/lib/services/projects-service";
 import { documentsService } from "@/lib/services/documents-service";
 import { tasksService } from "@/lib/services/tasks-service";
 import { useRouter } from "@/i18n/routing";
-import { OverviewTab } from "./components/OverviewTab";
-import { TaskBoardTab } from "./components/TaskBoardTab";
-import { ResourcesTab } from "./components/ResourcesTab";
-import { DocumentsTab } from "./components/DocumentsTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
-import { DailyLogsTab } from "./components/DailyLogsTab";
-import { MetresTab } from "./components/MetresTab";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const OverviewTab = dynamic(() => import("./components/OverviewTab").then(m => m.OverviewTab), { ssr: false });
+const TaskBoardTab = dynamic(() => import("./components/TaskBoardTab").then(m => m.TaskBoardTab), { ssr: false });
+const DailyLogsTab = dynamic(() => import("./components/DailyLogsTab").then(m => m.DailyLogsTab), { ssr: false });
+const MetresTab = dynamic(() => import("./components/MetresTab").then(m => m.MetresTab), { ssr: false });
+const ProjectGanttChart = dynamic(() => import("./components/GanttChart").then(m => m.GanttChart), { ssr: false });
+const ResourcesTab = dynamic(() => import("./components/ResourcesTab").then(m => m.ResourcesTab), { ssr: false });
+const DocumentsTab = dynamic(() => import("./components/DocumentsTab").then(m => m.DocumentsTab), { ssr: false });
 
 type ProjectWithJoins = Project & {
   project_documents: ProjectDocument[];

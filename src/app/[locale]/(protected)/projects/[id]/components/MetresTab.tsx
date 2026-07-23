@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,8 @@ import { ContractItem, ContractItemWithProgress, MetresSummary } from "@/lib/typ
 import { metresService } from "@/lib/services/metres-service";
 import { contractItemsService } from "@/lib/services/contract-items-service";
 import { AddContractItemDialog } from "./AddContractItemDialog";
-import { SituationPDFDownload } from "@/components/daily-log/SituationPDF";
+
+const SituationPDFDownload = dynamic(() => import("@/components/daily-log/SituationPDF").then(m => m.SituationPDFDownload), { ssr: false });
 
 interface Props {
   project: Project;

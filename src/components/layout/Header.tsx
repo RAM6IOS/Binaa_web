@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Globe, LogOut } from "lucide-react";
@@ -14,7 +15,8 @@ import {
 } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
-import { NotificationDropdown } from "./NotificationDropdown";
+
+const NotificationDropdown = dynamic(() => import("./NotificationDropdown").then(m => m.NotificationDropdown), { ssr: false });
 
 export function Header({
   locale,

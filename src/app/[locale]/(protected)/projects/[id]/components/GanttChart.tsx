@@ -5,10 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,6 +16,7 @@ import { projectsService } from "@/lib/services/projects-service";
 import { Worker, Project } from "@/lib/types/projects";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { GanttTaskDialog, PRESET_COLORS } from "./GanttTaskDialog";
 import {
     Plus,
     ZoomIn,
@@ -80,16 +78,6 @@ interface DragState {
     originalStart: Date;
     originalDue: Date;
 }
-
-const PRESET_COLORS = [
-    { value: "", label: "تلقائي", class: "bg-slate-300 dark:bg-slate-700" },
-    { value: "blue", label: "أزرق", class: "bg-blue-500" },
-    { value: "green", label: "أخضر", class: "bg-emerald-500" },
-    { value: "amber", label: "برتقالي", class: "bg-amber-500" },
-    { value: "purple", label: "بنفسجي", class: "bg-purple-500" },
-    { value: "rose", label: "وردي", class: "bg-rose-500" },
-    { value: "slate", label: "رمادي", class: "bg-slate-500" }
-];
 
 export function GanttChart({ projectId, isAr }: GanttChartProps) {
     const [tasks, setTasks] = useState<GanttTaskExtended[]>([]);
@@ -1749,401 +1737,22 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
             </Card>
 
             {/* Edit / Create Task Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent
-                    className={`sm:max-w-[650px] max-h-[95vh] overflow-y-auto p-0 gap-0 border-none shadow-2xl ${isAr ? "rtl font-sans" : "ltr"
-                        }`}
-                >
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-                                <div className="p-2 bg-white/20 rounded-lg">
-                                    <Calendar className="w-6 h-6" />
-                                </div>
-                                {activeTask?.id
-                                    ? isAr
-                                        ? "تعديل بيانات المهمة"
-                                        : "Modifier la tâche"
-                                    : isAr
-                                        ? "إضافة مهمة جديدة للمشروع"
-                                        : "Ajouter une tâche"}
-                            </DialogTitle>
-                        </DialogHeader>
-                    </div>
-
-                    <form onSubmit={handleSaveTask} className="p-6 space-y-6 bg-white dark:bg-slate-950">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Title */}
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label htmlFor="title" className="text-sm font-semibold flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4 text-blue-500" />
-                                    {isAr ? "عنوان المهمة" : "Titre"}
-                                    <span className="text-red-500">*</span>
-                                </Label>
-                                <Input
-                                    id="title"
-                                    required
-                                    placeholder={isAr ? "أدخل عنوان المهمة..." : "Titre..."}
-                                    value={activeTask?.title || ""}
-                                    onChange={(e) => setActiveTask({ ...activeTask, title: e.target.value })}
-                                    className="h-11 focus-visible:ring-blue-500 bg-white dark:bg-slate-900 border-slate-200"
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label htmlFor="description" className="text-sm font-semibold">
-                                    {isAr ? "وصف المهمة" : "Description"}
-                                </Label>
-                                <Textarea
-                                    id="description"
-                                    rows={3}
-                                    placeholder={isAr ? "أدخل تفاصيل المهمة ووصفها..." : "Détails..."}
-                                    value={activeTask?.description || ""}
-                                    onChange={(e) =>
-                                        setActiveTask({ ...activeTask, description: e.target.value })
-                                    }
-                                    className="resize-none focus-visible:ring-blue-500 bg-white dark:bg-slate-900 border-slate-200"
-                                />
-                            </div>
-
-                            {/* Priority */}
-                            <div className="space-y-2">
-                                <Label htmlFor="priority" className="text-sm font-semibold">
-                                    {isAr ? "الأولوية" : "Priorité"}
-                                </Label>
-                                <Select
-                                    value={activeTask?.priority || "medium"}
-                                    onValueChange={(v) => setActiveTask({ ...activeTask, priority: v })}
-                                >
-                                    <SelectTrigger id="priority" className="h-11 bg-white dark:bg-slate-900">
-                                        <SelectValue placeholder={isAr ? "اختر الأولوية" : "Choisir"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="low">{isAr ? "منخفضة" : "Basse"}</SelectItem>
-                                        <SelectItem value="medium">{isAr ? "متوسطة" : "Moyenne"}</SelectItem>
-                                        <SelectItem value="high">{isAr ? "عالية" : "Haute"}</SelectItem>
-                                        <SelectItem value="urgent">{isAr ? "عاجلة" : "Urgent"}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Status */}
-                            <div className="space-y-2">
-                                <Label htmlFor="status" className="text-sm font-semibold">
-                                    {isAr ? "الحالة" : "Statut"}
-                                </Label>
-                                <Select
-                                    value={activeTask?.status || "todo"}
-                                    onValueChange={(v) => {
-                                        let prog = activeTask?.progress || 0;
-                                        if (v === "done") prog = 100;
-                                        if (v === "todo") prog = 0;
-                                        setActiveTask({ ...activeTask, status: v, progress: prog });
-                                    }}
-                                >
-                                    <SelectTrigger id="status" className="h-11 bg-white dark:bg-slate-900">
-                                        <SelectValue placeholder={isAr ? "اختر الحالة" : "Choisir"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="todo">{isAr ? "للقيام بها" : "À faire"}</SelectItem>
-                                        <SelectItem value="in_progress">{isAr ? "قيد الإنجاز" : "En cours"}</SelectItem>
-                                        <SelectItem value="done">{isAr ? "مكتملة" : "Terminée"}</SelectItem>
-                                        <SelectItem value="delayed">{isAr ? "متأخرة" : "En retard"}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Dates */}
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="start_date"
-                                    className="text-sm font-semibold flex items-center gap-2"
-                                >
-                                    <Calendar className="w-4 h-4 text-blue-500" />
-                                    {isAr ? "تاريخ البدء" : "Date de début"}
-                                </Label>
-                                <Input
-                                    id="start_date"
-                                    type="date"
-                                    disabled={!!activeTask?.is_milestone}
-                                    value={activeTask?.start_date || ""}
-                                    onChange={(e) =>
-                                        setActiveTask({ ...activeTask, start_date: e.target.value })
-                                    }
-                                    className="h-11 bg-white dark:bg-slate-900 border-slate-200"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="due_date"
-                                    className="text-sm font-semibold flex items-center gap-2"
-                                >
-                                    <Calendar className="w-4 h-4 text-orange-500" />
-                                    {activeTask?.is_milestone
-                                        ? isAr
-                                            ? "تاريخ المعلم الرئيسي"
-                                            : "Date du jalon"
-                                        : isAr
-                                            ? "تاريخ الاستحقاق"
-                                            : "Date d'échéance"}
-                                </Label>
-                                <Input
-                                    id="due_date"
-                                    type="date"
-                                    required
-                                    value={activeTask?.due_date || ""}
-                                    onChange={(e) => {
-                                        const dueD = e.target.value;
-                                        const startD = activeTask?.is_milestone
-                                            ? dueD
-                                            : activeTask?.start_date || dueD;
-                                        setActiveTask({
-                                            ...activeTask,
-                                            due_date: dueD,
-                                            start_date: startD
-                                        });
-                                    }}
-                                    className="h-11 bg-white dark:bg-slate-900 border-slate-200"
-                                />
-                            </div>
-
-                            {/* Progress */}
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <div className="flex justify-between items-center">
-                                    <Label htmlFor="progress" className="text-sm font-semibold flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-slate-500" />
-                                        {isAr ? "نسبة الإنجاز" : "Progrès"}
-                                    </Label>
-                                    <span className="text-xs font-black text-blue-600 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded">
-                                        {activeTask?.progress || 0}%
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <input
-                                        id="progress"
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        disabled={!!activeTask?.is_milestone}
-                                        value={activeTask?.progress || 0}
-                                        onChange={(e) => {
-                                            const prog = Number(e.target.value);
-                                            let stat = activeTask?.status || "todo";
-                                            if (prog === 100) stat = "done";
-                                            if (prog === 0 && stat === "done") stat = "todo";
-                                            setActiveTask({ ...activeTask, progress: prog, status: stat });
-                                        }}
-                                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Assignee */}
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label htmlFor="assigned_to" className="text-sm font-semibold flex items-center gap-2">
-                                    <User className="w-4 h-4 text-emerald-500" />
-                                    {isAr ? "تعيين عامل (المسؤول)" : "Assigner à"}
-                                </Label>
-                                <Select
-                                    value={activeTask?.assigned_to || "unassigned"}
-                                    onValueChange={(v) => setActiveTask({ ...activeTask, assigned_to: v })}
-                                >
-                                    <SelectTrigger id="assigned_to" className="h-11 bg-white dark:bg-slate-900">
-                                        <SelectValue placeholder={isAr ? "غير معين" : "Choisir"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="unassigned">{isAr ? "غير معين" : "Non assigné"}</SelectItem>
-                                        {workers.map((w) => (
-                                            <SelectItem key={w.id} value={w.id}>
-                                                {w.full_name} ({w.job_title})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Parent Task select (Hierarchical organization) */}
-                            {/*  <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label htmlFor="parent_task" className="text-sm font-semibold">
-                                    {isAr ? "المهمة الأب (الهيكلية الهرمية)" : "Tâche parente"}
-                                </Label>
-                                <Select
-                                    value={activeTask?.parent_task_id || "none"}
-                                    onValueChange={(v) => setActiveTask({ ...activeTask, parent_task_id: v })}
-                                >
-                                    <SelectTrigger id="parent_task" className="h-11 bg-white dark:bg-slate-900">
-                                        <SelectValue placeholder={isAr ? "بدون مهمة أب" : "Aucune"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">{isAr ? "بدون مهمة أب (مستوى رئيسي)" : "Aucune (Racine)"}</SelectItem>
-                                        {potentialParents.map((t) => (
-                                            <SelectItem key={t.id} value={t.id}>
-                                                {t.title}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            */}
-
-                            {/* Predecessors / Dependencies */}
-                            {/*
-                           
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label className="text-sm font-semibold flex items-center gap-2">
-                                    <ArrowRightLeft className="w-4 h-4 text-purple-500" />
-                                    {isAr ? "المهام السابقة (التبعيات)" : "Tâches précédentes (Dépendances)"}
-                                </Label>
-                                {tasks.filter((t) => t.id !== activeTask?.id).length === 0 ? (
-                                    <p className="text-xs text-slate-500 italic">
-                                        {isAr ? "لا توجد مهام أخرى لربطها." : "Aucune autre tâche."}
-                                    </p>
-                                ) : (
-                                    <div className="border rounded-lg p-3 max-h-[140px] overflow-y-auto space-y-2 bg-slate-50 dark:bg-slate-900/50 border-slate-200">
-                                        {tasks
-                                            .filter((t) => t.id !== activeTask?.id)
-                                            .map((t) => {
-                                                const isChecked = (
-                                                    activeTask?.dependency_ids || []
-                                                ).includes(t.id);
-                                                return (
-                                                    <label
-                                                        key={t.id}
-                                                        className="flex items-center gap-2 text-xs font-semibold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded transition-all"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
-                                                            checked={isChecked}
-                                                            onChange={(e) => {
-                                                                const checked = e.target.checked;
-                                                                const deps = [
-                                                                    ...(activeTask?.dependency_ids || [])
-                                                                ];
-                                                                if (checked) {
-                                                                    deps.push(t.id);
-                                                                } else {
-                                                                    const idx = deps.indexOf(t.id);
-                                                                    if (idx > -1) deps.splice(idx, 1);
-                                                                }
-                                                                setActiveTask({
-                                                                    ...activeTask,
-                                                                    dependency_ids: deps
-                                                                });
-                                                            }}
-                                                        />
-                                                        <span className="truncate flex-1">{t.title}</span>
-                                                        <Badge variant="outline" className="text-[9px] px-1">
-                                                            {isAr ? getStatusArabic(t.status) : t.status}
-                                                        </Badge>
-                                                    </label>
-                                                );
-                                            })}
-                                    </div>
-                                )}
-                            </div>
-                            */}
-
-                            {/* Milestone Toggle */}
-                            {/*
-                            <div className="flex items-center justify-between border rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30 col-span-1 md:col-span-2 border-slate-200">
-                                <div className="space-y-0.5">
-                                    <Label htmlFor="milestone" className="text-sm font-semibold">
-                                        {isAr ? "معلم رئيسي (Milestone)" : "Jalon"}
-                                    </Label>
-                                    <p className="text-xs text-slate-500">
-                                        {isAr
-                                            ? "المعلم الرئيسي يمثل نقطة زمنية محددة بدون مدة"
-                                            : "Un jalon représente un point clé sans durée"}
-                                    </p>
-                                </div>
-                                <Switch
-                                    id="milestone"
-                                    checked={!!activeTask?.is_milestone}
-                                    onCheckedChange={(checked) => {
-                                        const dueD = activeTask?.due_date || new Date().toISOString().split("T")[0];
-                                        setActiveTask({
-                                            ...activeTask,
-                                            is_milestone: checked,
-                                            start_date: checked ? dueD : activeTask?.start_date || dueD,
-                                            progress: checked ? 0 : activeTask?.progress || 0
-                                        });
-                                    }}
-                                />
-                            </div>
-                             */}
-
-                            {/* Bar Color picker */}
-                            <div className="space-y-2 col-span-1 md:col-span-2">
-                                <Label className="text-sm font-semibold">
-                                    {isAr ? "تخصيص لون شريط المهمة" : "Couleur personnalisée"}
-                                </Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {PRESET_COLORS.map((c) => (
-                                        <button
-                                            key={c.value}
-                                            type="button"
-                                            onClick={() => setActiveTask({ ...activeTask, color: c.value })}
-                                            className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${c.class
-                                                } ${activeTask?.color === c.value
-                                                    ? "border-blue-600 dark:border-white scale-110 shadow-lg"
-                                                    : "border-transparent hover:scale-105"
-                                                }`}
-                                            title={c.label}
-                                        >
-                                            {activeTask?.color === c.value && (
-                                                <div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <DialogFooter className="mt-8 flex flex-row gap-3 sm:justify-between w-full">
-                            <div>
-                                {activeTask?.id && (
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={handleDeleteTask}
-                                        disabled={isSaving}
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 gap-1.5 text-xs font-bold"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        {isAr ? "حذف المهمة" : "Supprimer"}
-                                    </Button>
-                                )}
-                            </div>
-                            <div className="flex flex-row gap-3 sm:justify-end flex-1">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsDialogOpen(false)}
-                                    disabled={isSaving}
-                                    className="text-xs font-bold"
-                                >
-                                    {isAr ? "إلغاء" : "Annuler"}
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isSaving}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px] font-bold text-xs"
-                                >
-                                    {isSaving && (
-                                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    )}
-                                    {isAr ? "حفظ التغييرات" : "Enregistrer"}
-                                </Button>
-                            </div>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            <GanttTaskDialog
+                isAr={isAr}
+                isDialogOpen={isDialogOpen}
+                setIsDialogOpen={setIsDialogOpen}
+                activeTask={activeTask}
+                setActiveTask={setActiveTask}
+                isSaving={isSaving}
+                workers={workers}
+                tasks={tasks}
+                handleSaveTask={handleSaveTask}
+                handleDeleteTask={handleDeleteTask}
+                isDeleteModalOpen={isDeleteModalOpen}
+                setIsDeleteModalOpen={setIsDeleteModalOpen}
+                handleConfirmDelete={handleConfirmDelete}
+                getStatusArabic={getStatusArabic}
+            />
         </TooltipProvider>
     );
 }
