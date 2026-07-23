@@ -44,7 +44,10 @@ export const documentService = {
     description?: string,
     category?: string,
     gpsCoordinates?: string,
-    customClient?: SupabaseClient
+    customClient?: SupabaseClient,
+    documentType?: string,
+    documentDate?: string,
+    documentCategory?: string
   ): Promise<ProjectDocument> {
     const supabase = getSupabase(customClient);
 
@@ -93,6 +96,9 @@ export const documentService = {
           file_name: title || file.name,
           file_url: publicUrl,
           file_type: category || file.type.split('/')[0] || 'document',
+          document_type: documentType || null,
+          document_date: documentDate || null,
+          document_category: documentCategory || null,
           notes: description || '',
           gps_coordinates: gpsCoordinates || null,
           uploaded_by: user.id,
@@ -110,6 +116,26 @@ export const documentService = {
     }
 
     return dbData as ProjectDocument;
+  },
+
+  async updateDocument(
+    documentId: string,
+    updates: Partial<Pick<ProjectDocument, 'file_name' | 'notes' | 'document_type' | 'document_date' | 'document_category'>>,
+    customClient?: SupabaseClient
+  ): Promise<ProjectDocument> {
+    const supabase = getSupabase(customClient);
+    const { data, error } = await supabase
+      .from('project_documents')
+      .update(updates)
+      .eq('id', documentId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error in updateDocument:', error.message);
+      throw error;
+    }
+    return data as ProjectDocument;
   },
 
   async deleteDocument(documentId: string, customClient?: SupabaseClient): Promise<boolean> {

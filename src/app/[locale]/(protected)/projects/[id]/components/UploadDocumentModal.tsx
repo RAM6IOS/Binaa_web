@@ -30,6 +30,9 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
   const [formData, setFormData] = useState({
     file_name: "",
     file_type: "document",
+    document_type: "",
+    document_date: "",
+    document_category: "",
     notes: "",
     gps_coordinates: "",
   });
@@ -120,7 +123,10 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
         formData.notes || undefined,
         formData.file_type || undefined,
         formData.gps_coordinates || undefined,
-        supabase
+        supabase,
+        formData.document_type || undefined,
+        formData.document_date || undefined,
+        formData.document_category || undefined
       );
 
       toast.success(isAr ? 'تم رفع الوثيقة بنجاح' : 'Document téléchargé avec succès');
@@ -130,7 +136,7 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
       setSelectedFile(null);
       setPreviewUrl(null);
       setFormData({
-        file_name: "", file_type: "document", notes: "", gps_coordinates: ""
+        file_name: "", file_type: "document", document_type: "", document_date: "", document_category: "", notes: "", gps_coordinates: ""
       });
       if(fileInputRef.current) fileInputRef.current.value = "";
       if (onSuccess) onSuccess();
@@ -221,6 +227,45 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
                   <SelectItem value="report">{isAr ? "تقرير رسمي" : "Rapport officiel"}</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="document_type">{isAr ? 'نوع الوثيقة' : 'Type de document'}</Label>
+              <Select value={formData.document_type} onValueChange={(v) => setFormData({ ...formData, document_type: v })}>
+                <SelectTrigger id="document_type">
+                  <SelectValue placeholder={isAr ? '-- اختر نوع الوثيقة --' : '-- Sélectionner --'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technical_report">{isAr ? "تقرير فني" : "Rapport technique"}</SelectItem>
+                  <SelectItem value="field_photos">{isAr ? "صور ميدانية" : "Photos de terrain"}</SelectItem>
+                  <SelectItem value="administrative">{isAr ? "وثيقة إدارية" : "Document administratif"}</SelectItem>
+                  <SelectItem value="contract">{isAr ? "عقد" : "Contrat"}</SelectItem>
+                  <SelectItem value="invoice">{isAr ? "فاتورة" : "Facture"}</SelectItem>
+                  <SelectItem value="other">{isAr ? "أخرى" : "Autre"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="document_date">{isAr ? 'التاريخ' : 'Date'}</Label>
+                <Input 
+                  id="document_date" 
+                  type="date"
+                  value={formData.document_date}
+                  onChange={e => setFormData({ ...formData, document_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="document_category">{isAr ? 'فئة الوثيقة' : 'Catégorie du document'}</Label>
+                <Input 
+                  id="document_category" 
+                  placeholder={isAr ? 'مثال: أشغال عمومية، صيانة...' : 'Ex: travaux publics, maintenance...'}
+                  value={formData.document_category}
+                  onChange={e => setFormData({ ...formData, document_category: e.target.value })}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
