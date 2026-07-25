@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Loader2, Ruler, FileText, DollarSign, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { contractItemsService } from "@/lib/services/contract-items-service";
-import { CreateContractItemDto } from "@/lib/types/metres";
+import { ContractItem, CreateContractItemDto } from "@/lib/types/metres";
 
 interface Props {
   isAr: boolean;
   projectId: string;
   onSuccess?: () => void;
   trigger?: React.ReactNode;
+  editItem?: ContractItem | null;
 }
 
 const units = ["m³", "m²", "ml", "kg", "t", "unité", "lot", "m", "j"];
@@ -31,10 +32,11 @@ interface BulkItem {
   unit_price: number;
 }
 
-export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: Props) {
+export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, editItem }: Props) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<"single" | "bulk">("single");
+  const isEdit = !!editItem;
 
   const [formData, setFormData] = useState<CreateContractItemDto>({
     project_id: projectId,
@@ -66,6 +68,23 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
     setMode("single");
   };
 
+  useEffect(() => {
+    if (editItem) {
+      setFormData({
+        project_id: projectId,
+        item_number: editItem.item_number,
+        designation: editItem.designation,
+        unit: editItem.unit,
+        quantity: editItem.quantity,
+        unit_price: editItem.unit_price,
+        notes: editItem.notes || "",
+        sort_order: editItem.sort_order,
+      });
+      setMode("single");
+      setOpen(true);
+    }
+  }, [editItem, projectId]);
+
   const handleSingleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.item_number.trim() || !formData.designation.trim()) {
@@ -79,8 +98,13 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
 
     setIsLoading(true);
     try {
-      await contractItemsService.create(formData);
-      toast.success(isAr ? "تم إضافة البند بنجاح ✓" : "Article ajouté ✓");
+      if (isEdit && editItem) {
+        await contractItemsService.update(editItem.id, formData);
+        toast.success(isAr ? "تم تعديل البند بنجاح ✓" : "Article modifié ✓");
+      } else {
+        await contractItemsService.create(formData);
+        toast.success(isAr ? "تم إضافة البند بنجاح ✓" : "Article ajouté ✓");
+      }
       setOpen(false);
       resetForm();
       onSuccess?.();
@@ -88,7 +112,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
       if (err?.code === "23505" || err?.message?.includes("duplicate") || err?.message?.includes("unique")) {
         toast.error(isAr ? "رقم البند موجود مسبقاً في هذا المشروع" : "Ce numéro d'article existe déjà");
       } else {
-        toast.error(isAr ? "حدث خطأ أثناء الإضافة" : "Erreur lors de l'ajout");
+        toast.error(isAr ? "حدث خطأ" : "Erreur");
       }
     } finally {
       setIsLoading(false);
@@ -142,17 +166,37 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+    <Dialog open={open} onOpenChange={(v) => {
+      setOpen(v);
+      if (v && editItem) {
+        setFormData({
+          project_id: projectId,
+          item_number: editItem.item_number,
+          designation: editItem.designation,
+          unit: editItem.unit,
+          quantity: editItem.quantity,
+          unit_price: editItem.unit_price,
+          notes: editItem.notes || "",
+          sort_order: editItem.sort_order,
+        });
+        setMode("single");
+      } else if (!v) {
+        resetForm();
+      }
+    }}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className={mode === 'bulk' ? 'sm:max-w-[900px] max-h-[90vh] overflow-y-auto' : 'sm:max-w-[550px] max-h-[90vh] overflow-y-auto'}>
         <DialogHeader className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-500 text-white">
           <DialogTitle className="text-xl flex items-center gap-2">
             <Ruler className="w-5 h-5" />
-            {isAr ? "إضافة بنود العقد (BPU)" : "Ajouter des articles (BPU)"}
+            {isEdit
+              ? (isAr ? "تعديل البند" : "Modifier l'article")
+              : (isAr ? "إضافة بنود العقد (BPU)" : "Ajouter des articles (BPU)")}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Toggle Single / Bulk */}
+        {/* Toggle Single / Bulk — hidden in edit mode */}
+        {!isEdit && (
         <div className="flex gap-2 p-4 border-b bg-slate-50 dark:bg-slate-900/40">
           <Button
             type="button"
@@ -175,6 +219,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
             {isAr ? "إضافة جماعية" : "Import groupé"}
           </Button>
         </div>
+        )}
 
         {mode === "single" ? (
           <form onSubmit={handleSingleSubmit} className="p-6 space-y-5">
@@ -266,7 +311,9 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger }: P
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>{isAr ? "إلغاء" : "Annuler"}</Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isAr ? "إضافة البند" : "Ajouter"}
+                {isEdit
+                  ? (isAr ? "حفظ التعديلات" : "Enregistrer")
+                  : (isAr ? "إضافة البند" : "Ajouter")}
               </Button>
             </DialogFooter>
           </form>
