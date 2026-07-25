@@ -1,9 +1,10 @@
 import { createClient } from '../supabase/client';
-import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto } from '../types/daily-logs';
+import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto, DailyLogMaterialConsumption } from '../types/daily-logs';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
 import { CreateMetreDto } from '../types/metres';
+import { materialsService } from './materials-service';
 
 const supabase = createClient();
 
@@ -80,6 +81,50 @@ async function saveMetresFromQuantities(
   }
 }
 
+// ── حفظ استهلاك المواد في material_consumptions ──
+async function saveConsumptions(
+  projectId: string,
+  dailyLogId: string | null,
+  consumptions: DailyLogMaterialConsumption[],
+  createdBy: string
+) {
+  if (!consumptions || consumptions.length === 0) return;
+
+  try {
+    // حذف الاستهلاكات القديمة لهذا التقرير لتجنّب التكرار
+    if (dailyLogId) {
+      await supabase
+        .from('material_consumptions')
+        .delete()
+        .eq('daily_log_id', dailyLogId);
+    }
+
+    const payload = consumptions
+      .filter(c => c.consumed_quantity > 0)
+      .map(c => ({
+        project_id: projectId,
+        material_id: c.material_id,
+        daily_log_id: dailyLogId,
+        quantity: c.consumed_quantity,
+        consumed_at: new Date().toISOString().split('T')[0],
+        notes: c.notes || undefined,
+        created_by: createdBy,
+      }));
+
+    if (payload.length > 0) {
+      const { error } = await supabase
+        .from('material_consumptions')
+        .insert(payload);
+
+      if (error) {
+        console.warn('[DailyLog] Failed to save consumptions:', error.message);
+      }
+    }
+  } catch (err) {
+    console.warn('[DailyLog] Failed to save consumptions:', err);
+  }
+}
+
 export const dailyLogService = {
   async getByProjectId(projectId: string): Promise<DailyLog[]> {
     const isOnline = await checkNetworkStatus();
@@ -105,6 +150,30 @@ export const dailyLogService = {
           materials: row.materials || [],
           photos: row.photos || [],
         })) as DailyLog[];
+
+        // جلب استهلاكات المواد لكل التقارير دفعة واحدة
+        const logIds = logs.map(l => l.id);
+        if (logIds.length > 0) {
+          const { data: consumptionRows } = await supabase
+            .from('material_consumptions')
+            .select('daily_log_id, material_id, quantity, notes, materials(name)')
+            .in('daily_log_id', logIds);
+
+          const consumptionMap: Record<string, DailyLogMaterialConsumption[]> = {};
+          for (const row of (consumptionRows || []) as any[]) {
+            if (!consumptionMap[row.daily_log_id]) consumptionMap[row.daily_log_id] = [];
+            consumptionMap[row.daily_log_id].push({
+              material_id: row.material_id,
+              material_name: row.materials?.name ?? '',
+              consumed_quantity: Number(row.quantity),
+              notes: row.notes ?? undefined,
+            });
+          }
+
+          for (const log of logs) {
+            log.material_consumptions = consumptionMap[log.id] || [];
+          }
+        }
 
         // Cache locally (delete old ones and store the fresh ones)
         await db.daily_logs.where('project_id').equals(projectId).delete();
@@ -150,6 +219,7 @@ export const dailyLogService = {
           quantities: data.quantities || [],
           materials: data.materials || [],
           photos: data.photos || [],
+          material_consumptions: await materialsService.getConsumptionsByDailyLogId(id),
         } as DailyLog;
 
         // Cache locally
@@ -247,6 +317,11 @@ export const dailyLogService = {
       // حفظ الكميات المرتبطة ببنود العقد في جدول metres
       await saveMetresFromQuantities(dto.project_id, createdLog.id, createdLog.log_date, createdLog.quantities);
 
+      // حفظ استهلاك المواد في جدول material_consumptions
+      if (dto.material_consumptions && dto.material_consumptions.length > 0) {
+        await saveConsumptions(dto.project_id, createdLog.id, dto.material_consumptions, userId);
+      }
+
       return createdLog;
     }
 
@@ -308,6 +383,16 @@ export const dailyLogService = {
 
   async update(id: string, dto: UpdateDailyLogDto): Promise<DailyLog> {
     const isOnline = await checkNetworkStatus();
+
+    // Resolve userId for consumption records
+    let userId = '';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      userId = session.user.id;
+    } else {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (!authError && user) userId = user.id;
+    }
 
     const baseUpdate: Record<string, any> = {
       updated_at: new Date().toISOString(),
@@ -374,6 +459,11 @@ export const dailyLogService = {
       // تحديث الكميات المرتبطة ببنود العقد
       if (dto.quantities !== undefined) {
         await saveMetresFromQuantities(updatedLog.project_id, updatedLog.id, updatedLog.log_date, updatedLog.quantities);
+      }
+
+      // تحديث استهلاك المواد
+      if (dto.material_consumptions !== undefined && userId) {
+        await saveConsumptions(updatedLog.project_id, updatedLog.id, dto.material_consumptions, userId);
       }
 
       return updatedLog;

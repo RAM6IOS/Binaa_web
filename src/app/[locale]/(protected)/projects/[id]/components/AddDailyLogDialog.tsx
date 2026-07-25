@@ -23,13 +23,15 @@ import { projectEquipmentService } from "@/lib/services/project-equipment-servic
 import { projectsService } from "@/lib/services/projects-service";
 import {
   DailyLog, WeatherCondition, SiteStatus, DailyLogWorker, DailyLogEquipment,
-  DailyLogPhoto, DailyLogMaterial, DailyLogQuantity
+  DailyLogPhoto, DailyLogMaterial, DailyLogQuantity, DailyLogMaterialConsumption
 } from "@/lib/types/daily-logs";
 import { ProjectWorker, ProjectEquipment } from "@/lib/types/projects";
 import { ContractItem } from "@/lib/types/metres";
 import { contractItemsService } from "@/lib/services/contract-items-service";
 import { attachmentsService, Attachment } from "@/lib/services/attachments-service";
 import { AttachmentsList } from "./AttachmentsList";
+import { MaterialWithStats } from "@/lib/types/materials";
+import { materialsService } from "@/lib/services/materials-service";
 
 
 interface Props {
@@ -68,6 +70,8 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   const [selectedEquipment, setSelectedEquipment] = useState<DailyLogEquipment[]>([]);
   const [quantities, setQuantities] = useState<DailyLogQuantity[]>([]);
   const [materials, setMaterials] = useState<DailyLogMaterial[]>([]);
+  const [materialConsumptions, setMaterialConsumptions] = useState<DailyLogMaterialConsumption[]>([]);
+  const [projectMaterials, setProjectMaterials] = useState<MaterialWithStats[]>([]);
   const [photos, setPhotos] = useState<DailyLogPhoto[]>([]);
 
   const [projectWorkers, setProjectWorkers] = useState<ProjectWorker[]>([]);
@@ -107,6 +111,22 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   };
   const removeMaterial = (index: number) => setMaterials(materials.filter((_, i) => i !== index));
 
+  // ────── Material Consumption Functions ──────
+  const addConsumption = () => setMaterialConsumptions([...materialConsumptions, { material_id: "", material_name: "", consumed_quantity: 0, notes: "" }]);
+  const updateConsumption = (index: number, field: keyof DailyLogMaterialConsumption, value: any) => {
+    const updated = [...materialConsumptions];
+    updated[index] = { ...updated[index], [field]: value };
+    // Auto-fill material_name when selecting a material
+    if (field === "material_id" && value) {
+      const mat = projectMaterials.find(m => m.id === value);
+      if (mat) {
+        updated[index] = { ...updated[index], material_name: mat.name };
+      }
+    }
+    setMaterialConsumptions(updated);
+  };
+  const removeConsumption = (index: number) => setMaterialConsumptions(materialConsumptions.filter((_, i) => i !== index));
+
   // Load resources and form data
   useEffect(() => {
     if (!open) return;
@@ -114,15 +134,17 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
     const fetchResources = async () => {
       setIsResourcesLoading(true);
       try {
-        const [workersRes, equipmentRes, projectRes, contractItemsRes] = await Promise.all([
+        const [workersRes, equipmentRes, projectRes, contractItemsRes, materialsRes] = await Promise.all([
           projectWorkersService.getByProjectId(projectId),
           projectEquipmentService.fetchProjectEquipment(projectId),
           projectsService.getById(projectId),
           contractItemsService.getByProjectId(projectId).catch(() => []),
+          materialsService.getWithStats(projectId).catch(() => []),
         ]);
         setProjectWorkers(workersRes);
         setProjectEquipment(equipmentRes);
         setContractItems(contractItemsRes);
+        setProjectMaterials(materialsRes);
         if (projectRes) setProjectProgress(projectRes.progress || 0);
       } catch (err) {
         console.error(err);
@@ -153,6 +175,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
       setSelectedEquipment(log.equipment_used || []);
       setQuantities(log.quantities || []);
       setMaterials(log.materials || []);
+      setMaterialConsumptions(log.material_consumptions || []);
       setPhotos(log.photos || []);
     } else {
       setFormData({
@@ -173,6 +196,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
       setSelectedEquipment([]);
       setQuantities([]);
       setMaterials([]);
+      setMaterialConsumptions([]);
       setPhotos([]);
     }
   }, [open, projectId, log]);
@@ -248,6 +272,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
         equipment_used: selectedEquipment,
         quantities,
         materials,
+        material_consumptions: materialConsumptions,
         photos,
       };
 
@@ -545,23 +570,113 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
               })}
             </div>
           </div>
-          {/* Materials */}
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {/* قسم استهلاك المواد */}
+          {/* ══════════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold flex items-center gap-2"><Package className="w-5 h-5" /> {isAr ? "استهلاك المواد" : "Matériaux consommés"}</h3>
-              <Button type="button" variant="outline" onClick={addMaterial}><Plus className="w-4 h-4" /></Button>
+            <div className="flex justify-between items-center border-b pb-2">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Package className="w-5 h-5 text-emerald-600" />
+                {isAr ? "استهلاك المواد" : "Consommation de matériaux"}
+              </h3>
+              <Button type="button" variant="outline" size="sm" onClick={addConsumption} className="border-emerald-500 text-emerald-600 hover:bg-emerald-50">
+                <Plus className="w-4 h-4 ml-1" /> {isAr ? "إضافة مادة" : "Ajouter"}
+              </Button>
             </div>
-            {materials.map((m, i) => (
-              <div key={i} className="flex gap-3 items-end border p-4 rounded-xl">
-                <Input className="flex-1" placeholder="اسم المادة" value={m.material_name} onChange={(e) => updateMaterial(i, 'material_name', e.target.value)} />
-                <Input className="w-24" type="number" value={m.quantity} onChange={(e) => updateMaterial(i, 'quantity', Number(e.target.value))} />
-                <Select value={m.unit} onValueChange={(v) => updateMaterial(i, 'unit', v)}>
-                  <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-                  <SelectContent>{units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                </Select>
-                <Button type="button" variant="ghost" onClick={() => removeMaterial(i)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+
+            {projectMaterials.length === 0 && (
+              <div className="text-center py-6 text-slate-400 border-2 border-dashed rounded-xl">
+                <Package className="mx-auto w-8 h-8 mb-2 opacity-30" />
+                <p className="text-sm">{isAr ? "لا توجد مواد مسجلة في المخزون" : "Aucun matériel en stock"}</p>
+                <p className="text-[10px]">{isAr ? "أضف المواد أولاً من تبويب المواد" : "Ajoutez des matériaux depuis l'onglet Matériaux"}</p>
               </div>
-            ))}
+            )}
+
+            {materialConsumptions.length === 0 && projectMaterials.length > 0 && (
+              <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded-xl">
+                <Package className="mx-auto w-8 h-8 mb-2 opacity-30" />
+                <p className="text-sm">{isAr ? "لم يُسجَّل استهلاك بعد" : "Aucune consommation"}</p>
+                <p className="text-[10px]">{isAr ? "اضغط \"إضافة مادة\" لتسجيل الاستهلاك اليومي" : "Cliquez \"Ajouter\" pour enregistrer"}</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {materialConsumptions.map((c, i) => {
+                const mat = projectMaterials.find(m => m.id === c.material_id);
+                return (
+                  <div key={i} className="border rounded-xl p-3 relative group bg-white shadow-sm border-slate-200">
+                    <button type="button" onClick={() => removeConsumption(i)}
+                      className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    <div className="flex flex-col md:flex-row gap-3 items-start">
+                      {/* اختيار المادة */}
+                      <div className="flex-1 w-full space-y-1">
+                        <Label className="text-[10px] text-slate-400 font-bold">
+                          {isAr ? "المادة" : "Matériau"}
+                        </Label>
+                        <Select
+                          value={c.material_id}
+                          onValueChange={(v) => updateConsumption(i, 'material_id', v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={isAr ? "اختر مادة..." : "Choisir..."} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {projectMaterials.map(m => (
+                              <SelectItem key={m.id} value={m.id}>
+                                {m.name} ({m.remaining_quantity.toLocaleString()} {m.unit} {isAr ? "متوفر" : "dispo"})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* الكمية المستهلكة */}
+                      <div className="w-full md:w-32 space-y-1">
+                        <Label className="text-[10px] text-slate-400 font-bold">
+                          {isAr ? "الكمية المستهلكة" : "Qté consommée"}
+                        </Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={c.consumed_quantity || ""}
+                          onChange={(e) => updateConsumption(i, 'consumed_quantity', Number(e.target.value))}
+                          className="font-bold text-amber-600"
+                        />
+                      </div>
+
+                      {/* المتوفر (للقراءة فقط) */}
+                      <div className="w-full md:w-28 space-y-1">
+                        <Label className="text-[10px] text-slate-400">{isAr ? "المتوفر" : "Disponible"}</Label>
+                        <div className="h-9 flex items-center px-3 bg-slate-50 border rounded-md text-sm font-bold text-emerald-600">
+                          {mat ? mat.remaining_quantity.toLocaleString() : "—"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ملاحظات */}
+                    <div className="mt-2">
+                      <Input
+                        placeholder={isAr ? "ملاحظات (اختياري)" : "Notes (optionnel)"}
+                        value={c.notes || ""}
+                        onChange={(e) => updateConsumption(i, 'notes', e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    {/* تحذير إذا تجاوزت الكمية المتوفرة */}
+                    {mat && c.consumed_quantity > mat.remaining_quantity && (
+                      <div className="mt-2 text-[10px] font-bold text-red-500 flex items-center gap-1">
+                        ⚠ {isAr ? "الكمية المستهلكة تتجاوز المتوفر!" : "La quantité consommée dépasse le stock!"}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Workers Section */}
