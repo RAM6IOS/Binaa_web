@@ -9,7 +9,7 @@ import {
   memo,
 } from "react";
 import Image from "next/image";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import {
   Table,
   TableBody,
@@ -335,8 +335,12 @@ const DesktopTableRow = memo(function DesktopTableRow({
   askDelete: () => void;
   isPriority: boolean;
 }) {
+  const router = useRouter();
   return (
-    <TableRow className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors duration-100">
+    <TableRow
+      className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors duration-100 cursor-pointer"
+      onClick={() => router.push(`/projects/${p.id}`)}
+    >
       <TableCell className="ps-8 py-4 font-bold">
         <div className="flex items-center gap-3">
           {p.cover_image && (
@@ -350,6 +354,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
             <Link
               href={`/projects/${p.id}`}
               className="text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 block transition-colors font-bold text-sm leading-tight truncate max-w-[200px]"
+              onClick={(e) => e.stopPropagation()}
             >
               {p.name}
             </Link>
@@ -915,6 +920,7 @@ const ActionMenu = memo(function ActionMenu({
           size="icon"
           className="rounded-full hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all h-10 w-10 shrink-0"
           aria-label={isAr ? "خيارات المشروع" : "Options du projet"}
+          onClick={(e) => e.stopPropagation()}
         >
           <MoreVertical size={16} className="text-slate-400" />
         </Button>
