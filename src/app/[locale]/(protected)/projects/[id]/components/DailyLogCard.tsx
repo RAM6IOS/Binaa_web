@@ -82,7 +82,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
   const totalWorkers = log.workers_present?.length || 0;
   const totalEquipment = log.equipment_used?.length || 0;
   const totalQuantities = log.quantities?.length || 0;
-  const totalMaterials = log.materials?.length || 0;
+  const totalConsumptions = log.material_consumptions?.length || 0;
 
   return (
     <Card className="overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all shadow-sm rounded-2xl group">
@@ -203,7 +203,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
           <StatBox icon={<Users className="w-4.5 h-4.5" />} color="emerald" count={totalWorkers} label={isAr ? "عامل" : "Effectif"} />
           <StatBox icon={<Truck className="w-4.5 h-4.5" />} color="blue" count={totalEquipment} label={isAr ? "معدة" : "Engins"} />
           <StatBox icon={<Ruler className="w-4.5 h-4.5" />} color="purple" count={totalQuantities} label={isAr ? "بند منجز" : "Métrés"} />
-          <StatBox icon={<Package className="w-4.5 h-4.5" />} color="amber" count={totalMaterials} label={isAr ? "مواد" : "Matériaux"} />
+          <StatBox icon={<Package className="w-4.5 h-4.5" />} color="amber" count={totalConsumptions} label={isAr ? "مادة مستهلكة" : "Consommation"} />
         </div>
 
         {/* Expand/Collapse Section */}
@@ -301,6 +301,26 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
                     <div key={idx} className="flex justify-between p-3.5 rounded-2xl border bg-slate-50 dark:bg-slate-900/60 font-bold text-xs group-hover:bg-white transition-colors">
                       <span className="text-slate-600 truncate"># {e.equipment_name}</span>
                       <span className="text-blue-600">{e.usage_hours} H <span className="text-[8px] opacity-60">USAGE</span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 5. استهلاك المواد من المخزون */}
+            {totalConsumptions > 0 && (
+              <div className="space-y-4 pt-2">
+                <h4 className="text-[11px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                  <Package className="w-4 h-4" /> {isAr ? "استهلاك المواد" : "Consommation de matériaux"}
+                </h4>
+                <div className="space-y-2.5">
+                  {log.material_consumptions?.map((c, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-800 transition-hover hover:border-amber-300 shadow-sm">
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{c.material_name}</span>
+                      <div className="bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-amber-200">
+                        <span className="text-sm font-black text-amber-600">{c.consumed_quantity}</span>
+                        {c.notes && <span className="text-[10px] text-slate-400 ms-2 italic">({c.notes})</span>}
+                      </div>
                     </div>
                   ))}
                 </div>

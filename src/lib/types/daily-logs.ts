@@ -48,6 +48,14 @@ export interface DailyLogMaterial {
   notes?: string;
 }
 
+// ── سطر استهلاك مادة مرتبط بجدول materials ──
+export interface DailyLogMaterialConsumption {
+  material_id: string;           // مرجع لـ materials.id
+  material_name: string;         // للعرض السريع
+  consumed_quantity: number;     // الكمية المستهلكة اليوم
+  notes?: string;
+}
+
 // ── النوع الرئيسي للتقرير اليومي (وضعية الأشغال المتكاملة) ──
 export interface DailyLog {
   id: string;
@@ -72,6 +80,7 @@ export interface DailyLog {
   equipment_used: DailyLogEquipment[];
   quantities: DailyLogQuantity[];
   materials: DailyLogMaterial[];
+  material_consumptions?: DailyLogMaterialConsumption[];
   photos: DailyLogPhoto[];
 
   attachments?: Attachment[];
