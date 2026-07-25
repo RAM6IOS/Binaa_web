@@ -31,6 +31,7 @@ export function MetresTab({ project, isAr }: Props) {
   const [summary, setSummary] = useState<MetresSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<ContractItemWithProgress | null>(null);
 
   const fetchData = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -116,6 +117,14 @@ export function MetresTab({ project, isAr }: Props) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* ─── Edit Dialog (hidden trigger) ─── */}
+      <AddContractItemDialog
+        isAr={isAr}
+        projectId={project.id}
+        editItem={editingItem}
+        onSuccess={() => { fetchData(true); setEditingItem(null); }}
+        trigger={<span className="hidden" />}
+      />
       {/* ─── Hero ─── */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
@@ -255,7 +264,11 @@ export function MetresTab({ project, isAr }: Props) {
               </TableHeader>
               <TableBody>
                 {items.map((item, idx) => (
-                  <TableRow key={item.id} className={idx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-900/30"}>
+                  <TableRow
+                    key={item.id}
+                    className={`cursor-pointer hover:bg-blue-50/60 dark:hover:bg-blue-900/20 transition-colors ${idx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-900/30"}`}
+                    onClick={() => setEditingItem(item)}
+                  >
                     <TableCell className="text-center text-xs font-bold text-slate-400">{idx + 1}</TableCell>
                     <TableCell className="font-mono font-bold text-xs">{item.item_number}</TableCell>
                     <TableCell className="text-xs font-medium max-w-[200px] truncate">{item.designation}</TableCell>
@@ -288,7 +301,7 @@ export function MetresTab({ project, isAr }: Props) {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-slate-300 hover:text-red-500"
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
                         disabled={deletingId === item.id}
                       >
                         {deletingId === item.id ? (
@@ -307,7 +320,11 @@ export function MetresTab({ project, isAr }: Props) {
           {/* Mobile Cards */}
           <div className="md:hidden space-y-3">
             {items.map((item, idx) => (
-              <div key={item.id} className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+              <div
+                key={item.id}
+                className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3 cursor-pointer hover:bg-blue-50/60 dark:hover:bg-blue-900/20 transition-colors"
+                onClick={() => setEditingItem(item)}
+              >
                 {/* Top: designation + delete */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -320,7 +337,7 @@ export function MetresTab({ project, isAr }: Props) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 text-slate-300 hover:text-red-500 shrink-0"
-                    onClick={() => handleDeleteItem(item.id)}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
                     disabled={deletingId === item.id}
                   >
                     {deletingId === item.id ? (
