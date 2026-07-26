@@ -12,16 +12,13 @@ import {
 } from "date-fns";
 import { arDZ, fr } from "date-fns/locale";
 import {
-  ArrowLeft,
-  ArrowRight,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Eye,
+  Info,
   Loader2,
-  LogIn,
-  LogOut,
-  MapPin,
   RefreshCw,
   Search,
   Timer,
@@ -31,16 +28,6 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -49,16 +36,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/client";
 import { workersService } from "@/lib/services/workers-service";
 import { projectsService } from "@/lib/services/projects-service";
 import { pointageService } from "@/lib/services/pointage-service";
 import { Worker } from "@/lib/types/projects";
 import { WeeklyScheduleGrid } from "@/components/pointage/WeeklyScheduleGrid";
-import { ShiftEditDialog } from "@/components/pointage/ShiftEditDialog";
 import {
   DayShift,
-  ShiftCellContext,
   WEEK_STARTS_ON,
   WorkerScheduleRow,
 } from "@/components/pointage/schedule-types";
@@ -143,17 +127,6 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   const [searchQuery, setSearchQuery] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
   const [isCompact, setIsCompact] = useState(false);
-
-  const [isClockInOpen, setIsClockInOpen] = useState(false);
-  const [isClockOutOpen, setIsClockOutOpen] = useState(false);
-  const [selectedWorkerId, setSelectedWorkerId] = useState("");
-  const [selectedProjectId, setSelectedProjectId] = useState("none");
-  const [location, setLocation] = useState("");
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [shiftEditContext, setShiftEditContext] = useState<ShiftCellContext | null>(null);
-  const [isShiftEditOpen, setIsShiftEditOpen] = useState(false);
 
   const startDateStr = format(weekStart, "yyyy-MM-dd");
   const endDateStr = format(weekEnd, "yyyy-MM-dd");
@@ -245,81 +218,18 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
 
   const weekLabel = `${format(weekStart, "d MMM", { locale: dateLocale })} – ${format(weekEnd, "d MMM yyyy", { locale: dateLocale })}`;
 
-  const resetForm = () => {
-    setSelectedWorkerId("");
-    setSelectedProjectId("none");
-    setLocation("");
-    setNotes("");
-  };
-
-  const resolveProjectOptions = () => {
-    if (selectedProjectId === "none" || selectedProjectId === "general") {
-      return { projectId: undefined, location: location || undefined };
-    }
-    return { projectId: selectedProjectId, location: location || undefined };
-  };
-
-  const handleClockIn = async () => {
-    if (!selectedWorkerId) {
-      toast.error(isAr ? "يرجى اختيار عامل" : "Veuillez sélectionner un ouvrier");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await pointageService.clockIn(selectedWorkerId, {
-        ...resolveProjectOptions(),
-        notes: notes || undefined,
-      });
-      toast.success(isAr ? "تم تسجيل الدخول بنجاح ✓" : "Entrée enregistrée ✓");
-      setIsClockInOpen(false);
-      resetForm();
-      fetchData();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isAr ? "فشل تسجيل الدخول" : "Échec";
-      toast.error(msg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleClockOut = async () => {
-    if (!selectedWorkerId) {
-      toast.error(isAr ? "يرجى اختيار عامل" : "Veuillez sélectionner un ouvrier");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await pointageService.clockOut(selectedWorkerId, resolveProjectOptions());
-      toast.success(isAr ? "تم تسجيل الخروج بنجاح ✓" : "Sortie enregistrée ✓");
-      setIsClockOutOpen(false);
-      resetForm();
-      fetchData();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isAr ? "فشل تسجيل الخروج" : "Échec";
-      toast.error(msg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCellClick = (ctx: ShiftCellContext) => {
-    setShiftEditContext(ctx);
-    setIsShiftEditOpen(true);
-  };
-
-  const activeWorkersToday = useMemo(() => {
-    const active: { worker: Worker; shift: DayShift }[] = [];
-    for (const row of scheduleRows) {
-      const shift = row.shifts[todayStr];
-      if (shift?.checkIn && !shift.checkOut) {
-        active.push({ worker: row.worker, shift });
-      }
-    }
-    return active;
-  }, [scheduleRows, todayStr]);
-
   return (
     <div className="space-y-5 p-4 md:p-6" dir={isAr ? "rtl" : "ltr"}>
+      {/* ── Read-only Banner ── */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-3">
+        <Info className="w-5 h-5 text-blue-600 shrink-0" />
+        <p className="text-sm font-semibold text-blue-800">
+          {isAr
+            ? "هذه الصفحة للعرض فقط. لتسجيل الحضور ادخل إلى المشروع"
+            : "Cette page est en lecture seule. Pour pointer, accédez au projet."}
+        </p>
+      </div>
+
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -328,40 +238,15 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
               <CalendarDays className="w-5 h-5 text-emerald-600" />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-              {isAr ? "جدولة الحضور الأسبوعية" : "Planning Hebdomadaire"}
+              {isAr ? "سجل الحضور الأسبوعي" : "Registre de Présence"}
             </h1>
           </div>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm flex items-center gap-1.5">
+            <Eye className="w-3.5 h-3.5" />
             {isAr
-              ? "إدارة ورديات العمال — عرض أسبوعي مثل Skello"
-              : "Gestion des shifts — vue hebdomadaire type Skello"}
+              ? "عرض فقط — للتسجيل ادخل إلى المشروع"
+              : "Lecture seule — pour pointer, allez dans le projet"}
           </p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            size="lg"
-            className="bg-emerald-600 hover:bg-emerald-700 gap-2 shadow-md shadow-emerald-200 flex-1 sm:flex-none"
-            onClick={() => {
-              resetForm();
-              setIsClockInOpen(true);
-            }}
-          >
-            <LogIn className="w-4 h-4" />
-            {isAr ? "تسجيل دخول سريع" : "Pointage Entrée"}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-amber-300 text-amber-700 hover:bg-amber-50 gap-2 flex-1 sm:flex-none"
-            onClick={() => {
-              resetForm();
-              setIsClockOutOpen(true);
-            }}
-          >
-            <LogOut className="w-4 h-4" />
-            {isAr ? "تسجيل خروج" : "Pointage Sortie"}
-          </Button>
         </div>
       </div>
 
@@ -415,7 +300,6 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
       {/* ── Toolbar: week nav + filters ── */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          {/* Week navigation */}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -489,7 +373,6 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
           </Select>
         </div>
 
-        {/* Legend — 3 couleurs unifiées */}
         <div className="flex flex-wrap gap-4 pt-1 border-t border-slate-100">
           {[
             { color: "bg-emerald-400", label: isAr ? "حاضر (مكتمل)" : "Présent" },
@@ -504,27 +387,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
         </div>
       </div>
 
-      {/* ── Active workers today banner ── */}
-      {activeWorkersToday.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex flex-wrap items-center gap-2">
-          <Timer className="w-4 h-4 text-yellow-700 shrink-0" />
-          <span className="text-sm font-semibold text-yellow-900">
-            {isAr ? "ورديات نشطة:" : "Shifts en cours:"}
-          </span>
-          {activeWorkersToday.map(({ worker, shift }) => (
-            <Badge
-              key={worker.id}
-              className="bg-yellow-100 text-yellow-900 border-yellow-300 hover:bg-yellow-100 cursor-pointer"
-              onClick={() => handleCellClick({ worker, date: todayStr, shift })}
-            >
-              {worker.full_name}
-              {shift.checkIn && ` · ${shift.checkIn.slice(0, 5)}`}
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {/* ── Weekly Schedule Grid ── */}
+      {/* ── Weekly Schedule Grid (Read-Only — no onCellClick) ── */}
       <WeeklyScheduleGrid
         rows={scheduleRows}
         weekDates={weekDates}
@@ -532,183 +395,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
         isAr={isAr}
         isLoading={isLoading}
         compact={isCompact}
-        onCellClick={handleCellClick}
       />
-
-      <ShiftEditDialog
-        open={isShiftEditOpen}
-        onOpenChange={setIsShiftEditOpen}
-        context={shiftEditContext}
-        projects={projects}
-        defaultProjectId={projectFilter}
-        todayStr={todayStr}
-        isAr={isAr}
-        onSuccess={fetchData}
-      />
-
-      {/* ── Clock In Dialog ── */}
-      <Dialog open={isClockInOpen} onOpenChange={setIsClockInOpen}>
-        <DialogContent className="sm:max-w-md" dir={isAr ? "rtl" : "ltr"}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-emerald-700">
-              <ArrowRight className="w-5 h-5" />
-              {isAr ? "تسجيل دخول سريع" : "Pointage Entrée"}
-            </DialogTitle>
-            <DialogDescription>
-              {isAr
-                ? "سجّل دخول العامل وابدأ نوبة العمل"
-                : "Enregistrer l'entrée et démarrer le shift"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>{isAr ? "العامل *" : "Ouvrier *"}</Label>
-              <Select value={selectedWorkerId} onValueChange={setSelectedWorkerId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isAr ? "اختر عاملاً..." : "Sélectionner..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {workers.map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.full_name} — {w.job_title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{isAr ? "المشروع (اختياري)" : "Projet (optionnel)"}</Label>
-              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{isAr ? "بدون مشروع" : "Sans projet"}</SelectItem>
-                  <SelectItem value="general">{isAr ? "وضع عام" : "Général"}</SelectItem>
-                  {projects.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5" />
-                {isAr ? "الموقع (اختياري)" : "Lieu (optionnel)"}
-              </Label>
-              <Input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder={isAr ? "مثال: موقع البناء أ" : "Ex: Chantier A"}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{isAr ? "ملاحظات" : "Notes"}</Label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                placeholder={isAr ? "ملاحظات إضافية..." : "Notes..."}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsClockInOpen(false)}>
-              {isAr ? "إلغاء" : "Annuler"}
-            </Button>
-            <Button
-              className="bg-emerald-600 hover:bg-emerald-700 gap-2"
-              onClick={handleClockIn}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <LogIn className="w-4 h-4" />
-              )}
-              {isAr ? "تسجيل الدخول" : "Confirmer"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Clock Out Dialog ── */}
-      <Dialog open={isClockOutOpen} onOpenChange={setIsClockOutOpen}>
-        <DialogContent className="sm:max-w-md" dir={isAr ? "rtl" : "ltr"}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-700">
-              <ArrowLeft className="w-5 h-5" />
-              {isAr ? "تسجيل خروج" : "Pointage Sortie"}
-            </DialogTitle>
-            <DialogDescription>
-              {isAr
-                ? "أنهِ نوبة العمل واحسب الساعات تلقائياً"
-                : "Terminer le shift et calculer les heures"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>{isAr ? "العامل *" : "Ouvrier *"}</Label>
-              <Select value={selectedWorkerId} onValueChange={setSelectedWorkerId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isAr ? "اختر عاملاً..." : "Sélectionner..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {workers.map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.full_name} — {w.job_title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{isAr ? "المشروع" : "Projet"}</Label>
-              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{isAr ? "بدون مشروع" : "Sans projet"}</SelectItem>
-                  <SelectItem value="general">{isAr ? "وضع عام" : "Général"}</SelectItem>
-                  {projects.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsClockOutOpen(false)}>
-              {isAr ? "إلغاء" : "Annuler"}
-            </Button>
-            <Button
-              className="bg-amber-600 hover:bg-amber-700 gap-2"
-              onClick={handleClockOut}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <LogOut className="w-4 h-4" />
-              )}
-              {isAr ? "تسجيل الخروج" : "Confirmer"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

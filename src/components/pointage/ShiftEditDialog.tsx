@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { arDZ, fr } from "date-fns/locale";
-import { Loader2, LogIn, LogOut, Save } from "lucide-react";
+import { Loader2, LogIn, LogOut, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,7 @@ export function ShiftEditDialog({
 
   const shift = context?.shift ?? null;
   const isToday = context?.date === todayStr;
+  const isFuture = context ? context.date > todayStr : false;
   const isEmpty = !shift?.status;
   const isActive = !!(shift?.checkIn && !shift?.checkOut && isToday);
   const variant = getShiftVariant(shift, isToday);
@@ -102,6 +103,10 @@ export function ShiftEditDialog({
   const styles = STATUS_STYLES[variant];
 
   const handleSave = async () => {
+    if (isFuture) {
+      toast.error(isAr ? "لا يمكن تعديل الحضور لتاريخ مستقبلي" : "Modification impossible pour une date future");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await pointageService.upsertWorkerShift({
@@ -124,6 +129,10 @@ export function ShiftEditDialog({
   };
 
   const handleClockIn = async () => {
+    if (isFuture) {
+      toast.error(isAr ? "لا يمكن تسجيل الدخول لتاريخ مستقبلي" : "Pointage impossible pour une date future");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const pid = resolveProjectId(projectId);
@@ -141,6 +150,10 @@ export function ShiftEditDialog({
   };
 
   const handleClockOut = async () => {
+    if (isFuture) {
+      toast.error(isAr ? "لا يمكن تسجيل الخروج لتاريخ مستقبلي" : "Pointage impossible pour une date future");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const pid = resolveProjectId(projectId);
@@ -178,8 +191,19 @@ export function ShiftEditDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {isFuture && (
+          <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <p className="text-xs font-semibold text-amber-800">
+              {isAr
+                ? "لا يمكن تسجيل أو تعديل الحضور لتاريخ مستقبلي"
+                : "Enregistrement impossible pour une date future"}
+            </p>
+          </div>
+        )}
+
         {/* إجراءات سريعة لليوم الحالي */}
-        {isToday && (
+        {isToday && !isFuture && (
           <div className="flex gap-2">
             {(isEmpty || isActive) && (
               <Button
@@ -268,7 +292,7 @@ export function ShiftEditDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {isAr ? "إلغاء" : "Annuler"}
           </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 gap-2" onClick={handleSave} disabled={isSubmitting}>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 gap-2" onClick={handleSave} disabled={isSubmitting || isFuture}>
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isAr ? "حفظ" : "Enregistrer"}
           </Button>
