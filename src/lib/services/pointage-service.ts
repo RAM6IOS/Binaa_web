@@ -1,30 +1,17 @@
 import { createClient } from '../supabase/client';
-import { Pointage, PointageWorker, CreatePointageDto } from '../types/daily-logs';
+import { Pointage, PointageWorker } from '../types/daily-logs';
 import type { PostgrestError } from '@supabase/supabase-js';
 
 const supabase = createClient();
 
-function logSupabaseError(context: string, error: PostgrestError) {
-  console.error(`${context}:`, error.code, error.message, error.details ?? '');
-}
-
-function toPointageError(error: PostgrestError, fallback: string): Error {
-  if (error.code === '42501') {
-    return new Error(
-      'Permission denied. Run the pointage_system migration in Supabase SQL Editor.'
-    );
-  }
-  if (error.code === '23505') {
-    return new Error('A pointage already exists for this date on this project/location.');
-  }
-  return new Error(error.message || fallback);
+function isFutureDate(dateStr: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr + "T00:00:00");
+  return target > today;
 }
 
 export const pointageService = {
-  /**
-   * حساب ساعات العمل تلقائياً استناداً إلى ساعة الدخول، ساعة الخروج، ومدة الاستراحة بالدقائق.
-   * يدعم تنسيقات متنوعة (HH:MM أو HH:MM:SS) وتغيير اليوم (الخروج في اليوم التالي).
-   */
   calculateHours(
     checkIn: string | null | undefined,
     checkOut: string | null | undefined,
@@ -33,27 +20,22 @@ export const pointageService = {
     if (!checkIn || !checkOut) return 0;
 
     try {
-      // استخراج الساعات والدقائق
       const [inH, inM] = checkIn.split(':').map(Number);
       const [outH, outM] = checkOut.split(':').map(Number);
 
       if (isNaN(inH) || isNaN(inM) || isNaN(outH) || isNaN(outM)) return 0;
 
-      // تحويل كامل الوقت إلى دقائق
       const inTotalMinutes = inH * 60 + inM;
       const outTotalMinutes = outH * 60 + outM;
 
-      // التعامل مع حالة خروج العامل في اليوم التالي
       let diffMinutes = outTotalMinutes - inTotalMinutes;
       if (diffMinutes < 0) {
-        diffMinutes += 24 * 60; // إضافة 24 ساعة بالدقائق
+        diffMinutes += 24 * 60;
       }
 
-      // طرح مدة الاستراحة وتفادي القيم السالبة
       const netMinutes = Math.max(0, diffMinutes - (breakMinutes || 0));
       const hours = netMinutes / 60;
 
-      // تقريب الساعات لأقرب خانتين عشريتين
       return Math.max(0, Math.round(hours * 100) / 100);
     } catch (e) {
       console.error('Error calculating hours:', e);
@@ -61,23 +43,14 @@ export const pointageService = {
     }
   },
 
-  /**
-   * جلب جميع تسجيلات الحضور مع إمكانية التصفية حسب المشروع (متوافق مع الكود القديم)
-   */
   async getByProjectId(projectId: string) {
     return this.getAll(projectId);
   },
 
-  /**
-   * جلب جميع تسجيلات الحضور مع تصفية اختيارية حسب المعرف
-   */
   async getAll(projectId?: string) {
     return this.getAllPointages({ projectId });
   },
 
-  /**
-   * دالة متطورة وموحدة لجلب جميع تسجيلات الحضور مع خيارات تصفية متعددة
-   */
   async getAllPointages(filters?: { projectId?: string; location?: string; limit?: number }) {
     const supabase = createClient();
 
@@ -133,9 +106,6 @@ export const pointageService = {
     }));
   },
 
-  /**
-   * جلب تسجيلات الحضور لنطاق تاريخي (جدولة أسبوعية)
-   */
   async getWeekPointages(
     startDate: string,
     endDate: string,
@@ -187,9 +157,6 @@ export const pointageService = {
     }));
   },
 
-  /**
-   * جلب تسجيلات حضور اليوم للوضع العام أو المشروعات المفتوحة
-   */
   async getTodayPointages() {
     const today = new Date().toISOString().split('T')[0];
     const supabase = createClient();
@@ -226,9 +193,47 @@ export const pointageService = {
     }));
   },
 
-  /**
-   * جلب تسجيل حضور بالمعرّف مع بيانات العمال
-   */
+  async getTodayPointageForProject(projectId: string): Promise<Pointage | null> {
+    const today = new Date().toISOString().split('T')[0];
+    return this.getPointageForDate(projectId, today);
+  },
+
+  async getPointageForDate(projectId: string, date: string): Promise<Pointage | null> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('daily_pointage')
+      .select(`
+        *,
+        pointage_workers (
+          *,
+          worker:workers!pointage_workers_worker_id_fkey (
+            id, full_name, job_title, photo_url
+          )
+        ),
+        pointage_equipment (*)
+      `)
+      .eq('pointage_date', date)
+      .eq('project_id', projectId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching pointage for date:', error);
+      throw error;
+    }
+
+    if (!data) return null;
+
+    return {
+      ...data,
+      pointage_workers: (data.pointage_workers || []).map((pw: any) => ({
+        ...pw,
+        worker_name: pw.worker?.full_name || '',
+        job_title: pw.worker?.job_title || ''
+      }))
+    } as Pointage;
+  },
+
   async getById(id: string): Promise<Pointage | null> {
     const { data, error } = await supabase
       .from('daily_pointage')
@@ -261,9 +266,6 @@ export const pointageService = {
     } as Pointage;
   },
 
-  /**
-   * جلب تسجيل حضور لمشروع/موقع وتاريخ محدد
-   */
   async getPointageByDate(date: string, projectId?: string, location?: string): Promise<Pointage | null> {
     let query = supabase
       .from('daily_pointage')
@@ -306,26 +308,24 @@ export const pointageService = {
     } as Pointage;
   },
 
-  /**
-   * تسجيل دخول سريع لعامل (Clock In)
-   */
   async clockIn(
     workerId: string,
-    options?: { projectId?: string; location?: string; notes?: string }
+    options?: { projectId?: string; location?: string; notes?: string; date?: string }
   ): Promise<PointageWorker> {
-    const today = new Date().toISOString().split('T')[0];
-    // صيغة الوقت HH:MM
+    const selectedDate = options?.date || new Date().toISOString().split('T')[0];
+    if (isFutureDate(selectedDate)) {
+      throw new Error("لا يمكن تسجيل الحضور لتاريخ مستقبلي");
+    }
     const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    // 1. جلب أو إنشاء رأس الحضور لليوم والموقع/المشروع المحدد
-    let pointage = await this.getPointageByDate(today, options?.projectId, options?.location);
+    let pointage = await this.getPointageByDate(selectedDate, options?.projectId, options?.location);
     
     if (!pointage) {
       const { data: { user } } = await supabase.auth.getUser();
       const pointageHeader = {
         project_id: options?.projectId || null,
         location: options?.location || null,
-        pointage_date: today,
+        pointage_date: selectedDate,
         notes: options?.notes || null,
         created_by: user?.id || null,
         created_at: new Date().toISOString(),
@@ -339,13 +339,12 @@ export const pointageService = {
         .single();
         
       if (error) {
-        logSupabaseError('Error creating pointage header in clockIn', error);
+        console.error('Error creating pointage header in clockIn:', error.code, error.message);
         throw error;
       }
       pointage = data;
     }
 
-    // 2. التحقق من وجود العامل مسجلاً مسبقاً في تفاصيل هذا الحضور
     const { data: existingWorker, error: workerError } = await supabase
       .from('pointage_workers')
       .select('*')
@@ -354,12 +353,11 @@ export const pointageService = {
       .maybeSingle();
 
     if (workerError) {
-      logSupabaseError('Error finding worker in clockIn', workerError);
+      console.error('Error finding worker in clockIn:', workerError);
       throw workerError;
     }
 
     if (existingWorker) {
-      // إذا لم يكن وقت الدخول مسجلاً، نقوم بتحديثه
       if (!existingWorker.check_in_time) {
         const { data: updated, error: updateError } = await supabase
           .from('pointage_workers')
@@ -373,7 +371,6 @@ export const pointageService = {
       return existingWorker as PointageWorker;
     }
 
-    // 3. إضافة سجل حضور جديد للعامل
     const payload = {
       pointage_id: pointage!.id,
       worker_id: workerId,
@@ -391,30 +388,28 @@ export const pointageService = {
       .single();
 
     if (insertError) {
-      logSupabaseError('Error inserting worker pointage in clockIn', insertError);
+      console.error('Error inserting worker pointage in clockIn:', insertError);
       throw insertError;
     }
 
     return data as PointageWorker;
   },
 
-  /**
-   * تسجيل خروج سريع لعامل (Clock Out) مع حساب الساعات تلقائياً
-   */
   async clockOut(
     workerId: string,
-    options?: { projectId?: string; location?: string }
+    options?: { projectId?: string; location?: string; date?: string }
   ): Promise<PointageWorker> {
-    const today = new Date().toISOString().split('T')[0];
+    const selectedDate = options?.date || new Date().toISOString().split('T')[0];
+    if (isFutureDate(selectedDate)) {
+      throw new Error("لا يمكن تسجيل الخروج لتاريخ مستقبلي");
+    }
     const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    // 1. جلب جلسة الحضور
-    const pointage = await this.getPointageByDate(today, options?.projectId, options?.location);
+    const pointage = await this.getPointageByDate(selectedDate, options?.projectId, options?.location);
     if (!pointage) {
       throw new Error('No pointage session found for today.');
     }
 
-    // 2. البحث عن العامل في الجلسة الحالية
     const { data: existingWorker, error: workerError } = await supabase
       .from('pointage_workers')
       .select('*')
@@ -423,7 +418,7 @@ export const pointageService = {
       .maybeSingle();
 
     if (workerError) {
-      logSupabaseError('Error finding worker in clockOut', workerError);
+      console.error('Error finding worker in clockOut:', workerError);
       throw workerError;
     }
 
@@ -431,7 +426,6 @@ export const pointageService = {
       throw new Error('Worker has not clocked in today.');
     }
 
-    // 3. حساب ساعات العمل وتحديث السجل
     const checkIn = existingWorker.check_in_time;
     const hours = this.calculateHours(checkIn, nowTime, existingWorker.break_duration_minutes || 0);
 
@@ -446,11 +440,10 @@ export const pointageService = {
       .single();
 
     if (updateError) {
-      logSupabaseError('Error updating worker in clockOut', updateError);
+      console.error('Error updating worker in clockOut:', updateError);
       throw updateError;
     }
 
-    // مزامنة التقرير اليومي إذا كان الحضور مرتبطاً بمشروع
     if (pointage.project_id) {
       try {
         await this.syncToDailyLog(pointage.id);
@@ -462,9 +455,6 @@ export const pointageService = {
     return updated as PointageWorker;
   },
 
-  /**
-   * تحديث أو إضافة وردية لعامل في يوم محدد
-   */
   async upsertWorkerShift(params: {
     date: string;
     workerId: string;
@@ -475,6 +465,9 @@ export const pointageService = {
     checkOut?: string | null;
     breakMinutes?: number;
   }): Promise<PointageWorker> {
+    if (isFutureDate(params.date)) {
+      throw new Error("لا يمكن تعديل الحضور لتاريخ مستقبلي");
+    }
     let pointage = await this.getPointageByDate(
       params.date,
       params.projectId ?? undefined,
@@ -497,7 +490,7 @@ export const pointageService = {
         .single();
 
       if (error) {
-        logSupabaseError('Error creating pointage header in upsertWorkerShift', error);
+        console.error('Error creating pointage header in upsertWorkerShift:', error);
         throw error;
       }
       pointage = { ...data, pointage_workers: [] } as Pointage;
@@ -534,7 +527,7 @@ export const pointageService = {
         .select()
         .single();
       if (error) {
-        logSupabaseError('Error updating worker shift', error);
+        console.error('Error updating worker shift:', error);
         throw error;
       }
 
@@ -565,14 +558,10 @@ export const pointageService = {
     return result;
   },
 
-  /**
-   * إضافة حضور لعامل منفرد (دعم check_in_time و check_out_time)
-   */
   async addWorker(
     pointageId: string,
     workerAttendance: Omit<PointageWorker, 'id' | 'pointage_id'>
   ): Promise<PointageWorker> {
-    // حساب الساعات تلقائياً إذا توفرت الأوقات
     const hours = this.calculateHours(
       workerAttendance.check_in_time,
       workerAttendance.check_out_time,
@@ -596,23 +585,22 @@ export const pointageService = {
       .single();
 
     if (error) {
-      logSupabaseError('Error adding worker pointage', error);
+      console.error('Error adding worker pointage:', error);
       throw error;
     }
 
     return data as PointageWorker;
   },
 
-  /**
-   * حفظ تسجيل حضور كامل (الرأس والتفاصيل للعمال)
-   */
   async save(dto: any): Promise<Pointage> {
+    if (dto.pointage_date && isFutureDate(dto.pointage_date)) {
+      throw new Error("لا يمكن حفظ الحضور لتاريخ مستقبلي");
+    }
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       throw new Error('You must be logged in to save pointage.');
     }
 
-    // تحقق من تسجيل حضور قائم لنفس التاريخ (والمشروع/الموقع)
     const existing = await this.getPointageByDate(dto.pointage_date, dto.project_id, dto.location);
     const pointageId = dto.id || existing?.id;
 
@@ -629,29 +617,26 @@ export const pointageService = {
     let finalPointageId = pointageId;
 
     if (pointageId) {
-      // تحديث الرأس
       const { error } = await supabase
         .from('daily_pointage')
         .update(pointageHeader)
         .eq('id', pointageId);
 
       if (error) {
-        logSupabaseError('Error updating pointage header', error);
-        throw toPointageError(error, 'Failed to update pointage');
+        console.error('Error updating pointage header:', error);
+        throw new Error(error.message || 'Failed to update pointage');
       }
 
-      // حذف تفاصيل العمال الحالية لإعادة إضافتهم (Delete-and-Insert Pattern)
       const { error: deleteError } = await supabase
         .from('pointage_workers')
         .delete()
         .eq('pointage_id', pointageId);
 
       if (deleteError) {
-        logSupabaseError('Error clearing pointage workers', deleteError);
+        console.error('Error clearing pointage workers:', deleteError);
         throw deleteError;
       }
     } else {
-      // إنشاء رأس جديد
       const { data, error } = await supabase
         .from('daily_pointage')
         .insert({
@@ -663,17 +648,15 @@ export const pointageService = {
         .single();
 
       if (error) {
-        logSupabaseError('Error creating pointage header', error);
-        throw toPointageError(error, 'Failed to create pointage');
+        console.error('Error creating pointage header:', error);
+        throw new Error(error.message || 'Failed to create pointage');
       }
 
       finalPointageId = data.id;
     }
 
-    // إدخال تفاصيل عمال الحضور الجدد
     if (dto.pointage_workers && dto.pointage_workers.length > 0) {
       const workersPayload = dto.pointage_workers.map((w: any) => {
-        // حساب ساعات العمل التلقائي
         const calculatedHours = this.calculateHours(w.check_in_time, w.check_out_time, w.break_duration_minutes);
         
         let finalHours = 0;
@@ -684,7 +667,7 @@ export const pointageService = {
         } else if (calculatedHours > 0) {
           finalHours = calculatedHours;
         } else {
-          finalHours = 8.0; // افتراضي إذا لم يتوفر أي شيء
+          finalHours = 8.0;
         }
 
         return {
@@ -703,12 +686,11 @@ export const pointageService = {
         .insert(workersPayload);
 
       if (insertWorkersError) {
-        logSupabaseError('Error inserting pointage workers', insertWorkersError);
+        console.error('Error inserting pointage workers:', insertWorkersError);
         throw insertWorkersError;
       }
     }
 
-    // محاولة مزامنة تسجيل الحضور كتقرير يومي (Daily Log) إذا كان تابعاً لمشروع
     if (dto.project_id) {
       try {
         await this.syncToDailyLog(finalPointageId!);
@@ -717,20 +699,15 @@ export const pointageService = {
       }
     }
 
-    // جلب وحفظ النتيجة النهائية بالربط
     const result = await this.getById(finalPointageId!);
     if (!result) throw new Error('Failed to retrieve saved pointage');
     return result;
   },
 
-  /**
-   * مزامنة حضور العمال والعتاد مع جدول daily_logs إذا كان متوفراً
-   */
   async syncToDailyLog(pointageId: string): Promise<void> {
     const pointage = await this.getById(pointageId);
     if (!pointage || !pointage.project_id) return;
 
-    // تحقق مما إذا كان هناك تقرير يومي لنفس التاريخ
     const { data: existingLog } = await supabase
       .from('daily_logs')
       .select('id')
@@ -738,7 +715,6 @@ export const pointageService = {
       .eq('log_date', pointage.pointage_date)
       .maybeSingle();
 
-    // تجهيز مصفوفة العمال بتنسيق JSON لـ daily_logs
     const workersPresentJson = pointage.pointage_workers.map((pw: any) => ({
       worker_id: pw.worker_id,
       worker_name: pw.worker_name,
@@ -783,9 +759,6 @@ export const pointageService = {
     }
   },
 
-  /**
-   * حذف تسجيل حضور كامل
-   */
   async delete(id: string): Promise<void> {
     const { error } = await supabase
       .from('daily_pointage')
@@ -798,9 +771,6 @@ export const pointageService = {
     }
   },
 
-  /**
-   * رفع صورة مرفقة
-   */
   async uploadPhoto(file: File, projectId?: string): Promise<string> {
     const ext = file.name.split('.').pop() || 'jpg';
     const folder = projectId ? `daily-logs/${projectId}` : `daily-logs/general`;
@@ -825,9 +795,6 @@ export const pointageService = {
     return urlData.publicUrl;
   },
 
-  /**
-   * الاشتراك بالتغيرات الفورية
-   */
   subscribe(callback: () => void, projectId?: string) {
     let filter = undefined;
     if (projectId) {

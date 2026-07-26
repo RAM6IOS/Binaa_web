@@ -21,6 +21,7 @@ import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
 import { MetresTab } from "./components/MetresTab";
 import { MaterialsTab } from "./components/MaterialsTab";
+import { PointageTab } from "./components/PointageTab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ProjectWithJoins = Project & {
@@ -137,6 +138,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
               { id: 'metres', label: isAr ? 'الكميات المنجزة' : 'Métrés' },
               { id: 'gantt', label: isAr ? 'الجدول الزمني' : 'Gantt' },
               { id: 'resources', label: isAr ? 'العمال والعتاد' : 'Resources' },
+              { id: 'pointage', label: isAr ? 'الحضور' : 'Pointage' },
               { id: 'materials', label: isAr ? 'المواد' : 'Matériaux' },
               { id: 'documents', label: isAr ? 'الوثائق' : 'Documents' },
             ].map(tab => (
@@ -158,6 +160,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="metres"><MetresTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="gantt" className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><ResourcesTab project={project} isAr={isAr} /></TabsContent>
+          <TabsContent value="pointage"><PointageTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="materials"><MaterialsTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="documents"><DocumentsTab project={project} isAr={isAr} /></TabsContent>
         </div>
