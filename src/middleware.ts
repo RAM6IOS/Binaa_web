@@ -6,7 +6,7 @@ import { createServerClient } from '@supabase/ssr';
 const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  let response = intlMiddleware(request);
+  let response = await intlMiddleware(request);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
