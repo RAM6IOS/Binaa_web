@@ -125,8 +125,11 @@ export const materialsService = {
 
   // ── Realtime ──
   subscribe(projectId: string, callback: () => void) {
+    const channelName = `materials-${projectId}`;
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel(`materials-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'materials', filter: `project_id=eq.${projectId}` },

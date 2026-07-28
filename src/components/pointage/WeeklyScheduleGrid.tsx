@@ -156,26 +156,56 @@ export function WeeklyScheduleGrid({
                 </div>
               </div>
 
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-1.5">
                 {weekDates.map((date) => {
                   const d = parseISO(date);
                   const isToday = date === todayStr;
                   const shift = shifts[date];
+
+                  const formatShortTime = (t: string | null | undefined) => {
+                    if (!t) return null;
+                    if (t.length <= 5) return t;
+                    const parts = t.split(":");
+                    return parts.length >= 2 ? `${parts[0]}:${parts[1]}` : t;
+                  };
+
                   return (
                     <div
                       key={date}
                       onClick={() => onCellClick?.({ worker, date, shift: shift ?? null })}
                       className={cn(
-                        "text-center p-1.5 rounded-lg cursor-pointer transition-colors border",
-                        isToday ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-100",
-                        shift ? "border-blue-300 bg-blue-50" : ""
+                        "text-center p-1.5 rounded-lg cursor-pointer transition-colors border min-h-[54px] flex flex-col justify-between",
+                        isToday
+                          ? "bg-emerald-100 border-emerald-300 ring-1 ring-emerald-200 shadow-sm"
+                          : "bg-slate-50 border-slate-100",
+                        shift && !shift.checkOut
+                          ? isToday
+                            ? "bg-emerald-200 border-emerald-400"
+                            : "bg-yellow-50 border-yellow-300"
+                          : shift
+                            ? isToday
+                              ? "bg-emerald-100 border-emerald-300"
+                              : "bg-blue-50 border-blue-200"
+                            : ""
                       )}
                     >
-                      <p className="text-[8px] text-slate-500 uppercase">{format(d, "EEE", { locale })}</p>
-                      <p className="text-xs font-bold">{format(d, "d", { locale })}</p>
+                      <div>
+                        <p className={cn("text-[8px] font-medium uppercase", isToday ? "text-emerald-700" : "text-slate-400")}>
+                          {format(d, "EEE", { locale })}
+                        </p>
+                        <p className={cn("text-sm font-bold leading-tight", isToday ? "text-emerald-800" : "text-slate-700")}>
+                          {format(d, "d", { locale })}
+                        </p>
+                      </div>
                       {shift && (
                         <div className="mt-0.5">
-                          <p className="text-[8px] font-bold text-blue-600">{shift.checkIn || '-'}{shift.checkOut ? `-${shift.checkOut}` : ''}</p>
+                          <p className={cn(
+                            "text-[9px] font-bold tabular-nums leading-tight",
+                            !shift.checkOut ? "text-amber-600" : "text-blue-600"
+                          )}>
+                            {formatShortTime(shift.checkIn)}
+                            {shift.checkOut ? `-${formatShortTime(shift.checkOut)}` : ''}
+                          </p>
                         </div>
                       )}
                     </div>

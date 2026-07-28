@@ -30,7 +30,6 @@ import {
   MapPin,
   LayoutGrid,
   Construction,
-  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   Calendar,
@@ -58,6 +57,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 
 // ────────────────────────────────────────────
@@ -70,28 +76,28 @@ const PAGE_SIZE = 10;
 // ────────────────────────────────────────────
 const MobileCardSkeleton = memo(function MobileCardSkeleton() {
   return (
-    <div className="p-5 space-y-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="mx-3 my-2 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/40 bg-white dark:bg-slate-900 space-y-3">
       <div className="flex justify-between items-start">
         <div className="space-y-2 flex-1">
           <Skeleton className="h-5 w-3/4 rounded-lg" />
           <Skeleton className="h-4 w-1/3 rounded-full" />
         </div>
-        <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+        <Skeleton className="h-12 w-12 rounded-full shrink-0" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="space-y-1.5">
-            <Skeleton className="h-3 w-16 rounded" />
-            <Skeleton className="h-5 w-24 rounded-full" />
-          </div>
-        ))}
+      <div className="flex gap-2">
+        <Skeleton className="h-6 w-20 rounded-full" />
+        <Skeleton className="h-6 w-16 rounded-full" />
       </div>
-      <div className="space-y-1.5 pt-1">
+      <div className="flex justify-between">
+        <Skeleton className="h-4 w-24 rounded" />
+        <Skeleton className="h-4 w-20 rounded" />
+      </div>
+      <div className="space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-800">
         <div className="flex justify-between">
           <Skeleton className="h-3 w-14 rounded" />
           <Skeleton className="h-3 w-8 rounded" />
         </div>
-        <Skeleton className="h-2 w-full rounded-full" />
+        <Skeleton className="h-2.5 w-full rounded-full" />
       </div>
     </div>
   );
@@ -205,20 +211,20 @@ const StatsBar = memo(function StatsBar({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-2">
       {items.map((item) => (
         <div
           key={item.label}
-          className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm"
+          className="flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-3.5 sm:px-4 py-3 shadow-sm"
         >
-          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 shrink-0">
             {item.icon}
           </div>
           <div className="text-start min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
               {item.label}
             </p>
-            <p className={`text-lg font-black leading-none mt-0.5 ${item.color}`}>
+            <p className={`text-base sm:text-lg font-black leading-none mt-0.5 ${item.color}`}>
               {item.value}
             </p>
           </div>
@@ -237,15 +243,21 @@ const MobileProjectCard = memo(function MobileProjectCard({
   refresh,
   askDelete,
   isPriority,
+  onEdit,
 }: {
   p: Project;
   isAr: boolean;
   refresh: () => void;
   askDelete: () => void;
   isPriority: boolean;
+  onEdit: (project: Project) => void;
 }) {
   return (
-    <div className="p-4 sm:p-5 space-y-3.5 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors duration-150 border-b border-slate-100 dark:border-slate-800 last:border-0">
+    <Link
+      href={`/projects/${p.id}`}
+      className="block mx-3 my-2 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/40 bg-white dark:bg-slate-900 shadow-sm active:shadow-none active:scale-[0.98] active:bg-slate-50 dark:active:bg-slate-800/60 transition-all duration-150"
+    >
+      {/* Row 1: name + action menu */}
       <div className="flex items-start gap-3 justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {p.cover_image && (
@@ -255,67 +267,103 @@ const MobileProjectCard = memo(function MobileProjectCard({
               priority={isPriority}
             />
           )}
-          <div className="min-w-0">
-            <Link
-              href={`/projects/${p.id}`}
-              className="font-bold text-sm text-slate-900 dark:text-slate-50 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 leading-tight"
-            >
-              <span className="truncate">{p.name}</span>
-              <ArrowUpRight size={13} className="shrink-0" />
-            </Link>
-            <Badge
-              variant="secondary"
-              className="text-[9px] uppercase font-bold tabular-nums mt-1 h-4"
-            >
-              #{p.contract_number || "N/A"}
-            </Badge>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-black text-[15px] text-slate-900 dark:text-slate-50 leading-tight truncate">
+              {p.name}
+            </h3>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge
+                variant="secondary"
+                className="text-[9px] uppercase font-bold tabular-nums h-4"
+              >
+                #{p.contract_number || "N/A"}
+              </Badge>
+            </div>
           </div>
         </div>
-        <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} />
+        {/* 48px touch target for action menu */}
+        <div
+          className="shrink-0 -m-1"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
-        <InfoItem
-          label={isAr ? "الحالة" : "Statut"}
-          value={<ProjectStatusBadge status={p.status} isAr={isAr} />}
-        />
-        <InfoItem
-          label={isAr ? "النوع" : "Type"}
-          value={<ProjectTypeBadge type={p.project_type} isAr={isAr} />}
-        />
-        <InfoItem
-          label={isAr ? "الولاية" : "Wilaya"}
-          value={
-            <div className="flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300">
-              <MapPin size={11} className="text-red-500 shrink-0" />
-              <span className="truncate">{p.wilaya}</span>
-            </div>
-          }
-        />
-        <InfoItem
-          label={isAr ? "الميزانية" : "Budget"}
-          value={
-            <div className="font-black text-slate-900 dark:text-slate-100 tabular-nums text-[11px]">
-              {(p.budget ?? 0).toLocaleString("fr-DZ")}{" "}
-              <span className="text-[8px] opacity-50 font-bold">DZD</span>
-            </div>
-          }
-        />
+      {/* Row 2: status + type badges — unified size */}
+      <div className="flex items-center gap-2 mt-3">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 ring-1 ring-blue-200/50 dark:ring-blue-800/50">
+          {isAr
+            ? p.status === "planning" ? "قيد التخطيط"
+            : p.status === "in_progress" ? "قيد الإنجاز"
+            : p.status === "completed" ? "مكتمل"
+            : p.status === "delayed" ? "متأخر"
+            : "ملغى"
+            : p.status === "planning" ? "Planification"
+            : p.status === "in_progress" ? "En cours"
+            : p.status === "completed" ? "Terminé"
+            : p.status === "delayed" ? "En retard"
+            : "Annulé"}
+        </span>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+          {isAr
+            ? p.project_type === "road" ? "طرق"
+            : p.project_type === "bridge" ? "جسور"
+            : p.project_type === "housing" ? "سكن"
+            : p.project_type === "school" ? "مدرسة"
+            : p.project_type === "hospital" ? "مستشفى"
+            : "بنية تحتية"
+            : p.project_type === "road" ? "Route"
+            : p.project_type === "bridge" ? "Pont"
+            : p.project_type === "housing" ? "Logement"
+            : p.project_type === "school" ? "École"
+            : p.project_type === "hospital" ? "Hôpital"
+            : "Infrastructure"}
+        </span>
       </div>
 
-      <div className="pt-1">
-        <div className="flex justify-between text-[10px] font-black uppercase mb-1.5 text-slate-400 tracking-widest">
-          <span>{isAr ? "الإنجاز" : "Avancement"}</span>
-          <span>{p.progress ?? 0}%</span>
+      {/* Row 3: wilaya + budget */}
+      <div className="flex items-center justify-between gap-3 mt-3">
+        <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 min-w-0">
+          <MapPin size={13} className="text-red-500 shrink-0" />
+          <span className="font-semibold truncate">{p.wilaya}</span>
+        </div>
+        <div className="shrink-0 font-black text-slate-900 dark:text-slate-100 tabular-nums text-[11px] whitespace-nowrap">
+          {(p.budget ?? 0).toLocaleString("ar-DZ")}{" "}
+          <span className="text-[9px] opacity-60 font-bold tracking-tight">دج</span>
+        </div>
+      </div>
+
+      {/* Row 4: prominent progress bar */}
+      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            {isAr ? "الإنجاز" : "Avancement"}
+          </span>
+          <span className="text-xs font-black tabular-nums text-slate-700 dark:text-slate-300">
+            {p.progress ?? 0}%
+          </span>
         </div>
         <ProgressBar
           progress={p.progress ?? 0}
           status={p.status}
-          className="h-2 rounded-full"
+          className="h-2.5 rounded-full"
           showText={false}
         />
       </div>
-    </div>
+
+      {/* Tappable indicator — arrow + subtle text */}
+      <div className="flex items-center justify-end gap-1 mt-2.5 opacity-40">
+        <span className="text-[9px] font-bold uppercase tracking-widest">
+          {isAr ? "فتح" : "Ouvrir"}
+        </span>
+        <ChevronLeft
+          size={12}
+          className="rtl:rotate-180"
+        />
+      </div>
+    </Link>
   );
 });
 
@@ -328,12 +376,14 @@ const DesktopTableRow = memo(function DesktopTableRow({
   refresh,
   askDelete,
   isPriority,
+  onEdit,
 }: {
   p: Project;
   isAr: boolean;
   refresh: () => void;
   askDelete: () => void;
   isPriority: boolean;
+  onEdit: (project: Project) => void;
 }) {
   const router = useRouter();
   return (
@@ -396,7 +446,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
         </div>
       </TableCell>
       <TableCell className="text-end pe-8">
-        <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} />
+        <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} />
       </TableCell>
     </TableRow>
   );
@@ -503,6 +553,8 @@ export default function ProjectsListPage({
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [editProject, setEditProject] = useState<Project | null>(null);
+
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [wilayaFilter, setWilayaFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -533,6 +585,15 @@ export default function ProjectsListPage({
       return () => clearTimeout(t);
     }
   }, [isDeleteModalOpen]);
+
+  useEffect(() => {
+    if (!editProject) {
+      const t = setTimeout(() => {
+        document.body.style.pointerEvents = "auto";
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [editProject]);
 
   const askDelete = useCallback((id: string) => {
     setItemToDelete(id);
@@ -572,6 +633,14 @@ export default function ProjectsListPage({
       searchQuery.trim() !== "",
     [statusFilter, wilayaFilter, typeFilter, searchQuery]
   );
+
+  const filterCount = useMemo(() => {
+    let c = 0;
+    if (statusFilter !== "all") c++;
+    if (wilayaFilter !== "all") c++;
+    if (typeFilter !== "all") c++;
+    return c;
+  }, [statusFilter, wilayaFilter, typeFilter]);
 
   const filteredProjects = useMemo(() => {
     const term = searchQuery.toLowerCase().trim();
@@ -630,6 +699,15 @@ export default function ProjectsListPage({
         }
       />
 
+      <CreateProjectDialog
+        isAr={isAr}
+        onSuccess={fetchProjects}
+        project={editProject ?? undefined}
+        open={!!editProject}
+        onOpenChange={(open) => { if (!open) setEditProject(null); }}
+        trigger={<span className="hidden" />}
+      />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
         <div className="text-start">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50">
@@ -679,45 +757,84 @@ export default function ProjectsListPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Filter size={13} className="text-slate-400 shrink-0" />
-              <FilterSelect
-                value={statusFilter}
-                onChange={setStatusFilter}
-                isAr={isAr}
-                type="status"
-              />
-              <FilterSelect
-                value={wilayaFilter}
-                onChange={setWilayaFilter}
-                isAr={isAr}
-                options={uniqueWilayas as string[]}
-                type="wilaya"
-              />
-              <FilterSelect
-                value={typeFilter}
-                onChange={setTypeFilter}
-                isAr={isAr}
-                type="type"
-              />
-              {hasActiveFilters && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
-                  className="h-9 text-xs font-bold text-slate-500 hover:text-red-500 gap-1.5 rounded-xl"
-                >
-                  <X size={12} />
-                  {isAr ? "مسح الكل" : "Effacer"}
-                </Button>
-              )}
-              {filteredProjects.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ms-auto text-[10px] font-black h-6 rounded-full"
-                >
-                  {filteredProjects.length}
-                </Badge>
-              )}
+              {/* Mobile: single filter button + count */}
+              <div className="md:hidden flex items-center gap-2 w-full">
+                <MobileFilterSheet
+                  isAr={isAr}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  wilayaFilter={wilayaFilter}
+                  setWilayaFilter={setWilayaFilter}
+                  typeFilter={typeFilter}
+                  setTypeFilter={setTypeFilter}
+                  uniqueWilayas={uniqueWilayas as string[]}
+                  hasActiveFilters={hasActiveFilters}
+                  clearFilters={clearFilters}
+                  filterCount={filterCount}
+                />
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="h-10 text-xs font-bold text-slate-500 hover:text-red-500 gap-1.5 rounded-xl"
+                  >
+                    <X size={13} />
+                    {isAr ? "مسح" : "Effacer"}
+                  </Button>
+                )}
+                {filteredProjects.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ms-auto text-[10px] font-black h-6 rounded-full"
+                  >
+                    {filteredProjects.length}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Desktop: inline filter selects */}
+              <div className="hidden md:flex flex-wrap items-center gap-2 w-full">
+                <Filter size={13} className="text-slate-400 shrink-0" />
+                <FilterSelect
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  isAr={isAr}
+                  type="status"
+                />
+                <FilterSelect
+                  value={wilayaFilter}
+                  onChange={setWilayaFilter}
+                  isAr={isAr}
+                  options={uniqueWilayas as string[]}
+                  type="wilaya"
+                />
+                <FilterSelect
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                  isAr={isAr}
+                  type="type"
+                />
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="h-9 text-xs font-bold text-slate-500 hover:text-red-500 gap-1.5 rounded-xl"
+                  >
+                    <X size={12} />
+                    {isAr ? "مسح الكل" : "Effacer"}
+                  </Button>
+                )}
+                {filteredProjects.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ms-auto text-[10px] font-black h-6 rounded-full"
+                  >
+                    {filteredProjects.length}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -774,6 +891,7 @@ export default function ProjectsListPage({
                       refresh={fetchProjects}
                       askDelete={() => askDelete(p.id)}
                       isPriority={idx < 3}
+                      onEdit={(proj) => setEditProject(proj)}
                     />
                   ))
                 )}
@@ -812,6 +930,7 @@ export default function ProjectsListPage({
                           refresh={fetchProjects}
                           askDelete={() => askDelete(p.id)}
                           isPriority={idx < 3}
+                          onEdit={(proj) => setEditProject(proj)}
                         />
                       ))
                     )}
@@ -901,16 +1020,187 @@ function FilterSelect({
   );
 }
 
+// ────────────────────────────────────────────
+// Mobile Filter Sheet (bottom drawer)
+// ────────────────────────────────────────────
+function MobileFilterSheet({
+  isAr,
+  statusFilter,
+  setStatusFilter,
+  wilayaFilter,
+  setWilayaFilter,
+  typeFilter,
+  setTypeFilter,
+  uniqueWilayas,
+  hasActiveFilters,
+  clearFilters,
+  filterCount,
+}: {
+  isAr: boolean;
+  statusFilter: string;
+  setStatusFilter: (v: string) => void;
+  wilayaFilter: string;
+  setWilayaFilter: (v: string) => void;
+  typeFilter: string;
+  setTypeFilter: (v: string) => void;
+  uniqueWilayas: string[];
+  hasActiveFilters: boolean;
+  clearFilters: () => void;
+  filterCount: number;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="relative h-10 rounded-xl font-bold text-xs gap-2 border-slate-200 dark:border-slate-700 shadow-sm"
+        >
+          <Filter size={14} />
+          {isAr ? "فلترة" : "Filtrer"}
+          {filterCount > 0 && (
+            <span className="absolute -top-1.5 -end-1.5 h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px] font-black">
+              {filterCount}
+            </span>
+          )}
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        side="bottom"
+        className="rounded-t-3xl max-h-[85vh] overflow-y-auto"
+      >
+        <SheetHeader className="pb-2 ps-0">
+          <SheetTitle className="text-lg font-black">
+            {isAr ? "خيارات الفلترة" : "Filtres"}
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className="space-y-5 py-4">
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              {isAr ? "الحالة" : "Statut"}
+            </label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+                <SelectValue
+                  placeholder={isAr ? "الكل" : "Tous"}
+                />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all" className="text-sm font-bold py-3">
+                  {isAr ? "الكل" : "Tous"}
+                </SelectItem>
+                <SelectItem value="planning" className="text-sm py-3">
+                  {isAr ? "قيد التخطيط" : "En planification"}
+                </SelectItem>
+                <SelectItem value="in_progress" className="text-sm py-3">
+                  {isAr ? "قيد الإنجاز" : "En cours"}
+                </SelectItem>
+                <SelectItem value="completed" className="text-sm py-3">
+                  {isAr ? "مكتمل" : "Terminé"}
+                </SelectItem>
+                <SelectItem value="delayed" className="text-sm py-3">
+                  {isAr ? "متأخر" : "En retard"}
+                </SelectItem>
+                <SelectItem value="cancelled" className="text-sm py-3">
+                  {isAr ? "ملغى" : "Annulé"}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              {isAr ? "الولاية" : "Wilaya"}
+            </label>
+            <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
+              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+                <SelectValue
+                  placeholder={isAr ? "الكل" : "Toutes"}
+                />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl max-h-60">
+                <SelectItem value="all" className="text-sm font-bold py-3">
+                  {isAr ? "الكل" : "Toutes"}
+                </SelectItem>
+                {uniqueWilayas.map((w) => (
+                  <SelectItem key={w} value={w} className="text-sm py-3">
+                    {w}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              {isAr ? "النوع" : "Type"}
+            </label>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+                <SelectValue
+                  placeholder={isAr ? "الكل" : "Tous"}
+                />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all" className="text-sm font-bold py-3">
+                  {isAr ? "الكل" : "Tous"}
+                </SelectItem>
+                <SelectItem value="road" className="text-sm py-3">
+                  {isAr ? "طرق" : "Route"}
+                </SelectItem>
+                <SelectItem value="bridge" className="text-sm py-3">
+                  {isAr ? "جسور" : "Pont"}
+                </SelectItem>
+                <SelectItem value="housing" className="text-sm py-3">
+                  {isAr ? "سكنات" : "Bâtiment"}
+                </SelectItem>
+                <SelectItem value="school" className="text-sm py-3">
+                  {isAr ? "مدارس" : "École"}
+                </SelectItem>
+                <SelectItem value="hospital" className="text-sm py-3">
+                  {isAr ? "مستشفيات" : "Hôpital"}
+                </SelectItem>
+                <SelectItem value="infrastructure" className="text-sm py-3">
+                  {isAr ? "بنية تحتية" : "Infrastructure"}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                clearFilters();
+                setOpen(false);
+              }}
+              className="w-full h-12 rounded-xl font-bold text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 gap-2"
+            >
+              <X size={16} />
+              {isAr ? "مسح جميع الفلاتر" : "Effacer tous les filtres"}
+            </Button>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 const ActionMenu = memo(function ActionMenu({
   p,
   isAr,
   refresh,
   askDelete,
+  onEdit,
 }: {
   p: Project;
   isAr: boolean;
   refresh: () => void;
   askDelete: () => void;
+  onEdit: (project: Project) => void;
 }) {
   return (
     <DropdownMenu>
@@ -918,7 +1208,7 @@ const ActionMenu = memo(function ActionMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all h-10 w-10 shrink-0"
+          className="rounded-full hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all h-12 w-12 shrink-0"
           aria-label={isAr ? "خيارات المشروع" : "Options du projet"}
           onClick={(e) => e.stopPropagation()}
         >
@@ -938,20 +1228,13 @@ const ActionMenu = memo(function ActionMenu({
             {isAr ? "فتح الورشة" : "Consulter"}
           </Link>
         </DropdownMenuItem>
-        <CreateProjectDialog
-          isAr={isAr}
-          onSuccess={refresh}
-          project={p}
-          trigger={
-            <DropdownMenuItem
-              onSelect={(e) => e.preventDefault()}
-              className="cursor-pointer font-bold text-[11px] uppercase gap-2 py-3 rounded-xl"
-            >
-              <Edit size={14} className="text-amber-500" />
-              {isAr ? "تعديل" : "Modifier"}
-            </DropdownMenuItem>
-          }
-        />
+        <DropdownMenuItem
+          onClick={(e) => { e.stopPropagation(); onEdit(p); }}
+          className="cursor-pointer font-bold text-[11px] uppercase gap-2 py-3 rounded-xl"
+        >
+          <Edit size={14} className="text-amber-500" />
+          {isAr ? "تعديل" : "Modifier"}
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={askDelete}
           className="text-red-600 font-bold text-[11px] uppercase gap-2 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-950 focus:bg-red-50 dark:focus:bg-red-950"

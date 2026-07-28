@@ -205,8 +205,11 @@ export const metresService = {
 
   // ── اشتراك في التغييرات ──
   subscribe(projectId: string, callback: () => void) {
+    const channelName = `metres-${projectId}`;
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel(`metres-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'metres', filter: `project_id=eq.${projectId}` },
