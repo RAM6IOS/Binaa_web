@@ -92,7 +92,7 @@ const col = {
 const Td: React.FC<{ width: string; children: React.ReactNode; bold?: boolean; color?: string }> = ({ width, children, bold, color }) => (
   <View style={{ width, padding: 3 }}>
     <Text style={{ fontSize: 8, fontWeight: bold ? "bold" : "normal", color: color || C.text, textAlign: "right" }}>
-      {children}
+      {children != null ? String(children) : "-"}
     </Text>
   </View>
 );

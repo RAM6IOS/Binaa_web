@@ -473,7 +473,7 @@ const Td: React.FC<{
           : styles.tableCell
       }
     >
-      {children}
+      {children != null ? String(children) : "-"}
     </Text>
   </View>
 );
@@ -593,7 +593,7 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
               <View style={styles.infoCardEven}>
                 <Text style={styles.infoLabel}>{isAr ? "الحرارة" : "Température"}</Text>
                 <Text style={styles.infoValue}>
-                  {log.temperature}°C
+                  {log.temperature ?? 0}°C
                   {log.temperature_min != null ? ` / ${log.temperature_min}°C` : ""}
                 </Text>
               </View>
@@ -606,7 +606,7 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
               <View style={styles.infoCard}>
                 <Text style={styles.infoLabel}>{isAr ? "نسبة الإنجاز" : "Progrès"}</Text>
                 <Text style={{ ...styles.infoValue, color: C.primary, fontSize: 14 }}>
-                  %{log.overall_progress}
+                  %{log.overall_progress ?? 0}
                 </Text>
               </View>
               <View style={styles.infoCardEven}>
@@ -621,7 +621,7 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
             <Text style={styles.sectionTitle}>
               {isAr ? "ملخص الأعمال المنجزة" : "RÉSUMÉ DES TRAVAUX"}
             </Text>
-            <Text style={styles.bodyText}>{log.work_summary}</Text>
+            <Text style={styles.bodyText}>{log.work_summary || "-"}</Text>
           </View>
 
           {/* ── العمال الحاضرون ── */}
@@ -791,7 +791,7 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
                     {isAr ? "⚠ عقبات ميدانية" : "⚠ Incidents"}
                   </Text>
                   <Text style={{ ...styles.alertText, color: "#991b1b" }}>
-                    {log.problems_faced}
+                    {log.problems_faced || ""}
                   </Text>
                 </View>
               )}
@@ -807,7 +807,7 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
                     {isAr ? "📝 ملاحظات وتوصيات" : "📝 Notes & Recommandations"}
                   </Text>
                   <Text style={{ ...styles.alertText, color: "#1e3a5f" }}>
-                    {log.notes}
+                    {log.notes || ""}
                   </Text>
                 </View>
               )}

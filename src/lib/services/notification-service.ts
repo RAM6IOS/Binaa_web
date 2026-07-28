@@ -169,9 +169,11 @@ export const notificationService = {
   // Realtime Subscription
   subscribe(userId: string, callback: (payload: any) => void) {
     const supabase = createBrowserClient();
+    const channelName = `notifications-${userId}`;
+    supabase.removeChannel(supabase.channel(channelName));
 
     const channel = supabase
-      .channel(`notifications-${userId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

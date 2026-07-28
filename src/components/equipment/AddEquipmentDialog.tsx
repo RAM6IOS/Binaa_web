@@ -17,10 +17,14 @@ interface AddEquipmentDialogProps {
   onSuccess: () => void;
   equipment?: Equipment; // If provided, we are in Edit mode
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger }: AddEquipmentDialogProps) {
-  const [open, setOpen] = useState(false);
+export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: controlledOpen, onOpenChange }: AddEquipmentDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState<Partial<Equipment>>({
