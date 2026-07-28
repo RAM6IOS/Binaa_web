@@ -112,20 +112,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
       {/* ─── زر الرجوع ─── */}
       <Button
         variant="ghost"
-        onClick={() => {
-          if (mobileSection) {
-            setMobileSection(null);
-          } else {
-            router.push('/projects');
-          }
-        }}
+        onClick={() => router.push('/projects')}
         className="gap-2 -ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold"
       >
         {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-        {mobileSection 
-          ? (isAr ? 'العودة' : 'Retour')
-          : (isAr ? 'العودة إلى المشاريع' : 'Retour aux projets')
-        }
+        {isAr ? 'العودة إلى المشاريع' : 'Retour aux projets'}
       </Button>
 
       {/* ─── هيدر المشروع ─── */}
@@ -209,17 +200,28 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           </div>
         ) : (
           /* ── محتوى القسم المحدد ── */
-          <div className="animate-in fade-in slide-in-from-bottom-3 duration-300">
-            {activeSection && (
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-2 rounded-xl ${activeSection.color} ${activeSection.iconColor}`}>
-                  <activeSection.icon className="w-5 h-5" strokeWidth={2.2} />
+          <div className="animate-in fade-in slide-in-from-bottom-3 duration-300 space-y-4">
+            <div className="flex items-center justify-between">
+              {activeSection && (
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${activeSection.color} ${activeSection.iconColor}`}>
+                    <activeSection.icon className="w-5 h-5" strokeWidth={2.2} />
+                  </div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                    {isAr ? activeSection.labelAr : activeSection.labelFr}
+                  </h2>
                 </div>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white">
-                  {isAr ? activeSection.labelAr : activeSection.labelFr}
-                </h2>
-              </div>
-            )}
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMobileSection(null)}
+                className="gap-2 text-xs font-bold rounded-xl"
+              >
+                {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+                {isAr ? 'العودة للأقسام' : 'Retour aux sections'}
+              </Button>
+            </div>
             <SectionContent sectionId={mobileSection} project={project} isAr={isAr} onRefresh={() => fetchProject(true)} />
           </div>
         )}
