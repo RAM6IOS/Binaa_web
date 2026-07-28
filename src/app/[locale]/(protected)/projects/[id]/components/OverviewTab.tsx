@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { projectsService } from "@/lib/services/projects-service";
 import { toast } from "sonner";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -45,7 +45,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 animate-in fade-in duration-500" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="grid md:grid-cols-2 gap-3 md:gap-4 animate-in fade-in duration-300 md:duration-500" dir={isAr ? 'rtl' : 'ltr'}>
       <Card className="hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle>{isAr ? 'تفاصيل المشروع' : 'Détails du projet'}</CardTitle>
@@ -78,7 +78,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
           <CardTitle>{isAr ? 'الحالة والتقدم' : 'Statut et Progrès'}</CardTitle>
           <CardDescription>{isAr ? 'تحديث الحالة والنسب' : 'Mise à jour du statut et pourcentage'}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium">{isAr ? 'الحالة التشغيلية' : 'Statut'}</label>
             <div className="flex gap-2">
@@ -144,12 +144,17 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
               <div className="flex items-center gap-2">
                 <Input 
                   type="number" 
-                  className="flex-1 font-semibold text-red-600 dark:text-red-400"
+                  className="flex-1 font-semibold text-red-600 dark:text-red-400 h-10 md:h-auto"
                   value={editActualCost}
                   onChange={(e) => setEditActualCost(Number(e.target.value))}
                 />
-                <Button variant="outline" className="text-blue-600" onClick={() => handleUpdate('actual_cost', editActualCost)}>
-                   {isAr ? 'تحديث' : 'Mettre à jour'}
+                <Button 
+                  variant="outline" 
+                  className="text-blue-600 h-10 px-3 md:px-4 shrink-0" 
+                  onClick={() => handleUpdate('actual_cost', editActualCost)}
+                >
+                  <Check className="w-4 h-4 md:hidden" />
+                  <span className="hidden md:inline">{isAr ? 'تحديث' : 'Mettre à jour'}</span>
                 </Button>
               </div>
             </div>
@@ -170,19 +175,36 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
         </CardContent>
       </Card>
       
-      <Card className="hover:shadow-md transition-shadow">
+      {/* ── الموقع: مخفي على الموبايل (غير فعّال)، ظاهر على سطح المكتب ── */}
+      <Card className="hover:shadow-md transition-shadow hidden md:block">
         <CardHeader>
           <CardTitle>{isAr ? 'الموقع' : 'Emplacement'}</CardTitle>
           <CardDescription>{project.wilaya}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-300 dark:border-slate-700 relative overflow-hidden">
-             {/* Map Placeholder */}
              <div className="absolute inset-0 opacity-20 bg-[url('https://maps.wikimedia.org/osm-intl/12/2114/1569.png')] bg-cover bg-center mix-blend-luminosity"></div>
              <p className="text-slate-500 z-10 font-medium bg-white/80 dark:bg-black/80 px-4 py-2 rounded-md shadow-sm text-center">
                 [ {isAr ? 'خريطة GPS' : 'Carte GPS'} ]<br/>
                 <span className="text-xs font-mono">{project.location_coordinates || 'No Coordinates'}</span>
              </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── الموقع: بطاقة مبسّطة على الموبايل ── */}
+      <Card className="hover:shadow-md transition-shadow md:hidden">
+        <CardContent className="pt-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-red-50 dark:bg-red-950 rounded-xl">
+              <MapPin className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{project.wilaya}</p>
+              {project.location_coordinates && (
+                <p className="text-xs text-slate-400 font-mono mt-0.5">{project.location_coordinates}</p>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -213,8 +213,11 @@ export const workersService = {
   },
 
   subscribe(callback: () => void) {
+    const channelName = 'workers-changes';
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel('workers-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'workers' },

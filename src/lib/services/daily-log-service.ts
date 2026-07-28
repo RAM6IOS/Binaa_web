@@ -583,8 +583,11 @@ export const dailyLogService = {
   },
 
   subscribe(projectId: string, callback: () => void) {
+    const channelName = `daily-logs-${projectId}`;
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel(`daily-logs-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'daily_logs', filter: `project_id=eq.${projectId}` },

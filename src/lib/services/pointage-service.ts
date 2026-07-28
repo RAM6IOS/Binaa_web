@@ -802,6 +802,7 @@ export const pointageService = {
     }
 
     const channelName = projectId ? `daily-pointage-channel-${projectId}` : `daily-pointage-channel-general`;
+    supabase.removeChannel(supabase.channel(channelName));
 
     const channel = supabase
       .channel(channelName)
