@@ -93,8 +93,11 @@ export const contractItemsService = {
   },
 
   subscribe(projectId: string, callback: () => void) {
+    const channelName = `contract-items-${projectId}`;
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel(`contract-items-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'contract_items', filter: `project_id=eq.${projectId}` },

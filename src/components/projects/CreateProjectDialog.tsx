@@ -17,10 +17,14 @@ interface Props {
   onSuccess?: () => void;
   project?: Project;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateProjectDialog({ isAr, onSuccess, project, trigger }: Props) {
-  const [open, setOpen] = useState(false);
+export function CreateProjectDialog({ isAr, onSuccess, project, trigger, open: controlledOpen, onOpenChange }: Props) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Project>>({

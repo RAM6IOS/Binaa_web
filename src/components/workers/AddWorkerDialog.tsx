@@ -15,13 +15,17 @@ import { toast } from "sonner";
 
 interface AddWorkerDialogProps {
   isAr: boolean;
-  onSuccess: () => void;
+  onSuccess: (createdWorker?: Worker) => void;
   worker?: Worker; // If provided, we are in Edit mode
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerDialogProps) {
-  const [open, setOpen] = useState(false);
+export function AddWorkerDialog({ isAr, onSuccess, worker, trigger, open: controlledOpen, onOpenChange }: AddWorkerDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Worker>>({
@@ -100,8 +104,11 @@ export function AddWorkerDialog({ isAr, onSuccess, worker, trigger }: AddWorkerD
         toast.success(isAr ? 'تم تحديث بيانات العامل بنجاح ✓' : 'Ouvrier mis à jour ✓');
       } else {
         // إنشاء
-        await workersService.create(cleanData);
+        const createdWorker = await workersService.create(cleanData);
         toast.success(isAr ? 'تمت إضافة العامل بنجاح ✓' : 'Ouvrier ajouté avec succès ✓');
+        setOpen(false);
+        onSuccess?.(createdWorker);
+        return;
       }
 
       setOpen(false);

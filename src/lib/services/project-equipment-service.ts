@@ -59,8 +59,11 @@ export const projectEquipmentService = {
   },
 
   subscribe(projectId: string, callback: () => void) {
+    const channelName = `project-equipment-${projectId}`;
+    supabase.removeChannel(supabase.channel(channelName));
+
     const channel = supabase
-      .channel(`project-equipment-${projectId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
