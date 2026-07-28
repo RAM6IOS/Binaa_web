@@ -28,7 +28,7 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   turbopack: {
-    root: ".",
+    root: process.cwd(),
   },
   images: {
     formats: ["image/avif", "image/webp"],
