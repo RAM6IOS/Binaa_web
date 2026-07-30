@@ -16,6 +16,7 @@ import {
 import { workersService } from "@/lib/services/workers-service";
 import { Worker } from "@/lib/types/projects";
 import { AddWorkerDialog } from "@/components/workers/AddWorkerDialog";
+import { ImportWorkersDialog } from "@/components/workers/ImportWorkersDialog";
 import { WorkerStatusBadge } from "@/components/workers/WorkerStatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -182,14 +183,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
           : `Cet ouvrier est lié à ${disableInfo?.projectCount || 0} projet(s). Désactiver ?`}
       />
 
-      {/* ─── مودال التعديل ─── */}
-      <AddWorkerDialog
-        isAr={isAr}
-        onSuccess={fetchWorkers}
-        worker={editWorker ?? undefined}
-        open={!!editWorker}
-        onOpenChange={(open) => { if (!open) setEditWorker(null); }}
-      />
+
 
       {/* ════════════════════════════════════════════ */}
       {/* ── الهيدر ── */}
@@ -199,7 +193,10 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
           <h2 className="text-3xl font-black tracking-tight">{isAr ? 'إدارة الموارد البشرية' : 'Main d\'œuvre'}</h2>
           <p className="text-slate-500 font-medium mt-1">{isAr ? 'تنظيم العمال، تتبع الحرف والوثائق' : 'Gestion du personnel et métiers'}</p>
         </div>
-        <AddWorkerDialog isAr={isAr} onSuccess={fetchWorkers} />
+        <div className="flex items-center gap-3">
+          <ImportWorkersDialog isAr={isAr} onSuccess={fetchWorkers} existingWorkers={workers} />
+          <AddWorkerDialog isAr={isAr} onSuccess={fetchWorkers} />
+        </div>
       </div>
 
       {/* ════════════════════════════════════════════ */}
@@ -455,7 +452,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                       <TableCell><WorkerStatusBadge status={worker.availability} isAr={isAr} /></TableCell>
                       <TableCell><code className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">{worker.cin}</code></TableCell>
                       <TableCell className="text-right pe-8">
-                  <ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} />
+                        <ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} />
                       </TableCell>
                     </TableRow>
                   ))}

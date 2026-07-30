@@ -238,23 +238,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
             className="overflow-x-auto no-scrollbar scroll-smooth"
           >
             <TabsList className="w-auto justify-start h-14 p-0 bg-transparent rounded-none gap-6">
-              {[
-                { id: 'overview', label: 'نظرة عامة' },
-                { id: 'tasks', label: 'لوحة المهام' },
-                { id: 'daily-logs', label: 'التقارير اليومية' },
-                { id: 'metres', label: 'الكميات المنجزة' },
-                { id: 'gantt', label: 'الجدول الزمني' },
-                { id: 'workforce', label: 'اليد العاملة' },
-                { id: 'resources', label: 'الموارد' },
-                { id: 'materials', label: 'المواد' },
-                { id: 'documents', label: 'الوثائق' },
-              ].map(tab => (
+              {SECTIONS.map(section => (
                 <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
+                  key={section.id}
+                  value={section.id}
                   className="relative h-14 min-w-0 shrink-0 rounded-none border-b-[3px] border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-xs uppercase tracking-widest whitespace-nowrap transition-all px-2 text-slate-500 data-[state=active]:text-blue-600 dark:text-slate-400 dark:data-[state=active]:text-blue-400"
                 >
-                  {tab.label}
+                  {isAr ? section.labelAr : section.labelFr}
                 </TabsTrigger>
               ))}
             </TabsList>
