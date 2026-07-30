@@ -176,8 +176,8 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
           ? `مرتبط بـ ${disableInfo?.projectCount || 0} مشاريع. هل تريد التعطيل بدلاً من الحذف؟`
           : `Lié à ${disableInfo?.projectCount || 0} projet(s). Désactiver ?`}
       />
-
-      {/* ─── مودال التعديل ─── */}
+      { /*
+      
       <AddEquipmentDialog
         isAr={isAr}
         onSuccess={fetchEquipment}
@@ -185,6 +185,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
         open={!!editEquipment}
         onOpenChange={(open) => { if (!open) setEditEquipment(null); }}
       />
+*/}
 
       {/* ════════════════════════════════════════════ */}
       {/* ── الهيدر ── */}
