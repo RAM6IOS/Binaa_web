@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import {
   Ruler, Plus, Trash2, Loader2, TrendingUp, DollarSign, FileText,
-  BarChart3, CheckCircle2, AlertTriangle, Download, Package,
+  BarChart3, CheckCircle2, AlertTriangle, Download, Package, FileSpreadsheet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/lib/types/projects";
@@ -19,6 +19,7 @@ import { ContractItem, ContractItemWithProgress, MetresSummary } from "@/lib/typ
 import { metresService } from "@/lib/services/metres-service";
 import { contractItemsService } from "@/lib/services/contract-items-service";
 import { AddContractItemDialog } from "./AddContractItemDialog";
+import { ImportContractItemsDialog } from "@/components/metres/ImportContractItemsDialog";
 import { SituationPDFDownload } from "@/components/daily-log/SituationPDF";
 
 interface Props {
@@ -98,17 +99,25 @@ export function MetresTab({ project, isAr }: Props) {
                 ? "أضف بنود العقد (BPU) لتتمكن من تتبع الكميات المنجزة"
                 : "Ajoutez les articles du bordereau (BPU) pour suivre les quantités réalisées"}
             </p>
-            <AddContractItemDialog
-              isAr={isAr}
-              projectId={project.id}
-              onSuccess={() => fetchData(true)}
-              trigger={
-                <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
-                  <Plus className="w-4 h-4" />
-                  {isAr ? "إضافة بنود العقد" : "Ajouter les articles BPU"}
-                </Button>
-              }
-            />
+            <div className="flex flex-wrap gap-3 justify-center">
+              <AddContractItemDialog
+                isAr={isAr}
+                projectId={project.id}
+                onSuccess={() => fetchData(true)}
+                trigger={
+                  <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <Plus className="w-4 h-4" />
+                    {isAr ? "إضافة بنود العقد" : "Ajouter les articles BPU"}
+                  </Button>
+                }
+              />
+              <ImportContractItemsDialog
+                isAr={isAr}
+                projectId={project.id}
+                onSuccess={() => fetchData(true)}
+                existingItems={items}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -136,7 +145,7 @@ export function MetresTab({ project, isAr }: Props) {
             {isAr ? "متابعة بنود العقد والكميات المنجزة" : "Suivi des articles contractuels et quantités réalisées"}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <AddContractItemDialog
             isAr={isAr}
             projectId={project.id}
@@ -145,6 +154,18 @@ export function MetresTab({ project, isAr }: Props) {
               <Button variant="secondary" className="gap-2">
                 <Plus className="w-4 h-4" />
                 {isAr ? "إضافة بند" : "Ajouter article"}
+              </Button>
+            }
+          />
+          <ImportContractItemsDialog
+            isAr={isAr}
+            projectId={project.id}
+            onSuccess={() => fetchData(true)}
+            existingItems={items}
+            trigger={
+              <Button variant="secondary" className="gap-2">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                {isAr ? "استيراد" : "Importer"}
               </Button>
             }
           />
