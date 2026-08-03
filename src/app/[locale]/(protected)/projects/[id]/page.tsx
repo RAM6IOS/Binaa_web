@@ -23,6 +23,7 @@ import { DocumentsTab } from "./components/DocumentsTab";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { DailyLogsTab } from "./components/DailyLogsTab";
+import { WorkAttachmentsTab } from "./components/WorkAttachmentsTab";
 import { MetresTab } from "./components/MetresTab";
 import { MaterialsTab } from "./components/MaterialsTab";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,7 @@ const SECTIONS = [
   { id: 'overview',    icon: Eye,          labelAr: 'نظرة عامة',      labelFr: 'Vue d\'ensemble', color: 'bg-blue-50 dark:bg-blue-950',    iconColor: 'text-blue-600' },
   { id: 'daily-logs',  icon: ClipboardList, labelAr: 'السجل اليومي',   labelFr: 'Journal de bord', color: 'bg-amber-50 dark:bg-amber-950',  iconColor: 'text-amber-600' },
   { id: 'metres',      icon: Ruler,        labelAr: 'الكميات',        labelFr: 'Métrés',          color: 'bg-emerald-50 dark:bg-emerald-950', iconColor: 'text-emerald-600' },
+  { id: 'work-attachments', icon: FileText, labelAr: 'محاضر القيس', labelFr: 'Attachements', color: 'bg-teal-50 dark:bg-teal-950', iconColor: 'text-teal-600' },
   { id: 'materials',   icon: Package,      labelAr: 'المواد',         labelFr: 'Matériaux',       color: 'bg-amber-50 dark:bg-amber-950',   iconColor: 'text-amber-600' },
   { id: 'workforce',   icon: Users,        labelAr: 'اليد العاملة',   labelFr: 'Main-d\'œuvre',   color: 'bg-violet-50 dark:bg-violet-950', iconColor: 'text-violet-600' },
   { id: 'resources',   icon: Truck,        labelAr: 'المعدات',        labelFr: 'Équipements',     color: 'bg-orange-50 dark:bg-orange-950', iconColor: 'text-orange-600' },
@@ -256,6 +258,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="tasks"><TaskBoardTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="daily-logs"><DailyLogsTab project={project} isAr={isAr} onRefresh={() => fetchProject(true)} /></TabsContent>
           <TabsContent value="metres"><MetresTab project={project} isAr={isAr} /></TabsContent>
+          <TabsContent value="work-attachments"><WorkAttachmentsTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="gantt" className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
           <TabsContent value="workforce"><WorkforceTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><EquipmentTab project={project} isAr={isAr} /></TabsContent>
@@ -280,6 +283,7 @@ function SectionContent({ sectionId, project, isAr, onRefresh }: {
     case 'tasks':       return <TaskBoardTab project={project} isAr={isAr} />;
     case 'daily-logs':  return <DailyLogsTab project={project} isAr={isAr} onRefresh={onRefresh} />;
     case 'metres':      return <MetresTab project={project} isAr={isAr} />;
+    case 'work-attachments': return <WorkAttachmentsTab project={project} isAr={isAr} />;
     case 'materials':   return <MaterialsTab project={project} isAr={isAr} />;
     case 'workforce':   return <WorkforceTab project={project} isAr={isAr} />;
     case 'resources':   return <EquipmentTab project={project} isAr={isAr} />;
