@@ -21,19 +21,19 @@ import { Project } from "@/lib/types/projects";
 const FONT_URL = "https://fonts.cdnfonts.com/css/cairo";
 
 let fontsRegistered = false;
-
-function registerCairoFont() {
-  if (fontsRegistered) return;
-
-  Font.register({
-    family: "Cairo",
-    fonts: [
-      { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-      { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-    ],
-  });
-
-  fontsRegistered = true;
+try {
+  if (!fontsRegistered) {
+    Font.register({
+      family: "Cairo",
+      fonts: [
+        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
+        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
+      ],
+    });
+    fontsRegistered = true;
+  }
+} catch (e) {
+  console.error("Font registration error:", e);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -486,7 +486,6 @@ const DailyLogPDFDocument: React.FC<DailyLogPDFProps> = ({
   project,
   isAr = false,
 }) => {
-  registerCairoFont();
 
   const weather = weatherMap[log.weather_condition] || weatherMap.sunny;
   const siteStatus = siteStatusMap[log.site_status] || siteStatusMap.active;
