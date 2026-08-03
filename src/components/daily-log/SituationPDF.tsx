@@ -9,9 +9,8 @@ import { Project } from "@/lib/types/projects";
 
 // ─── Font Registration ───
 let fontsRegistered = false;
-function registerFont() {
-  if (fontsRegistered) return;
-  try {
+try {
+  if (!fontsRegistered) {
     const { Font } = require("@react-pdf/renderer");
     Font.register({
       family: "Cairo",
@@ -20,8 +19,10 @@ function registerFont() {
         { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
       ],
     });
-  } catch {}
-  fontsRegistered = true;
+    fontsRegistered = true;
+  }
+} catch (e) {
+  console.error("Font registration error:", e);
 }
 
 // ─── Colors ───
@@ -98,7 +99,6 @@ const Td: React.FC<{ width: string; children: React.ReactNode; bold?: boolean; c
 );
 
 const SituationDocument: React.FC<SituationPDFProps> = ({ items, summary, project, isAr = false }) => {
-  registerFont();
   const t = isAr ? "ar" : "fr";
 
   return (
