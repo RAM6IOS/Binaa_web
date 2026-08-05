@@ -43,11 +43,12 @@ self.addEventListener('fetch', (event) => {
 
   const requestUrl = new URL(event.request.url);
 
-  // Bypass external resources, local APIs, Supabase endpoints
+  // Bypass external resources, local APIs, Supabase endpoints, and page navigations
   if (
     requestUrl.origin !== self.location.origin ||
     requestUrl.pathname.startsWith('/api') ||
-    requestUrl.href.includes('supabase.co')
+    requestUrl.href.includes('supabase.co') ||
+    event.request.mode === 'navigate'
   ) {
     return;
   }
