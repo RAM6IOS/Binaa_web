@@ -20,25 +20,30 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
-          response = NextResponse.next({ request });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+            response.cookies.set(name, value, {
+              ...options,
+              path: '/',
+            });
           });
         },
       },
     }
   );
 
-  let session = null;
+  let user = null;
   try {
-    const { data } = await supabase.auth.getSession();
-    session = data.session;
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data?.user) {
+      user = data.user;
+    }
   } catch {
-    session = null;
-  }
-
-  if (session) {
-    supabase.auth.getUser().catch(() => {});
+    user = null;
   }
 
   const pathname = request.nextUrl.pathname;
@@ -55,13 +60,13 @@ export async function proxy(request: NextRequest) {
     pathname.includes('/marketplace') ||
     pathname.includes('/pointage');
 
-  if (isAuthPage && session?.user) {
+  if (isAuthPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/projects`;
     return NextResponse.redirect(url);
   }
 
-  if (isProtectedPage && !session?.user) {
+  if (isProtectedPage && !user) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}`;
     return NextResponse.redirect(url);
