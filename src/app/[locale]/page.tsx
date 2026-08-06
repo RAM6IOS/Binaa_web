@@ -69,7 +69,7 @@ export default function LandingPage() {
                     <ArrowLeft className="mr-2 w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                   </LinkNext>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-xl border-slate-200 hover:bg-slate-50">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-xl border-slate-200 hover:bg-slate-50" onClick={() => alert(isAr ? "سيتم توفير فيديو توضيحي قريباً" : "Vidéo de présentation bientôt disponible")}>
                   شاهد الفيديو
                 </Button>
               </div>
@@ -269,7 +269,7 @@ export default function LandingPage() {
       </section>
 
       {/* 6. Testimonials */}
-      <section className="py-24 bg-white">
+      <section id="pricing" className="py-24 bg-white">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">آراء شركائنا في النجاح</h2>
@@ -355,7 +355,7 @@ export default function LandingPage() {
       </section>
 
       {/* 8. Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
+      <footer id="contact" className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-16 text-right">
             <div className="col-span-1 md:col-span-1">
