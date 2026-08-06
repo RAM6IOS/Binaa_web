@@ -9,7 +9,7 @@ for (let i = 0; i < 5; i++) {
   page.on('console', (m) => { if (m.type() === 'error') errs.push('console.error: ' + m.text().slice(0, 120)); });
   try {
     await page.goto('http://localhost:3000/ar', { waitUntil: 'networkidle', timeout: 60000 });
-    await page.click('nav a[href="/ar/auth/login"]', { timeout: 10000 });
+    await page.click('text=تسجيل الدخول', { timeout: 10000 });
     await page.waitForTimeout(2000);
     const url = page.url();
     const ok = url.includes('/ar/auth/login');
