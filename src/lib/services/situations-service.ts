@@ -16,6 +16,28 @@ import { numberToWords } from "../utils/number-to-words";
 const supabase = createClient();
 
 export const situationsService = {
+  // حساب مبلغ الأشغال المعتمدة السابقة حسب الترتيب: 1. montant_ht, 2. montant_brut, 3. travaux_cumules
+  async calculateTravauxPrecedemmentCertifies(projectId: string, currentSituationNumber: number): Promise<number> {
+    const { data: validatedSituations } = await supabase
+      .from("work_situations")
+      .select("id, situation_number, montant_ht, montant_brut, travaux_cumules")
+      .eq("project_id", projectId)
+      .eq("status", "validated")
+      .lt("situation_number", currentSituationNumber)
+      .order("situation_number", { ascending: true });
+
+    if (!validatedSituations || validatedSituations.length === 0) return 0;
+
+    return validatedSituations.reduce((acc, s) => {
+      const amount = Number(s.montant_ht) > 0 
+        ? Number(s.montant_ht) 
+        : (Number(s.montant_brut) > 0 
+            ? Number(s.montant_brut) 
+            : (Number(s.travaux_cumules) || 0));
+      return acc + amount;
+    }, 0);
+  },
+
   // جلب كل الوضعيات للمشروع
   async getByProject(projectId: string): Promise<WorkSituation[]> {
     const { data, error } = await supabase
@@ -158,17 +180,15 @@ export const situationsService = {
     }
 
     // 5. جلب الوضعيات المعتمدة السابقة لحساب الكميات السابقة والمبالغ المعتمدة
+    const travauxPrecedemmentCertifies = await this.calculateTravauxPrecedemmentCertifies(dto.project_id, nextNumber);
+
     const { data: validatedSituations } = await supabase
       .from("work_situations")
-      .select("id, net_a_payer")
+      .select("id")
       .eq("project_id", dto.project_id)
       .eq("status", "validated");
 
     const validatedIds = (validatedSituations || []).map((s) => s.id);
-    let travauxPrecedemmentCertifies = 0;
-    if (validatedSituations) {
-      travauxPrecedemmentCertifies = validatedSituations.reduce((acc, s) => acc + (Number(s.net_a_payer) || 0), 0);
-    }
 
     let previousQtysMap: Record<string, number> = {};
     if (validatedIds.length > 0) {
@@ -388,7 +408,10 @@ export const situationsService = {
 
     if (sitErr || !sit) return;
 
-    // 2. جلب بنود الوضعية
+    // 2. حساب travaux_precedemment_certifies من الوضعيات المعتمدة السابقة
+    const travauxPrecedemmentCertifies = await this.calculateTravauxPrecedemmentCertifies(sit.project_id, sit.situation_number);
+
+    // 3. جلب بنود الوضعية
     const { data: items } = await supabase
       .from("work_situation_items")
       .select("period_amount, cumulative_amount")
@@ -414,8 +437,7 @@ export const situationsService = {
     // TOTAL 1 = (1) + (2) + (3) + (4) + (5)
     const total1 = Math.round((travauxCumules + avancesForfaitaires + avancesApprovisionnement + travauxAvenant + autresMontant) * 100) / 100;
 
-    // 6. Travaux précédemment certifiés
-    const travauxPrecedemmentCertifies = Number(sit.travaux_precedemment_certifies) || 0;
+    // 6. Travaux précédemment certifiés (تم جلبها أعلاه ديناميكياً)
     // 7. Avances forfaitaires reçues / remboursées
     const avancesForfaitairesRecues = Number(sit.avances_forfaitaires_recues) || 0;
     // 8. Avances appro reçues
@@ -455,6 +477,7 @@ export const situationsService = {
       .update({
         travaux_cumules: travauxCumules,
         total_1: total1,
+        travaux_precedemment_certifies: travauxPrecedemmentCertifies,
         total_2: total2,
         montant_brut: montantBrut,
         montant_ht: montantHt,
@@ -520,6 +543,19 @@ export const situationsService = {
       .eq("id", id);
 
     if (error) throw error;
+
+    // إعادة حساب الوضعيات اللاحقة لتحديث travaux_precedemment_certifies تلقائياً
+    const { data: subsequentSituations } = await supabase
+      .from("work_situations")
+      .select("id")
+      .eq("project_id", sitWithItems.project_id)
+      .gt("situation_number", sitWithItems.situation_number);
+
+    if (subsequentSituations) {
+      for (const subSit of subsequentSituations) {
+        await this.recalculate(subSit.id);
+      }
+    }
   },
 
   // حذف وضعية (فقط إذا كانت draft)
