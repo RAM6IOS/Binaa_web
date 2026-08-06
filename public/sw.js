@@ -1,8 +1,7 @@
 // public/sw.js
 
-const CACHE_NAME = 'binaa-cache-v1';
+const CACHE_NAME = 'binaa-cache-v2';
 const ASSETS_TO_CACHE = [
-  '/',
   '/manifest.json',
   '/images/icon-192.png',
   '/images/icon-512.png',
@@ -71,11 +70,15 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request)
         .then((networkResponse) => {
-          // Cache newly fetched static assets
+          // Cache newly fetched static assets, but NEVER cache HTML documents.
+          // Stale cached HTML was the root cause of navigations showing the
+          // old landing page after a deploy.
+          const contentType = networkResponse.headers.get('content-type') || '';
           if (
             networkResponse &&
             networkResponse.status === 200 &&
-            networkResponse.type === 'basic'
+            networkResponse.type === 'basic' &&
+            !contentType.includes('text/html')
           ) {
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
@@ -85,10 +88,8 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // Fallback for document navigation if network is down
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
+          // No fallback: navigations already bypass the service worker,
+          // so a failed static-asset fetch is left to the browser default.
         });
     })
   );
