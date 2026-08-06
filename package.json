@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:k6:tokens": "node scripts/k6/generate-tokens.mjs",
+    "test:smoke": "k6 run scripts/k6/smoke.js",
+    "test:load": "k6 run scripts/k6/load.js",
+    "test:stress": "k6 run scripts/k6/stress.js",
+    "test:write-smoke": "k6 run scripts/k6/write-smoke.js",
+    "test:write-load": "k6 run scripts/k6/write-load.js",
+    "test:k6:cleanup": "node scripts/k6/cleanup-loadtest.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

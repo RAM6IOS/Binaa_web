@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# k6 load testing — credentials and generated sessions (never commit)
+/scripts/k6/data/
