@@ -484,6 +484,25 @@ export function SituationDetailScreen({
           <CardContent className="space-y-4 pt-4 text-xs">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "رقم الحصة (Lot N°)" : "Lot N°"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.lot_number || ""}
+                  onChange={(e) => setSituation({ ...situation, lot_number: e.target.value })}
+                  className="rounded-xl h-10 text-xs"
+                />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <Label className="font-bold">{isAr ? "تسمية الحصة (Lot Label)" : "Lot Label"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.lot_label || ""}
+                  onChange={(e) => setSituation({ ...situation, lot_label: e.target.value })}
+                  className="rounded-xl h-10 text-xs"
+                  placeholder={isAr ? "مثال: أشغال إنجاز الأساسات (بدون كلمات تجريبية)" : "Ex: Gros œuvre"}
+                />
+              </div>
+              <div className="space-y-1">
                 <Label className="font-bold">{isAr ? "اسم المقاولة / الشركة" : "Nom de l'entreprise"}</Label>
                 <Input
                   disabled={!isDraft}
@@ -551,6 +570,8 @@ export function SituationDetailScreen({
                         company_nif: situation.company_nif,
                         company_article: situation.company_article,
                         company_rib: situation.company_rib,
+                        lot_number: situation.lot_number,
+                        lot_label: situation.lot_label,
                       });
                       toast.success(isAr ? "تم حفظ البيانات بنجاح" : "Modifications enregistrées");
                     } catch (err: any) {
