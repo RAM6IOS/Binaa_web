@@ -22,6 +22,17 @@ export interface Project {
   notes?: string;
   created_at?: string;
   updated_at?: string;
+  
+  // Default Contract / Company Info for Situations
+  company_name?: string;
+  company_address?: string;
+  company_rc?: string;
+  company_nif?: string;
+  company_article?: string;
+  company_rib?: string;
+  company_bank?: string;
+  lot_number?: string;
+  lot_label?: string;
 }
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'delayed';

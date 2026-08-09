@@ -161,6 +161,52 @@ export const situationsService = {
       throw new Error("المشروع غير موجود");
     }
 
+    // 2.5 جلب آخر وضعية لهذا المشروع (بأي حالة) كمصدر للبيانات الافتراضية
+    // ترتيب تنازلي لأخذ الأحدث رقماً (تحتوي على أحدث بيانات أدخلها المستخدم)
+    const { data: validatedSitsRaw, error: lastSitErr } = await supabase
+      .from("work_situations")
+      .select("*")
+      .eq("project_id", dto.project_id)
+      .order("situation_number", { ascending: false });
+
+    if (lastSitErr) {
+      console.warn("[Situations] تحذير: فشل جلب الوضعيات المعتمدة (لن يوقف الإنشاء):", lastSitErr.message);
+    }
+
+    // المصدر المرجعي: آخر وضعية معتمدة تحتوي company_name حقيقي
+    // الوضعيات المعتمدة اجتازت validate() التي تمنع: "Binaa Construction EURL"، NIF أصفار، RC فارغ
+    const refSituation =
+      validatedSitsRaw?.find((s) => s.company_name && s.company_name.trim() !== "") ??
+      validatedSitsRaw?.[0] ??
+      null;
+
+    // دالة مساعدة: تُرجع القيمة الأولى غير الفارغة (تتجاهل null/undefined/"")
+    const pickFirst = (...values: (string | null | undefined)[]): string => {
+      for (const v of values) {
+        if (v !== null && v !== undefined && v.trim() !== "") return v.trim();
+      }
+      return "";
+    };
+
+    // ترتيب الأولوية:
+    // 1. بيانات المشروع (محفوظة عبر "حفظ التعديلات" في تبويب Snapshot)
+    // 2. آخر وضعية معتمدة (بيانات حقيقية مضمونة)
+    // 3. قيم بسيطة آمنة
+    const defaults = {
+      company_name:    pickFirst(project.company_name,    refSituation?.company_name),
+      company_address: pickFirst(project.company_address, refSituation?.company_address),
+      company_rc:      pickFirst(project.company_rc,      refSituation?.company_rc),
+      company_nif:     pickFirst(project.company_nif,     refSituation?.company_nif),
+      company_article: pickFirst(project.company_article, refSituation?.company_article),
+      company_rib:     pickFirst(project.company_rib,     refSituation?.company_rib),
+      company_bank:    pickFirst(project.company_bank,    refSituation?.company_bank),
+      lot_number:      pickFirst(project.lot_number,      refSituation?.lot_number,  "01"),
+      lot_label:       pickFirst(project.lot_label,       refSituation?.lot_label,   project.description, "Lot unique"),
+    };
+
+    console.log("[Situations] المصدر المرجعي:", refSituation ? `وضعية N°${refSituation.situation_number} (معتمدة)` : "لا توجد وضعيات معتمدة");
+    console.log("[Situations] قيم Snapshot المحلولة:", defaults);
+
     // 3. جلب المستخدم الحالي
     let userId: string | undefined;
     const { data: { session } } = await supabase.auth.getSession();
@@ -237,19 +283,19 @@ export const situationsService = {
       status: "draft",
       situation_type: dto.situation_type || "monthly",
 
-      // Snapshots نظيفة تماماً بدون بيانات وهمية غير صالحة للاعتماد
-      wilaya: project.wilaya || "Alger",
-      company_name: "",
-      company_address: "",
-      company_rc: "",
-      company_nif: "",
-      company_article: "",
-      company_rib: "",
-      company_bank: "",
-      operation_name: project.name,
-      project_name: project.name,
-      lot_number: "01",
-      lot_label: project.description || "",
+      // Snapshot: ترتيب الأولوية: بيانات المشروع → آخر وضعية → قيمة افتراضية
+      wilaya:          project.wilaya || "Alger",
+      company_name:    defaults.company_name,
+      company_address: defaults.company_address,
+      company_rc:      defaults.company_rc,
+      company_nif:     defaults.company_nif,
+      company_article: defaults.company_article,
+      company_rib:     defaults.company_rib,
+      company_bank:    defaults.company_bank,
+      operation_name:  project.name,
+      project_name:    project.name,
+      lot_number:      defaults.lot_number,
+      lot_label:       defaults.lot_label,
       marche_amount_ttc: marcheAmountTtc,
       client_name: project.client_name || "",
       maitre_oeuvre: "",
@@ -350,6 +396,33 @@ export const situationsService = {
 
     if (error) throw error;
     await this.recalculate(situationId);
+  },
+
+  // تحديث لقطة الوضعية والبيانات الافتراضية للمشروع في نفس الوقت
+  async updateSnapshotAndDefaults(situationId: string, projectId: string, dto: UpdateWorkSituationFinancialsDto): Promise<void> {
+    // 1. تحديث الوضعية الحالية
+    await this.updateFinancialFields(situationId, dto);
+    
+    // 2. تحديث البيانات الافتراضية في المشروع لاستخدامها في الوضعيات القادمة
+    const { error } = await supabase
+      .from("projects")
+      .update({
+        company_name: dto.company_name,
+        company_address: dto.company_address,
+        company_rc: dto.company_rc,
+        company_nif: dto.company_nif,
+        company_article: dto.company_article,
+        company_rib: dto.company_rib,
+        lot_number: dto.lot_number,
+        lot_label: dto.lot_label,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", projectId);
+
+    if (error) {
+      console.error("[Situations] Error updating project defaults:", error.message);
+      throw error;
+    }
   },
 
   // تحديث بند في الوضعية

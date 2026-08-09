@@ -563,7 +563,7 @@ export function SituationDetailScreen({
                 <Button
                   onClick={async () => {
                     try {
-                      await situationsService.updateFinancialFields(situation.id, {
+                      await situationsService.updateSnapshotAndDefaults(situation.id, situation.project_id, {
                         company_name: situation.company_name,
                         company_address: situation.company_address,
                         company_rc: situation.company_rc,
@@ -573,7 +573,7 @@ export function SituationDetailScreen({
                         lot_number: situation.lot_number,
                         lot_label: situation.lot_label,
                       });
-                      toast.success(isAr ? "تم حفظ البيانات بنجاح" : "Modifications enregistrées");
+                      toast.success(isAr ? "تم حفظ البيانات واعتمادها للوضعيات القادمة" : "Modifications enregistrées pour les prochaines situations");
                     } catch (err: any) {
                       toast.error(err.message);
                     }
