@@ -136,11 +136,41 @@ export const metresService = {
     if (error) throw error;
   },
 
-  // ── حساب بنود العقد مع تقدم الإنجاز ──
-  async getItemsWithProgress(projectId: string): Promise<ContractItemWithProgress[]> {
+  // ── جلب الكميات مع فلتر تاريخي اختياري ──
+  // نبني شروط OR/AND بشكل صريح لتفادي مشكلة إعادة تعيين متغير Supabase v2
+  async _getMetresByDateRange(
+    projectId: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ): Promise<Metre[]> {
+    // نحدد نطاق التاريخ بقيم افتراضية آمنة جداً عند غياب أحد الحدّين
+    const from = dateFrom ?? '1900-01-01';
+    const to   = dateTo   ?? '9999-12-31';
+
+    const { data, error } = await supabase
+      .from('metres')
+      .select('*')
+      .eq('project_id', projectId)
+      .gte('log_date', from)   // log_date >= dateFrom (أو 1900 إن لم يُحدَّد)
+      .lte('log_date', to)     // log_date <= dateTo   (أو 9999 إن لم يُحدَّد)
+      .order('log_date', { ascending: false });
+
+    if (error) {
+      console.error('[Metres] Date-range fetch error:', error.message);
+      throw error;
+    }
+    return (data || []) as Metre[];
+  },
+
+  // ── حساب بنود العقد مع تقدم الإنجاز (مع فلتر تاريخي اختياري) ──
+  async getItemsWithProgress(
+    projectId: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ): Promise<ContractItemWithProgress[]> {
     const [items, metres] = await Promise.all([
       this._getContractItems(projectId),
-      this.getByProjectId(projectId),
+      this._getMetresByDateRange(projectId, dateFrom, dateTo),
     ]);
 
     return items.map(item => {
@@ -163,9 +193,13 @@ export const metresService = {
     });
   },
 
-  // ── ملخص عام للمقاسات ──
-  async getSummary(projectId: string): Promise<MetresSummary> {
-    const itemsWithProgress = await this.getItemsWithProgress(projectId);
+  // ── ملخص عام للمقاسات (مع فلتر تاريخي اختياري) ──
+  async getSummary(
+    projectId: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ): Promise<MetresSummary> {
+    const itemsWithProgress = await this.getItemsWithProgress(projectId, dateFrom, dateTo);
 
     const total_contract_value = itemsWithProgress.reduce(
       (sum, item) => sum + (item.quantity * item.unit_price), 0

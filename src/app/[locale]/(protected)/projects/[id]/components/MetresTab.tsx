@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Calendar, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,12 +35,21 @@ export function MetresTab({ project, isAr }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<ContractItemWithProgress | null>(null);
 
+  // ── فلتر الفترة الزمنية ──
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo,   setDateTo]   = useState("");
+  const isFiltered = dateFrom !== "" || dateTo !== "";
+
+  const clearFilter = () => { setDateFrom(""); setDateTo(""); };
+
   const fetchData = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
     try {
+      const from = dateFrom || undefined;
+      const to   = dateTo   || undefined;
       const [itemsData, summaryData] = await Promise.all([
-        metresService.getItemsWithProgress(project.id),
-        metresService.getSummary(project.id),
+        metresService.getItemsWithProgress(project.id, from, to),
+        metresService.getSummary(project.id, from, to),
       ]);
       setItems(itemsData);
       setSummary(summaryData);
@@ -48,7 +58,7 @@ export function MetresTab({ project, isAr }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [project.id]);
+  }, [project.id, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchData();
@@ -176,6 +186,70 @@ export function MetresTab({ project, isAr }: Props) {
             </Button>
           </SituationPDFDownload>
         </div>
+      </div>
+
+      {/* ─── فلتر الفترة الزمنية ─── */}
+      <div className="flex flex-wrap items-end gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+          <Calendar className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase">
+            {isAr ? "فلترة زمنية" : "Période"}
+          </span>
+        </div>
+
+        <div className="flex flex-1 flex-wrap items-end gap-3 min-w-0">
+          {/* من / Du */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">
+              {isAr ? "من" : "Du"}
+            </label>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              max={dateTo || undefined}
+              className="h-8 text-xs w-36"
+            />
+          </div>
+
+          {/* إلى / Au */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">
+              {isAr ? "إلى" : "Au"}
+            </label>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              min={dateFrom || undefined}
+              className="h-8 text-xs w-36"
+            />
+          </div>
+
+          {/* زر مسح */}
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilter}
+              className="h-8 gap-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 self-end"
+            >
+              <X className="w-3.5 h-3.5" />
+              {isAr ? "مسح الفلتر" : "Effacer le filtre"}
+            </Button>
+          )}
+        </div>
+
+        {/* شريط الحالة */}
+        {isFiltered && (
+          <div className="w-full mt-1 flex items-center gap-2 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block" />
+            {isAr
+              ? `عرض الكميات المنجزة${dateFrom ? " من " + dateFrom : ""}${dateTo ? " إلى " + dateTo : ""}`
+              : `Filtré : quantités réalisées${dateFrom ? " du " + dateFrom : ""}${dateTo ? " au " + dateTo : ""}`
+            }
+          </div>
+        )}
       </div>
 
       {/* ─── Summary Cards ─── */}
