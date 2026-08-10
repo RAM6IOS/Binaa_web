@@ -488,7 +488,7 @@ const WorkAttachmentDocument: React.FC<WorkAttachmentPDFProps> = ({
 
           <View style={styles.signatureBox}>
             <Text style={styles.signatureTitle}>
-              {isAr ? "مهندس المشروع (مكتب الدراسات / المتابع)" : "Chef de Projet"}
+              {isAr ? "مكتب الدراسات" : "Bureau d'études"}
             </Text>
             <Text style={styles.signatureFooter}>
               {isAr ? "التوقيع (Signature)" : "Signature"}

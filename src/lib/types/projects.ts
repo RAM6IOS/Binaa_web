@@ -27,10 +27,13 @@ export interface Project {
   company_name?: string;
   company_address?: string;
   company_rc?: string;
+  company_rc_date?: string;
   company_nif?: string;
+  company_nis?: string;
   company_article?: string;
   company_rib?: string;
   company_bank?: string;
+  company_capital?: string;
   lot_number?: string;
   lot_label?: string;
 }

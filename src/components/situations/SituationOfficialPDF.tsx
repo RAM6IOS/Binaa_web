@@ -187,30 +187,70 @@ const SituationOfficialPDFDocument: React.FC<SituationPDFProps> = ({ situation }
 
         {/* عنوان الوثيقة الرسمي */}
         <View style={styles.titleBox}>
-          <Text style={styles.mainTitle}>Situation de Travaux — Partie Co-Contractant</Text>
+          <Text style={styles.mainTitle}>SITUATION DES TRAVAUX</Text>
           <Text style={styles.subTitle}>
-            Situation N° {situation.situation_number} — Arrêtée au {situation.arretee_au} ({situation.situation_type})
+            Situation N° {situation.situation_number} — Arrêtée au {situation.arretee_au} ({situation.situation_type === "monthly" ? "Mensuelle" : situation.situation_type === "final" ? "Finale" : "Intérimaire"})
           </Text>
         </View>
 
-        {/* معلومات المقاول والصفقة */}
+        {/* معلومات الأطراف والصفقة (نموذج إداري جزائري رسمي) */}
         <View style={styles.gridTwo}>
+          {/* 1. المصلحة المتعاقدة والصفقة (Service Contractant & Marché) */}
           <View style={styles.box}>
-            <Text style={styles.boxTitle}>1. Co-Contractant (Entrepreneur)</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Nom / Raison sociale:</Text> {situation.company_name || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Adresse:</Text> {situation.company_address || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>NIF:</Text> {situation.company_nif || "—"} | <Text style={styles.label}>RC:</Text> {situation.company_rc || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Article d'imposition:</Text> {situation.company_article || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Compte Bancaire (RIB):</Text> {situation.company_rib || "—"}</Text>
+            <Text style={styles.boxTitle}>1. Service Contractant & Marché</Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Maître d'Ouvrage:</Text> {situation.client_name || "Service Contractant"}
+            </Text>
+            {situation.maitre_oeuvre && (
+              <Text style={styles.rowText}>
+                <Text style={styles.label}>Maître d'Œuvre:</Text> {situation.maitre_oeuvre}
+              </Text>
+            )}
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Marché N°:</Text> {situation.marche_number || "—"}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Montant Marché TTC:</Text> {(situation.marche_amount_ttc || 0).toLocaleString()} DZD
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Lot N°:</Text> {situation.lot_number || "01"} — {situation.lot_label || "Lot unique"}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Projet / Opération:</Text> {situation.operation_name || situation.project_name || "—"}
+            </Text>
           </View>
 
+          {/* 2. المقاول / الشركة المتعاقدة (Co-Contractant / Entrepreneur) */}
           <View style={styles.box}>
-            <Text style={styles.boxTitle}>2. Projet & Marché</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Opération:</Text> {situation.operation_name || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Intitulé du Projet:</Text> {situation.project_name || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Lot N°:</Text> {situation.lot_number || "01"} — {situation.lot_label || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Maître d'Ouvrage:</Text> {situation.client_name || "—"}</Text>
-            <Text style={styles.rowText}><Text style={styles.label}>Montant Marché TTC:</Text> {(situation.marche_amount_ttc || 0).toLocaleString()} DZD</Text>
+            <Text style={styles.boxTitle}>2. Co-Contractant (Entrepreneur)</Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Nom / Raison sociale:</Text> {situation.company_name || "—"}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Adresse:</Text> {situation.company_address || "—"}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>RC N°:</Text> {situation.company_rc || "—"}{situation.company_rc_date ? ` (du ${situation.company_rc_date})` : ""}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>NIF:</Text> {situation.company_nif || "—"}{situation.company_nis ? ` | NIS: ${situation.company_nis}` : ""}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Article d'imposition (AI):</Text> {situation.company_article || "—"}
+            </Text>
+            <Text style={styles.rowText}>
+              <Text style={styles.label}>Compte Bancaire (RIB):</Text> {situation.company_rib || "—"}
+            </Text>
+            {situation.company_bank && (
+              <Text style={styles.rowText}>
+                <Text style={styles.label}>Banque / Agence:</Text> {situation.company_bank}
+              </Text>
+            )}
+            {situation.company_capital && (
+              <Text style={styles.rowText}>
+                <Text style={styles.label}>Capital Social:</Text> {situation.company_capital}
+              </Text>
+            )}
           </View>
         </View>
 

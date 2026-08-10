@@ -484,6 +484,26 @@ export function SituationDetailScreen({
           <CardContent className="space-y-4 pt-4 text-xs">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "صاحب المشروع / المصلحة المتعاقدة" : "Maître d'ouvrage"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.client_name || ""}
+                  onChange={(e) => setSituation({ ...situation, client_name: e.target.value })}
+                  className="rounded-xl h-10 text-xs font-semibold"
+                  placeholder={isAr ? "مثال: مديرية التجهيزات العمومية" : "Ex: Direction des Équipements Publics"}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "رقم الصفقة (Marché N°)" : "Marché N°"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.marche_number || ""}
+                  onChange={(e) => setSituation({ ...situation, marche_number: e.target.value })}
+                  className="rounded-xl h-10 text-xs font-semibold"
+                  placeholder={isAr ? "مثال: N° 45/2024" : "Ex: N° 45/2024"}
+                />
+              </div>
+              <div className="space-y-1">
                 <Label className="font-bold">{isAr ? "رقم الحصة (Lot N°)" : "Lot N°"}</Label>
                 <Input
                   disabled={!isDraft}
@@ -492,27 +512,28 @@ export function SituationDetailScreen({
                   className="rounded-xl h-10 text-xs"
                 />
               </div>
-              <div className="space-y-1 md:col-span-2">
+              <div className="space-y-1 md:col-span-3">
                 <Label className="font-bold">{isAr ? "تسمية الحصة (Lot Label)" : "Lot Label"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.lot_label || ""}
                   onChange={(e) => setSituation({ ...situation, lot_label: e.target.value })}
                   className="rounded-xl h-10 text-xs"
-                  placeholder={isAr ? "مثال: أشغال إنجاز الأساسات (بدون كلمات تجريبية)" : "Ex: Gros œuvre"}
+                  placeholder={isAr ? "مثال: أشغال إنجاز الأساسات والهيكل" : "Ex: Gros œuvre"}
                 />
               </div>
+
               <div className="space-y-1">
-                <Label className="font-bold">{isAr ? "اسم المقاولة / الشركة" : "Nom de l'entreprise"}</Label>
+                <Label className="font-bold">{isAr ? "اسم المقاولة / الشركة (Co-contractant)" : "Nom de l'entreprise"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.company_name || ""}
                   onChange={(e) => setSituation({ ...situation, company_name: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-xl h-10 text-xs font-semibold"
                 />
               </div>
-              <div className="space-y-1">
-                <Label className="font-bold">{isAr ? "عنوان المقاولة" : "Adresse"}</Label>
+              <div className="space-y-1 md:col-span-2">
+                <Label className="font-bold">{isAr ? "عنوان المقاولة الرسمي" : "Adresse"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.company_address || ""}
@@ -520,12 +541,23 @@ export function SituationDetailScreen({
                   className="rounded-xl h-10 text-xs"
                 />
               </div>
+
               <div className="space-y-1">
-                <Label className="font-bold">{isAr ? "السجل التجاري (RC)" : "Registre de Commerce (RC)"}</Label>
+                <Label className="font-bold">{isAr ? "السجل التجاري (RC N°)" : "Registre de Commerce (RC)"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.company_rc || ""}
                   onChange={(e) => setSituation({ ...situation, company_rc: e.target.value })}
+                  className="rounded-xl h-10 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "تاريخ السجل التجاري (Date RC)" : "Date RC"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  type="date"
+                  value={situation.company_rc_date || ""}
+                  onChange={(e) => setSituation({ ...situation, company_rc_date: e.target.value })}
                   className="rounded-xl h-10 text-xs"
                 />
               </div>
@@ -538,8 +570,18 @@ export function SituationDetailScreen({
                   className="rounded-xl h-10 text-xs"
                 />
               </div>
+
               <div className="space-y-1">
-                <Label className="font-bold">{isAr ? "رقم التعريف الإحصائي (Article)" : "Article d'imposition"}</Label>
+                <Label className="font-bold">{isAr ? "الرقم الإحصائي (NIS)" : "NIS"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.company_nis || ""}
+                  onChange={(e) => setSituation({ ...situation, company_nis: e.target.value })}
+                  className="rounded-xl h-10 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "المادة الضريبية (Article d'imposition)" : "Article d'imposition"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.company_article || ""}
@@ -548,12 +590,33 @@ export function SituationDetailScreen({
                 />
               </div>
               <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "رأس المال الاجتماعي (Capital Social)" : "Capital Social"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.company_capital || ""}
+                  onChange={(e) => setSituation({ ...situation, company_capital: e.target.value })}
+                  className="rounded-xl h-10 text-xs"
+                  placeholder="Ex: 10 000 000 DA"
+                />
+              </div>
+
+              <div className="space-y-1 md:col-span-2">
                 <Label className="font-bold">{isAr ? "رقم الحساب البنكي (RIB)" : "RIB Bancaire"}</Label>
                 <Input
                   disabled={!isDraft}
                   value={situation.company_rib || ""}
                   onChange={(e) => setSituation({ ...situation, company_rib: e.target.value })}
+                  className="rounded-xl h-10 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-bold">{isAr ? "البنك / الوكالة (Banque / Agence)" : "Banque / Agence"}</Label>
+                <Input
+                  disabled={!isDraft}
+                  value={situation.company_bank || ""}
+                  onChange={(e) => setSituation({ ...situation, company_bank: e.target.value })}
                   className="rounded-xl h-10 text-xs"
+                  placeholder="Ex: BEA Agence 104"
                 />
               </div>
             </div>
@@ -567,11 +630,17 @@ export function SituationDetailScreen({
                         company_name: situation.company_name,
                         company_address: situation.company_address,
                         company_rc: situation.company_rc,
+                        company_rc_date: situation.company_rc_date,
                         company_nif: situation.company_nif,
+                        company_nis: situation.company_nis,
                         company_article: situation.company_article,
                         company_rib: situation.company_rib,
+                        company_bank: situation.company_bank,
+                        company_capital: situation.company_capital,
                         lot_number: situation.lot_number,
                         lot_label: situation.lot_label,
+                        client_name: situation.client_name,
+                        marche_number: situation.marche_number,
                       });
                       toast.success(isAr ? "تم حفظ البيانات واعتمادها للوضعيات القادمة" : "Modifications enregistrées pour les prochaines situations");
                     } catch (err: any) {
