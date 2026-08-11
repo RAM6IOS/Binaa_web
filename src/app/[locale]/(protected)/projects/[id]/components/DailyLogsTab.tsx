@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,12 +13,9 @@ import {
 } from "@/components/ui/select";
 import {
   BookOpen,
-  CalendarDays,
   Calendar,
-  Filter,
+  CloudSun,
   Search,
-  Sparkles,
-  Sun,
   AlertTriangle,
   Loader2,
   Plus,
@@ -167,94 +165,99 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
       </div>
 
       {/* Toolbar & Filters */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm space-y-3">
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+      <Card className="p-4 rounded-2xl border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-4">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute right-3 top-2.5 w-4 h-4 text-slate-400 rtl:right-3 rtl:left-auto ltr:left-3 ltr:right-auto" />
+          <div className="relative w-full xl:flex-1 xl:min-w-[240px]">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isAr ? "بحث في الملخص أو المشاكل..." : "Rechercher..."}
-              className="pl-9 pr-9 text-xs h-9"
+              className="ps-9 pe-9 text-sm"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 rtl:left-3 rtl:right-auto ltr:right-3 ltr:left-auto"
+                aria-label={isAr ? "مسح البحث" : "Effacer la recherche"}
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          {/* Date Range Filters (من / إلى) */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-              <Calendar className="w-3.5 h-3.5 text-orange-500 mx-1" />
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] font-bold text-slate-400">{isAr ? "من:" : "Du:"}</span>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  max={dateTo || undefined}
-                  className="h-7 w-32 text-[11px] bg-white dark:bg-slate-900 border-none shadow-none px-1"
-                />
-              </div>
-              <span className="text-slate-300 dark:text-slate-600">-</span>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] font-bold text-slate-400">{isAr ? "إلى:" : "Au:"}</span>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  min={dateFrom || undefined}
-                  className="h-7 w-32 text-[11px] bg-white dark:bg-slate-900 border-none shadow-none px-1"
-                />
-              </div>
+          {/* Date Range + Weather Filters */}
+          <div className="grid grid-cols-2 gap-3 xl:flex xl:items-center xl:gap-4">
+            <div className="relative w-full xl:w-40">
+              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                max={dateTo || undefined}
+                aria-label={isAr ? "من تاريخ" : "Du"}
+                className="ps-9 pe-1 text-sm"
+              />
+            </div>
+
+            <div className="relative w-full xl:w-40">
+              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                min={dateFrom || undefined}
+                aria-label={isAr ? "إلى تاريخ" : "Au"}
+                className="ps-9 pe-1 text-sm"
+              />
             </div>
 
             {/* Weather Filter */}
-            <Select value={filterWeather} onValueChange={setFilterWeather}>
-              <SelectTrigger className="h-9 w-32 text-xs">
-                <SelectValue placeholder={isAr ? "الطقس" : "Météo"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{isAr ? "كل الحالات" : "Toutes météos"}</SelectItem>
-                <SelectItem value="مشمس">{isAr ? "مشمس ☀️" : "Ensoleillé ☀️"}</SelectItem>
-                <SelectItem value="غائم">{isAr ? "غائم ☁️" : "Nuageux ☁️"}</SelectItem>
-                <SelectItem value="ممطر">{isAr ? "ممطر 🌧️" : "Pluvieux 🌧️"}</SelectItem>
-                <SelectItem value="عاصف">{isAr ? "عاصف 💨" : "Venteux 💨"}</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="col-span-2 xl:col-span-1 w-full xl:w-44">
+              <Select value={filterWeather} onValueChange={setFilterWeather}>
+                <SelectTrigger className="text-sm ps-9">
+                  <CloudSun className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <SelectValue placeholder={isAr ? "الطقس" : "Météo"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{isAr ? "كل الحالات" : "Toutes météos"}</SelectItem>
+                  <SelectItem value="مشمس">{isAr ? "مشمس ☀️" : "Ensoleillé ☀️"}</SelectItem>
+                  <SelectItem value="غائم">{isAr ? "غائم ☁️" : "Nuageux ☁️"}</SelectItem>
+                  <SelectItem value="ممطر">{isAr ? "ممطر 🌧️" : "Pluvieux 🌧️"}</SelectItem>
+                  <SelectItem value="عاصف">{isAr ? "عاصف 💨" : "Venteux 💨"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-            {/* Reset Filters */}
+          {/* Actions */}
+          <div className="flex items-center justify-between gap-2 xl:justify-end xl:shrink-0">
             {isFiltered && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="h-9 text-xs text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 gap-1"
+                className="h-11 md:h-10 text-xs text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 gap-1 shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
                 {isAr ? "إلغاء الفلتر" : "Effacer"}
               </Button>
             )}
-          </div>
 
-          {/* New Daily Log Button */}
-          <AddDailyLogDialog
-            isAr={isAr}
-            projectId={project.id}
-            onSuccess={() => { fetchLogs(true); onRefresh?.(); }}
-            trigger={
-              <Button size="sm" className="h-9 gap-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shrink-0">
-                <Plus className="w-4 h-4" />
-                {isAr ? "تقرير يومي جديد" : "Nouveau rapport"}
-              </Button>
-            }
-          />
+            {/* New Daily Log Button */}
+            <AddDailyLogDialog
+              isAr={isAr}
+              projectId={project.id}
+              onSuccess={() => { fetchLogs(true); onRefresh?.(); }}
+              trigger={
+                <Button className="h-11 md:h-10 gap-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shrink-0">
+                  <Plus className="w-4 h-4" />
+                  {isAr ? "تقرير يومي جديد" : "Nouveau rapport"}
+                </Button>
+              }
+            />
+          </div>
         </div>
 
         {/* Active Filter Notice Banner */}
@@ -278,7 +281,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
             </button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Logs List */}
       {isLoading ? (

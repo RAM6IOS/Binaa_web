@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Calendar, X } from "lucide-react";
+import { Calendar, CalendarClock, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,72 +189,68 @@ export function MetresTab({ project, isAr }: Props) {
       </div>
 
       {/* ─── فلتر الفترة الزمنية ─── */}
-      <div className="flex flex-wrap items-end gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-          <Calendar className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase">
-            {isAr ? "فلترة زمنية" : "Période"}
-          </span>
-        </div>
+      <Card className="p-4 rounded-2xl border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+          {/* عنوان الفترة */}
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 shrink-0">
+            <Calendar className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-bold">{isAr ? "الفترة الزمنية" : "Période"}</span>
+          </div>
 
-        <div className="flex flex-1 flex-wrap items-end gap-3 min-w-0">
-          {/* من / Du */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">
-              {isAr ? "من" : "Du"}
-            </label>
+          {/* Du – Au */}
+          <div className="grid grid-cols-2 gap-3 lg:flex lg:items-center lg:gap-2 lg:flex-1 lg:min-w-0">
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               max={dateTo || undefined}
-              className="h-8 text-xs w-36"
+              aria-label={isAr ? "من تاريخ" : "Du"}
+              className="h-11 md:h-10 w-full text-xs lg:w-40"
             />
-          </div>
-
-          {/* إلى / Au */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">
-              {isAr ? "إلى" : "Au"}
-            </label>
+            <span className="hidden lg:inline text-slate-300 text-sm select-none">–</span>
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               min={dateFrom || undefined}
-              className="h-8 text-xs w-36"
+              aria-label={isAr ? "إلى تاريخ" : "Au"}
+              className="h-11 md:h-10 w-full text-xs lg:w-40"
             />
           </div>
 
-          {/* زر مسح */}
-          {isFiltered && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilter}
-              className="h-8 gap-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 self-end"
-            >
-              <X className="w-3.5 h-3.5" />
-              {isAr ? "مسح الفلتر" : "Effacer le filtre"}
-            </Button>
-          )}
-        </div>
-
-        {/* شريط الحالة */}
-        {isFiltered && (
-          <div className="w-full mt-1 flex items-center gap-2 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block" />
-            {isAr
-              ? `عرض الكميات المنجزة${dateFrom ? " من " + dateFrom : ""}${dateTo ? " إلى " + dateTo : ""}`
-              : `Filtré : quantités réalisées${dateFrom ? " du " + dateFrom : ""}${dateTo ? " au " + dateTo : ""}`
-            }
+          {/* إعادة ضبط */}
+          <div className="flex items-center gap-2 lg:justify-end shrink-0">
+            {isFiltered && (
+              <Button
+                variant="outline"
+                onClick={clearFilter}
+                className="h-11 md:h-10 gap-1.5 text-xs text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:border-red-900 shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+                {isAr ? "إعادة ضبط" : "Réinitialiser"}
+              </Button>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </Card>
 
       {/* ─── Summary Cards ─── */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          {isFiltered && (
+            <div className="mb-3">
+              <Badge variant="info" className="gap-1.5 px-3 py-1.5">
+                <CalendarClock className="w-3.5 h-3.5" />
+                {isAr ? "حسب الفترة" : "Selon la période"}
+                {(dateFrom || dateTo) && (
+                  <span className="font-mono text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                    {dateFrom || "…"} – {dateTo || "…"}
+                  </span>
+                )}
+              </Badge>
+            </div>
+          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -316,6 +312,7 @@ export function MetresTab({ project, isAr }: Props) {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       )}
 
