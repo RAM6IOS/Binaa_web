@@ -26,8 +26,40 @@
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
+    --inverse: 222.2 47.4% 11.2%;
+    --inverse-foreground: 210 40% 98%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+
+    --success: 162 93% 24%;
+    --success-foreground: 210 40% 98%;
+    --warning: 31 92% 35%;
+    --warning-foreground: 210 40% 98%;
+    --info: 221 83% 53%;
+    --info-foreground: 210 40% 98%;
+
+    /* Attendance indicators (pointage): present / shift / absent */
+    --present: 159 65% 33%;
+    --present-foreground: 210 40% 98%;
+    --shift: 42 92% 42%;
+    --shift-foreground: 210 40% 98%;
+    --absent: 215 15% 45%;
+    --absent-foreground: 210 40% 98%;
+
+    /* Project types: road / bridge / housing / school / hospital / infrastructure */
+    --type-road: 215.3 25% 26.7%;
+    --type-road-foreground: 210 40% 98%;
+    --type-bridge: 244.5 57.9% 50.6%;
+    --type-bridge-foreground: 226 100% 97%;
+    --type-housing: 175 67% 32%;
+    --type-housing-foreground: 167 36% 98%;
+    --type-school: 187 72% 32%;
+    --type-school-foreground: 188 77% 97%;
+    --type-hospital: 350 62% 45%;
+    --type-hospital-foreground: 352 84% 98%;
+    --type-infrastructure: 27 87% 47%;
+    --type-infrastructure-foreground: 48 96% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -58,8 +90,38 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
+    --inverse: 210 40% 96.1%;
+    --inverse-foreground: 222.2 47.4% 11.2%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
+
+    --success: 159 84% 52%;
+    --success-foreground: 222.2 47.4% 11.2%;
+    --warning: 45 97% 59%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+    --info: 217 91% 67%;
+    --info-foreground: 222.2 47.4% 11.2%;
+
+    --present: 159 85% 60%;
+    --present-foreground: 222.2 47.4% 11.2%;
+    --shift: 47 96% 65%;
+    --shift-foreground: 222.2 47.4% 11.2%;
+    --absent: 215 20% 70%;
+    --absent-foreground: 222.2 47.4% 11.2%;
+
+    --type-road: 212.7 26.8% 83.9%;
+    --type-road-foreground: 222.2 47.4% 11.2%;
+    --type-bridge: 226 68% 78%;
+    --type-bridge-foreground: 226 68% 18%;
+    --type-housing: 167 65% 75%;
+    --type-housing-foreground: 167 65% 16%;
+    --type-school: 190 90% 72%;
+    --type-school-foreground: 189 90% 18%;
+    --type-hospital: 350 65% 78%;
+    --type-hospital-foreground: 350 70% 20%;
+    --type-infrastructure: 45 96% 75%;
+    --type-infrastructure-foreground: 30 90% 18%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;

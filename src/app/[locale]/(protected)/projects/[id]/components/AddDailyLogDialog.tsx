@@ -318,8 +318,8 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[980px] max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-orange-600 to-amber-500 text-white">
+      <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader className="p-6 border-b bg-warning text-warning-foreground">
           <DialogTitle className="text-2xl">
             {isEdit ? (isAr ? "تعديل التقرير اليومي" : "Modifier le rapport") : (isAr ? "تقرير يومي جديد" : "Nouveau rapport journalier")}
           </DialogTitle>
@@ -329,16 +329,16 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
           {/* Basic Info */}
           {/* Basic Info - وضعية الأشغال المتقدمة */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-muted/40 p-4 rounded-lg border border-border">
             {/* التاريخ */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Calendar className="w-4 h-4 text-orange-500" /> {isAr ? "تاريخ اليومية" : "Date"}</Label>
+              <Label className="flex items-center gap-2"><Calendar className="w-4 h-4 text-warning" /> {isAr ? "تاريخ اليومية" : "Date"}</Label>
               <Input type="date" value={formData.log_date} onChange={(e) => setFormData({ ...formData, log_date: e.target.value })} />
             </div>
 
             {/* مكان العمل الدقيق - مهم جداً للأشغال العمومية */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-blue-600">
+              <Label className="flex items-center gap-2 text-primary">
                 <MapPin className="w-4 h-4" /> {isAr ? "موقع العمل (PK/Zone)" : "Localisation"}
               </Label>
               <Input
@@ -350,7 +350,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
             {/* حالة الاعتماد (Workflow) */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-emerald-600"><CheckCircle className="w-4 h-4" /> {isAr ? "حالة الاعتماد" : "Statut Workflow"}</Label>
+              <Label className="flex items-center gap-2 text-success"><CheckCircle className="w-4 h-4" /> {isAr ? "حالة الاعتماد" : "Statut Workflow"}</Label>
               <Select value={formData.status} onValueChange={(v: any) => setFormData({ ...formData, status: v })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -365,21 +365,21 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
             {/* نسبة التقدم الفني */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Activity className="w-4 h-4 text-purple-500" /> {isAr ? "تقدم الإنجاز (%)" : "Progrès (%)"}</Label>
+              <Label className="flex items-center gap-2"><Activity className="w-4 h-4 text-info" /> {isAr ? "تقدم الإنجاز (%)" : "Progrès (%)"}</Label>
               <div className="flex items-center gap-2">
                 <Input type="number" min={0} max={100} value={formData.overall_progress} onChange={(e) => setFormData({ ...formData, overall_progress: Number(e.target.value) })} />
                 {projectProgress > 0 && (
-                  <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {isAr ? `الحالي: ${projectProgress}%` : `Actuel: ${projectProgress}%`}
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-slate-400">{isAr ? "سيتم تحديث تقدم المشروع تلقائياً" : "Le progrès du projet sera mis à jour automatiquement"}</p>
+              <p className="text-xs text-muted-foreground">{isAr ? "سيتم تحديث تقدم المشروع تلقائياً" : "Le progrès du projet sera mis à jour automatiquement"}</p>
             </div>
 
             {/* حالة الورشة */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><HardHat className="w-4 h-4 text-amber-500" /> {isAr ? "حالة الورشة" : "État du chantier"}</Label>
+              <Label className="flex items-center gap-2"><HardHat className="w-4 h-4 text-warning" /> {isAr ? "حالة الورشة" : "État du chantier"}</Label>
               <Select value={formData.site_status} onValueChange={(v: any) => setFormData({ ...formData, site_status: v })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -396,14 +396,14 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
           </div>
 
           {/* الأحوال الجوية */}
-          <div className="bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
-            <h3 className="font-bold text-sm flex items-center gap-2 mb-4 text-blue-700 dark:text-blue-300">
+          <div className="bg-info/10 p-4 rounded-lg border border-info/25">
+            <h3 className="font-bold text-sm flex items-center gap-2 mb-4 text-primary">
               <Sun className="w-4 h-4" /> {isAr ? "الأحوال الجوية" : "Météo"}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* حالة الطقس */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Cloud className="w-4 h-4 text-blue-500" /> {isAr ? "حالة الطقس" : "Condition"}</Label>
+                <Label className="flex items-center gap-2"><Cloud className="w-4 h-4 text-info" /> {isAr ? "حالة الطقس" : "Condition"}</Label>
                 <Select value={formData.weather_condition} onValueChange={(v: any) => setFormData({ ...formData, weather_condition: v })}>
                   <SelectTrigger>
                     <SelectValue />
@@ -421,7 +421,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
               {/* درجة الحرارة القصوى */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-red-500" /> {isAr ? "الحرارة القصوى" : "Temp. Max"}</Label>
+                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-warning" /> {isAr ? "الحرارة القصوى" : "Temp. Max"}</Label>
                 <Input
                   type="number"
                   placeholder="35"
@@ -432,7 +432,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
               {/* درجة الحرارة الدنيا */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-blue-500" /> {isAr ? "الحرارة الدنيا" : "Temp. Min"}</Label>
+                <Label className="flex items-center gap-2"><Thermometer className="w-4 h-4 text-info" /> {isAr ? "الحرارة الدنيا" : "Temp. Min"}</Label>
                 <Input
                   type="number"
                   placeholder="15"
@@ -467,19 +467,19 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b pb-2">
               <h3 className="font-bold text-lg flex items-center gap-2">
-                <Ruler className="w-5 h-5 text-orange-600" />
+                <Ruler className="w-5 h-5 text-warning" />
                 {isAr ? "الكميات المنجزة اليوم" : "Quantités réalisées aujourd'hui"}
               </h3>
-              <Button type="button" variant="outline" size="sm" onClick={addQuantity} className="border-orange-500 text-orange-600 hover:bg-orange-50">
+              <Button type="button" variant="outline" size="sm" onClick={addQuantity} className="border-warning/40 text-warning hover:bg-warning/10">
                 <Plus className="w-4 h-4 ml-1" /> {isAr ? "إضافة بند" : "Ajouter"}
               </Button>
             </div>
 
             {quantities.length === 0 && (
-              <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded-xl">
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                 <Ruler className="mx-auto w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">{isAr ? "لم تُسجَّل كمية بعد" : "Aucune quantité"}</p>
-                <p className="text-[10px]">{isAr ? "اضغط \"إضافة بند\" لبدء التسجيل" : "Cliquez \"Ajouter\" pour commencer"}</p>
+                <p className="text-xs">{isAr ? "اضغط \"إضافة بند\" لبدء التسجيل" : "Cliquez \"Ajouter\" pour commencer"}</p>
               </div>
             )}
 
@@ -492,9 +492,9 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                   : 0;
 
                 return (
-                  <div key={i} className="border rounded-xl p-3 relative group bg-white shadow-sm border-slate-200">
+                  <div key={i} className="border rounded-lg p-3 relative group bg-card shadow-sm border-border">
                     <button type="button" onClick={() => removeQuantity(i)}
-                      className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors">
+                      className="absolute top-2 left-2 text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
 
@@ -502,7 +502,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                     <div className="flex flex-col md:flex-row gap-3 items-start">
                       {/* البند (Dropdown) */}
                       <div className="flex-1 w-full space-y-1">
-                        <Label className="text-[10px] text-slate-400 font-bold">
+                        <Label className="text-xs text-muted-foreground font-bold">
                           {isAr ? "البند" : "Article"}
                         </Label>
                         <div className="flex gap-2">
@@ -527,7 +527,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
                       {/* الكمية المنجزة */}
                       <div className="w-full md:w-32 space-y-1">
-                        <Label className="text-[10px] text-slate-400 font-bold">
+                        <Label className="text-xs text-muted-foreground font-bold">
                           {isAr ? "الكمية المنجزة" : "Qté réalisée"}
                         </Label>
                         <Input
@@ -536,14 +536,14 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                           step="0.01"
                           value={q.achieved_quantity || ""}
                           onChange={(e) => updateQuantity(i, 'achieved_quantity', Number(e.target.value))}
-                          className="font-bold text-blue-600"
+                          className="font-bold text-primary"
                         />
                       </div>
 
                       {/* الوحدة (تلقائي من البند) */}
                       <div className="w-full md:w-20 space-y-1">
-                        <Label className="text-[10px] text-slate-400">{isAr ? "الوحدة" : "Unité"}</Label>
-                        <div className="h-9 flex items-center px-3 bg-slate-50 border rounded-md text-sm font-bold text-slate-600">
+                        <Label className="text-xs text-muted-foreground">{isAr ? "الوحدة" : "Unité"}</Label>
+                        <div className="h-9 flex items-center px-3 bg-muted border rounded-md text-sm font-bold text-foreground">
                           {q.unit || "-"}
                         </div>
                       </div>
@@ -561,7 +561,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
                     {/* المبلغ المحسوب */}
                     {todayAmount > 0 && (
-                      <div className="mt-2 text-[10px] font-bold text-green-600">
+                      <div className="mt-2 text-xs font-bold text-success">
                         {q.achieved_quantity} {q.unit} × {linkedItem!.unit_price.toLocaleString()} = {todayAmount.toLocaleString()} DZD
                       </div>
                     )}
@@ -576,27 +576,27 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b pb-2">
               <h3 className="font-bold text-lg flex items-center gap-2">
-                <Package className="w-5 h-5 text-emerald-600" />
+                <Package className="w-5 h-5 text-success" />
                 {isAr ? "استهلاك المواد" : "Consommation de matériaux"}
               </h3>
-              <Button type="button" variant="outline" size="sm" onClick={addConsumption} className="border-emerald-500 text-emerald-600 hover:bg-emerald-50">
+              <Button type="button" variant="outline" size="sm" onClick={addConsumption} className="border-success/40 text-success hover:bg-success/10">
                 <Plus className="w-4 h-4 ml-1" /> {isAr ? "إضافة مادة" : "Ajouter"}
               </Button>
             </div>
 
             {projectMaterials.length === 0 && (
-              <div className="text-center py-6 text-slate-400 border-2 border-dashed rounded-xl">
+              <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
                 <Package className="mx-auto w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">{isAr ? "لا توجد مواد مسجلة في المخزون" : "Aucun matériel en stock"}</p>
-                <p className="text-[10px]">{isAr ? "أضف المواد أولاً من تبويب المواد" : "Ajoutez des matériaux depuis l'onglet Matériaux"}</p>
+                <p className="text-xs">{isAr ? "أضف المواد أولاً من تبويب المواد" : "Ajoutez des matériaux depuis l'onglet Matériaux"}</p>
               </div>
             )}
 
             {materialConsumptions.length === 0 && projectMaterials.length > 0 && (
-              <div className="text-center py-8 text-slate-400 border-2 border-dashed rounded-xl">
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                 <Package className="mx-auto w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">{isAr ? "لم يُسجَّل استهلاك بعد" : "Aucune consommation"}</p>
-                <p className="text-[10px]">{isAr ? "اضغط \"إضافة مادة\" لتسجيل الاستهلاك اليومي" : "Cliquez \"Ajouter\" pour enregistrer"}</p>
+                <p className="text-xs">{isAr ? "اضغط \"إضافة مادة\" لتسجيل الاستهلاك اليومي" : "Cliquez \"Ajouter\" pour enregistrer"}</p>
               </div>
             )}
 
@@ -604,16 +604,16 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
               {materialConsumptions.map((c, i) => {
                 const mat = projectMaterials.find(m => m.id === c.material_id);
                 return (
-                  <div key={i} className="border rounded-xl p-3 relative group bg-white shadow-sm border-slate-200">
+                  <div key={i} className="border rounded-lg p-3 relative group bg-card shadow-sm border-border">
                     <button type="button" onClick={() => removeConsumption(i)}
-                      className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors">
+                      className="absolute top-2 left-2 text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
 
                     <div className="flex flex-col md:flex-row gap-3 items-start">
                       {/* اختيار المادة */}
                       <div className="flex-1 w-full space-y-1">
-                        <Label className="text-[10px] text-slate-400 font-bold">
+                        <Label className="text-xs text-muted-foreground font-bold">
                           {isAr ? "المادة" : "Matériau"}
                         </Label>
                         <Select
@@ -635,7 +635,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
                       {/* الكمية المستهلكة */}
                       <div className="w-full md:w-32 space-y-1">
-                        <Label className="text-[10px] text-slate-400 font-bold">
+                        <Label className="text-xs text-muted-foreground font-bold">
                           {isAr ? "الكمية المستهلكة" : "Qté consommée"}
                         </Label>
                         <Input
@@ -644,14 +644,14 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                           step="0.01"
                           value={c.consumed_quantity || ""}
                           onChange={(e) => updateConsumption(i, 'consumed_quantity', Number(e.target.value))}
-                          className="font-bold text-amber-600"
+                          className="font-bold text-warning"
                         />
                       </div>
 
                       {/* المتوفر (للقراءة فقط) */}
                       <div className="w-full md:w-28 space-y-1">
-                        <Label className="text-[10px] text-slate-400">{isAr ? "المتوفر" : "Disponible"}</Label>
-                        <div className="h-9 flex items-center px-3 bg-slate-50 border rounded-md text-sm font-bold text-emerald-600">
+                        <Label className="text-xs text-muted-foreground">{isAr ? "المتوفر" : "Disponible"}</Label>
+                        <div className="h-9 flex items-center px-3 bg-muted border rounded-md text-sm font-bold text-success">
                           {mat ? mat.remaining_quantity.toLocaleString() : "—"}
                         </div>
                       </div>
@@ -669,7 +669,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
                     {/* تحذير إذا تجاوزت الكمية المتوفرة */}
                     {mat && c.consumed_quantity > mat.remaining_quantity && (
-                      <div className="mt-2 text-[10px] font-bold text-red-500 flex items-center gap-1">
+                      <div className="mt-2 text-xs font-bold text-destructive flex items-center gap-1">
                         ⚠ {isAr ? "الكمية المستهلكة تتجاوز المتوفر!" : "La quantité consommée dépasse le stock!"}
                       </div>
                     )}
@@ -686,21 +686,21 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             {/* العمال الحاضرون */}
             <div className="space-y-4">
               <h3 className="font-bold flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-500" />
+                <Users className="w-5 h-5 text-success" />
                 {isAr ? "العمال الحاضرون" : "Ouvriers présents"}
                 {selectedWorkers.length > 0 && (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 ml-2">
+                  <Badge variant="success" className="ml-2">
                     {selectedWorkers.length}
                   </Badge>
                 )}
               </h3>
 
               {isResourcesLoading ? (
-                <div className="flex items-center gap-2 text-slate-400 py-4 italic text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground py-4 italic text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" /> {isAr ? "جاري تحميل العمال..." : "Chargement..."}
                 </div>
               ) : projectWorkers.length === 0 ? (
-                <p className="text-sm text-slate-400 italic bg-slate-50 p-3 rounded-lg border">
+                <p className="text-sm text-muted-foreground italic bg-muted/50 p-3 rounded-lg border">
                   {isAr ? "لا يوجد عمال مخصصون لهذا المشروع." : "Aucun ouvrier assigné."}
                 </p>
               ) : (
@@ -712,17 +712,17 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                       <div
                         key={pw.id}
                         onClick={() => handleWorkerToggle(pw)}
-                        className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
-                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
-                          : "border-slate-100 hover:border-slate-200 bg-white"
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${isSelected
+                          ? "border-success bg-success/10"
+                          : "border-border hover:border-border bg-card"
                           }`}
                       >
-                        <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold uppercase text-xs">
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-foreground font-bold uppercase text-xs">
                           {(pw.worker?.full_name || "?").charAt(0)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-xs truncate">{pw.worker?.full_name}</p>
-                          <p className="text-[10px] text-slate-500 truncate">{pw.worker?.job_title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{pw.worker?.job_title}</p>
                         </div>
                         {isSelected && (
                           <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 border-l pl-2">
@@ -734,9 +734,9 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                                 const hours = Number(e.target.value);
                                 setSelectedWorkers(prev => prev.map(w => w.worker_id === pw.worker_id ? { ...w, hours_worked: hours } : w));
                               }}
-                              className="w-10 h-7 text-xs border rounded text-center bg-white"
+                              className="w-10 h-7 text-xs border rounded text-center bg-card"
                             />
-                            <span className="text-[10px] text-slate-400">h</span>
+                            <span className="text-xs text-muted-foreground">h</span>
                           </div>
                         )}
                       </div>
@@ -754,21 +754,21 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             {/* المعدات المستخدمة */}
             <div className="space-y-4">
               <h3 className="font-bold flex items-center gap-2">
-                <Truck className="w-5 h-5 text-blue-500" />
+                <Truck className="w-5 h-5 text-primary" />
                 {isAr ? "المعدات المستخدمة" : "Équipements utilisés"}
                 {selectedEquipment.length > 0 && (
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 ml-2">
+                  <Badge variant="info" className="ml-2">
                     {selectedEquipment.length}
                   </Badge>
                 )}
               </h3>
 
               {isResourcesLoading ? (
-                <div className="flex items-center gap-2 text-slate-400 py-4 italic text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground py-4 italic text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" /> {isAr ? "جاري التحميل..." : "Chargement..."}
                 </div>
               ) : projectEquipment.length === 0 ? (
-                <p className="text-sm text-slate-400 italic bg-slate-50 p-3 rounded-lg border">
+                <p className="text-sm text-muted-foreground italic bg-muted/50 p-3 rounded-lg border">
                   {isAr ? "لا توجد معدات مخصصة لهذا المشروع." : "Aucun équipement assigné."}
                 </p>
               ) : (
@@ -780,17 +780,17 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                       <div
                         key={pe.id}
                         onClick={() => handleEquipmentToggle(pe)}
-                        className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
-                          : "border-slate-100 hover:border-slate-200 bg-white"
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${isSelected
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:border-border bg-card"
                           }`}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                           <Truck className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-xs truncate">{pe.equipment?.name}</p>
-                          <p className="text-[10px] text-slate-400 truncate">{pe.equipment?.type}</p>
+                          <p className="text-xs text-muted-foreground truncate">{pe.equipment?.type}</p>
                         </div>
                         {isSelected && (
                           <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 border-l pl-2">
@@ -802,9 +802,9 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                                 const hours = Number(e.target.value);
                                 setSelectedEquipment(prev => prev.map(eq => eq.equipment_id === pe.equipment_id ? { ...eq, usage_hours: hours } : eq));
                               }}
-                              className="w-10 h-7 text-xs border rounded text-center bg-white"
+                              className="w-10 h-7 text-xs border rounded text-center bg-card"
                             />
-                            <span className="text-[10px] text-slate-400">h</span>
+                            <span className="text-xs text-muted-foreground">h</span>
                           </div>
                         )}
                       </div>
@@ -823,7 +823,7 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
             <div className="space-y-6">
               <div className="space-y-3">
                 <h3 className="font-bold flex items-center gap-2">
-                  <ImagePlus className="w-5 h-5 text-purple-500" />
+                  <ImagePlus className="w-5 h-5 text-info" />
                   {isAr ? "الصور الميدانية" : "Photos du terrain"}
                 </h3>
 
@@ -831,12 +831,12 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
                 {photos.length > 0 && (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mb-4">
                     {photos.map((photo, idx) => (
-                      <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square shadow-sm">
+                      <div key={idx} className="relative group rounded-lg overflow-hidden aspect-square shadow-sm">
                         <img src={photo.url} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                         <button
                           type="button"
                           onClick={() => setPhotos(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -847,17 +847,17 @@ export function AddDailyLogDialog({ isAr, projectId, onSuccess, log, trigger }: 
 
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all border-slate-200"
+                  className="w-full border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-2 bg-muted cursor-pointer hover:bg-muted/60 transition-all border-border"
                 >
-                  {isUploadingPhoto ? <Loader2 className="animate-spin text-purple-500" /> : <Plus className="text-slate-400" />}
-                  <span className="text-sm font-medium text-slate-600">{isAr ? "انقر لإضافة صور من الميدان" : "Ajouter des photos de terrain"}</span>
+                  {isUploadingPhoto ? <Loader2 className="animate-spin text-info" /> : <Plus className="text-muted-foreground" />}
+                  <span className="text-sm font-medium text-foreground">{isAr ? "انقر لإضافة صور من الميدان" : "Ajouter des photos de terrain"}</span>
                   <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                 </div>
               </div>
 
               <div className="space-y-3 border-t pt-6">
                 <h3 className="font-bold flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-orange-500" />
+                  <FileText className="w-5 h-5 text-warning" />
                   {isAr ? "المرفقات (PDF, Excel...)" : "Pièces jointes"}
                 </h3>
 

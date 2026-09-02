@@ -92,14 +92,14 @@ function formatFileSize(url: string): string {
 
 function getFileIcon(type: string) {
   const t = type?.toLowerCase();
-  if (t?.includes("pdf")) return <FileText className="w-5 h-5 text-rose-500" />;
+  if (t?.includes("pdf")) return <FileText className="w-5 h-5 text-warning" />;
   if (t?.includes("image") || ["png", "jpg", "jpeg", "webp"].includes(t))
-    return <ImageIcon className="w-5 h-5 text-emerald-500" />;
+    return <ImageIcon className="w-5 h-5 text-success" />;
   if (t?.includes("spreadsheet") || t?.includes("excel") || t?.includes("csv"))
-    return <FileSpreadsheet className="w-5 h-5 text-green-600" />;
+    return <FileSpreadsheet className="w-5 h-5 text-success" />;
   if (t?.includes("word") || t?.includes("doc"))
-    return <FileSignature className="w-5 h-5 text-blue-500" />;
-  return <FileSearch className="w-5 h-5 text-slate-400" />;
+    return <FileSignature className="w-5 h-5 text-primary" />;
+  return <FileSearch className="w-5 h-5 text-muted-foreground" />;
 }
 
 export function DocumentPreviewModal({
@@ -190,23 +190,23 @@ export function DocumentPreviewModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={`p-0 gap-0 overflow-hidden
-          max-w-[95vw] w-[95vw] h-[92vh]
-          sm:max-w-[90vw] sm:w-[90vw] sm:h-[90vh]
-          md:max-w-[85vw] md:w-[85vw] md:h-[88vh]
-          lg:max-w-[80vw] lg:w-[80vw] lg:h-[85vh]
-          rounded-2xl sm:rounded-3xl
+          max-w-xl w-full h-full
+          sm:max-w-2xl sm:h-full
+          md:max-w-3xl md:h-full
+          lg:max-w-4xl lg:h-full
+          rounded-lg sm:rounded-lg
           ${isAr ? "rtl" : "ltr"}`}
       >
-        <DialogHeader className="flex flex-row items-center px-4 sm:px-6 py-3 pe-12 sm:pe-14 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+        <DialogHeader className="flex flex-row items-center px-4 sm:px-6 py-3 pe-12 sm:pe-14 border-b border-border bg-muted/50 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 shrink-0">
+            <div className="p-2 rounded-lg bg-primary/10 shrink-0">
               {getFileIcon(doc.file_type)}
             </div>
             <div className="min-w-0">
-              <DialogTitle className="text-sm sm:text-base font-bold truncate max-w-[200px] sm:max-w-[400px]">
+              <DialogTitle className="text-sm sm:text-base font-bold truncate max-w-md">
                 {isEditing ? editedFields.file_name : doc.file_name}
               </DialogTitle>
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
                 {ext} • {new Date(doc.uploaded_at).toLocaleDateString(isAr ? "ar" : "fr")}
               </p>
             </div>
@@ -215,9 +215,9 @@ export function DocumentPreviewModal({
 
         <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
           {/* ── Preview Area ── */}
-          <div className="flex-1 relative bg-slate-100 dark:bg-slate-950 flex flex-col min-h-0">
+          <div className="flex-1 relative bg-muted flex flex-col min-h-0">
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-800/60 shrink-0">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-background/90 backdrop-blur-sm border-b border-border/60 shrink-0">
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -229,7 +229,7 @@ export function DocumentPreviewModal({
                 >
                   <ZoomOut className="w-4 h-4" />
                 </Button>
-                <span className="text-xs font-mono font-bold text-slate-500 min-w-[48px] text-center select-none">
+                <span className="text-xs font-mono font-bold text-muted-foreground min-w-12 text-center select-none">
                   {zoom}%
                 </span>
                 <Button
@@ -294,15 +294,15 @@ export function DocumentPreviewModal({
               className="flex-1 overflow-auto flex items-center justify-center p-2 sm:p-4"
             >
               {previewLoading && !previewError && (
-                <div className="flex flex-col items-center gap-3 text-slate-400">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   <p className="text-xs font-medium">{isAr ? "جاري التحميل..." : "Chargement..."}</p>
                 </div>
               )}
 
               {previewError ? (
-                <div className="flex flex-col items-center gap-4 text-slate-400 p-8 text-center">
-                  <div className="p-4 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                <div className="flex flex-col items-center gap-4 text-muted-foreground p-8 text-center">
+                  <div className="p-4 bg-muted rounded-lg">
                     {getFileIcon(doc.file_type)}
                   </div>
                   <p className="text-sm font-medium">{isAr ? "معاينة غير متاحة لهذا النوع" : "Aperçu non disponible"}</p>
@@ -317,7 +317,7 @@ export function DocumentPreviewModal({
                 <img
                   src={doc.file_url}
                   alt={doc.file_name}
-                  className="max-w-full max-h-full object-contain transition-transform duration-200 rounded-lg shadow-lg"
+                  className="max-w-full max-h-full object-contain transition-transform duration-200 rounded-lg shadow-sm"
                   style={{ transform: `scale(${zoom / 100})` }}
                   onLoad={() => setPreviewLoading(false)}
                   onError={() => {
@@ -328,7 +328,7 @@ export function DocumentPreviewModal({
               ) : isPdf ? (
                 <iframe
                   src={doc.file_url}
-                  className="w-full h-full border-0 rounded-lg bg-white"
+                  className="w-full h-full border-0 rounded-lg bg-card"
                   style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
                   onLoad={() => setPreviewLoading(false)}
                   onError={() => {
@@ -340,7 +340,7 @@ export function DocumentPreviewModal({
               ) : (
                 <iframe
                   src={doc.file_url}
-                  className="w-full h-full border-0 rounded-lg bg-white"
+                  className="w-full h-full border-0 rounded-lg bg-card"
                   onLoad={() => setPreviewLoading(false)}
                   onError={() => {
                     setPreviewLoading(false);
@@ -353,19 +353,19 @@ export function DocumentPreviewModal({
           </div>
 
           {/* ── Sidebar ── */}
-          <div className="w-full md:w-[340px] lg:w-[380px] shrink-0 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col overflow-hidden">
+          <div className="w-full md:w-80 lg:w-96 shrink-0 border-t md:border-t-0 md:border-l border-border bg-background flex flex-col overflow-hidden">
             <div className="p-4 sm:p-5 space-y-5 overflow-y-auto flex-1 min-h-0">
               {/* Header */}
               <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-slate-400" />
-                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                <Info className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-bold text-foreground">
                   {isAr ? "تفاصيل الوثيقة" : "Détails du document"}
                 </h3>
               </div>
 
               {/* File Name */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <FileText className="w-3 h-3" />
                   {isAr ? "اسم الملف" : "Nom du fichier"}
                 </Label>
@@ -376,7 +376,7 @@ export function DocumentPreviewModal({
                     className="h-9 text-sm"
                   />
                 ) : (
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 break-words">
+                  <p className="text-sm font-semibold text-foreground break-words">
                     {doc.file_name}
                   </p>
                 )}
@@ -384,7 +384,7 @@ export function DocumentPreviewModal({
 
               {/* Document Type */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <FileType className="w-3 h-3" />
                   {isAr ? "نوع الوثيقة" : "Type de document"}
                 </Label>
@@ -392,7 +392,7 @@ export function DocumentPreviewModal({
                   <select
                     value={editedFields.document_type}
                     onChange={(e) => setEditedFields({ ...editedFields, document_type: e.target.value })}
-                    className="w-full h-9 text-sm rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full h-9 text-sm rounded-md border border-border bg-background px-3 focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">{isAr ? "-- اختياري --" : "-- Optionnel --"}</option>
                     <option value="technical_report">{isAr ? "تقرير فني" : "Rapport technique"}</option>
@@ -407,13 +407,13 @@ export function DocumentPreviewModal({
                     {docTypeLabel}
                   </Badge>
                 ) : (
-                  <p className="text-sm text-slate-400">-</p>
+                  <p className="text-sm text-muted-foreground">-</p>
                 )}
               </div>
 
               {/* Document Category */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <Tag className="w-3 h-3" />
                   {isAr ? "فئة الوثيقة" : "Catégorie"}
                 </Label>
@@ -429,19 +429,19 @@ export function DocumentPreviewModal({
                     {doc.document_category}
                   </Badge>
                 ) : (
-                  <p className="text-sm text-slate-400">-</p>
+                  <p className="text-sm text-muted-foreground">-</p>
                 )}
               </div>
 
-              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <div className="h-px bg-muted" />
 
               {/* Upload Date */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <Calendar className="w-3 h-3" />
                   {isAr ? "تاريخ الرفع" : "Date de téléchargement"}
                 </Label>
-                <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                <p className="text-sm text-foreground font-medium">
                   {new Date(doc.uploaded_at).toLocaleDateString(isAr ? "ar" : "fr", {
                     weekday: "long",
                     year: "numeric",
@@ -454,7 +454,7 @@ export function DocumentPreviewModal({
               {/* Document Date */}
               {(doc.document_date || isEditing) && (
                 <div className="space-y-2">
-                  <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <Calendar className="w-3 h-3" />
                     {isAr ? "تاريخ الوثيقة" : "Date du document"}
                   </Label>
@@ -466,20 +466,20 @@ export function DocumentPreviewModal({
                       className="h-9 text-sm"
                     />
                   ) : doc.document_date ? (
-                    <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                    <p className="text-sm text-foreground font-medium">
                       {new Date(doc.document_date).toLocaleDateString(isAr ? "ar" : "fr")}
                     </p>
                   ) : (
-                    <p className="text-sm text-slate-400">-</p>
+                    <p className="text-sm text-muted-foreground">-</p>
                   )}
                 </div>
               )}
 
-              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <div className="h-px bg-muted" />
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <FileText className="w-3 h-3" />
                   {isAr ? "ملاحظات ميدانية" : "Notes de terrain"}
                 </Label>
@@ -488,30 +488,30 @@ export function DocumentPreviewModal({
                     value={editedFields.notes}
                     onChange={(e) => setEditedFields({ ...editedFields, notes: e.target.value })}
                     placeholder={isAr ? "وصف إضافي..." : "Description supplémentaire..."}
-                    className="text-sm min-h-[80px] resize-none"
+                    className="text-sm min-h-20 resize-none"
                   />
                 ) : doc.notes ? (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                     {doc.notes}
                   </p>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">
+                  <p className="text-sm text-muted-foreground italic">
                     {isAr ? "لا توجد ملاحظات" : "Aucune note"}
                   </p>
                 )}
               </div>
 
-              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <div className="h-px bg-muted" />
 
               {/* GPS Coordinates */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <MapPin className="w-3 h-3" />
                   {isAr ? "إحداثيات الموقع" : "Coordonnées GPS"}
                 </Label>
                 {doc.gps_coordinates ? (
                   <div className="flex items-center gap-2">
-                    <code className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400">
+                    <code className="text-xs font-mono bg-muted px-2.5 py-1.5 rounded-lg text-foreground">
                       {doc.gps_coordinates}
                     </code>
                     <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" asChild>
@@ -521,37 +521,37 @@ export function DocumentPreviewModal({
                         rel="noopener noreferrer"
                         title={isAr ? "عرض على الخريطة" : "Voir sur la carte"}
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
+                        <ExternalLink className="w-3.5 h-3.5 text-primary" />
                       </a>
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">
+                  <p className="text-sm text-muted-foreground italic">
                     {isAr ? "غير محدد" : "Non disponible"}
                   </p>
                 )}
               </div>
 
-              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <div className="h-px bg-muted" />
 
               {/* File Info */}
               <div className="space-y-2">
-                <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <HardDrive className="w-3 h-3" />
                   {isAr ? "معلومات الملف" : "Informations du fichier"}
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2.5">
-                    <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
+                  <div className="bg-muted rounded-lg p-2.5">
+                    <p className="text-xs font-bold uppercase text-muted-foreground mb-0.5">
                       {isAr ? "النوع" : "Type"}
                     </p>
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{ext}</p>
+                    <p className="text-xs font-bold text-foreground">{ext}</p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2.5">
-                    <p className="text-[10px] font-bold uppercase text-slate-400 mb-0.5">
+                  <div className="bg-muted rounded-lg p-2.5">
+                    <p className="text-xs font-bold uppercase text-muted-foreground mb-0.5">
                       {isAr ? "الامتداد" : "Extension"}
                     </p>
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <p className="text-xs font-bold text-foreground">
                       .{doc.file_url.split(".").pop()?.split("?")[0] || "unknown"}
                     </p>
                   </div>
@@ -561,7 +561,7 @@ export function DocumentPreviewModal({
 
             {/* ── Sticky Footer (Edit / Delete) ── */}
             {isOwner && (
-              <div className="shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm p-3 sm:p-4">
+              <div className="shrink-0 border-t border-border bg-muted/80 backdrop-blur-sm p-3 sm:p-4">
                 {isEditing ? (
                   <div className="flex gap-2">
                     <Button
@@ -582,7 +582,7 @@ export function DocumentPreviewModal({
                       {isAr ? "إلغاء" : "Annuler"}
                     </Button>
                     <Button
-                      className="flex-1 h-10 text-sm font-bold bg-blue-600 hover:bg-blue-700 gap-1.5"
+                      className="flex-1 h-10 text-sm font-bold gap-1.5"
                       onClick={handleSave}
                       disabled={isSaving}
                     >

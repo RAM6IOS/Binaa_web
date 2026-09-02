@@ -135,7 +135,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
           isAr ? newNotif.title_ar : newNotif.title_fr,
           {
             description: isAr ? newNotif.content_ar : newNotif.content_fr,
-            icon: <Bell className="w-5 h-5 text-blue-500" />,
+            icon: <Bell className="w-5 h-5 text-primary" />,
             duration: 5000,
           }
         );
@@ -270,38 +270,38 @@ export function NotificationDropdown({ locale }: { locale: string }) {
     }
   };
 
-  // دالة الحصول على الأيقونة والألوان المناسبة لكل نوع إشعار
+  // دالة الحصول على الأيقونة والألوان المناسبة لكل نوع إشعار (ألوان دلالية من الـ tokens فقط)
   const getNotificationConfig = (type: string) => {
     switch (type) {
       case "new_task_assigned":
         return {
-          icon: <Clock className="w-5 h-5 text-blue-500 dark:text-blue-400" />,
-          bgColor: "bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/30",
+          icon: <Clock className="w-5 h-5 text-info" />,
+          bgColor: "bg-info/15 border-info/25",
         };
       case "project_deadline_approaching":
         return {
-          icon: <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400" />,
-          bgColor: "bg-amber-50 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/30",
+          icon: <AlertTriangle className="w-5 h-5 text-warning" />,
+          bgColor: "bg-warning/15 border-warning/25",
         };
       case "maintenance_due":
         return {
-          icon: <Wrench className="w-5 h-5 text-rose-500 dark:text-rose-400" />,
-          bgColor: "bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/30",
+          icon: <Wrench className="w-5 h-5 text-warning" />,
+          bgColor: "bg-warning/15 border-warning/25",
         };
       case "worker_added_to_project":
         return {
-          icon: <UserPlus className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />,
-          bgColor: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/30",
+          icon: <UserPlus className="w-5 h-5 text-success" />,
+          bgColor: "bg-success/15 border-success/25",
         };
       case "document_uploaded":
         return {
-          icon: <FileText className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
-          bgColor: "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-100 dark:border-indigo-900/30",
+          icon: <FileText className="w-5 h-5 text-info" />,
+          bgColor: "bg-info/15 border-info/25",
         };
       default:
         return {
-          icon: <Bell className="w-5 h-5 text-slate-500 dark:text-slate-400" />,
-          bgColor: "bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800/30",
+          icon: <Bell className="w-5 h-5 text-muted-foreground" />,
+          bgColor: "bg-muted border-border",
         };
     }
   };
@@ -326,13 +326,13 @@ export function NotificationDropdown({ locale }: { locale: string }) {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-all rounded-full w-10 h-10 flex items-center justify-center"
+        className="relative hover:bg-muted transition-all rounded-full w-10 h-10 flex items-center justify-center"
         aria-label={isAr ? "الإشعارات" : "Notifications"}
       >
-        <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+        <Bell className="w-5 h-5 text-muted-foreground" />
         {unreadCount > 0 && (
           <div className={`absolute -top-1 -right-1 transition-transform duration-200 ${unreadCount > 0 ? 'scale-100' : 'scale-0'}`}>
-            <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] min-w-5 h-5 px-1 flex items-center justify-center border-2 border-white dark:border-slate-900 rounded-full">
+            <Badge className="bg-destructive text-destructive-foreground font-bold text-xs min-w-5 h-5 px-1 flex items-center justify-center ring-2 ring-background rounded-full">
               {unreadCount > 9 ? "+9" : unreadCount}
             </Badge>
           </div>
@@ -343,16 +343,16 @@ export function NotificationDropdown({ locale }: { locale: string }) {
       {isOpen && (
           <div
             dir={isAr ? "rtl" : "ltr"}
-            className={`absolute top-12 ${isAr ? "left-0" : "right-0"} w-80 sm:w-96 max-h-[500px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 flex flex-col animate-fade-in`}
+            className={`absolute top-12 ${isAr ? "left-0" : "right-0"} w-80 sm:w-96 bg-background/95 backdrop-blur-md rounded-lg shadow-sm border border-border overflow-hidden z-50 flex flex-col animate-fade-in`}
           >
             {/* رأس القائمة */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/20">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-muted/50">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-800 dark:text-slate-100">
+                <span className="font-bold text-foreground">
                   {isAr ? "الإشعارات" : "Notifications"}
                 </span>
                 {unreadCount > 0 && (
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold">
+                  <Badge variant="info" className="font-semibold">
                     {unreadCount} {isAr ? "جديد" : "nouveaux"}
                   </Badge>
                 )}
@@ -363,7 +363,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                     variant="ghost"
                     size="sm"
                     onClick={handleMarkAllAsRead}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 h-7"
+                    className="text-xs text-primary hover:text-primary hover:bg-primary/10 px-2 h-7"
                   >
                     {isAr ? "قراءة الكل" : "Tout lire"}
                   </Button>
@@ -372,7 +372,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsOpen(false)}
-                  className="w-7 h-7 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="w-7 h-7 rounded-full text-muted-foreground hover:text-foreground"
                   aria-label={isAr ? "إغلاق" : "Fermer"}
                 >
                   <X className="w-4 h-4" />
@@ -381,57 +381,57 @@ export function NotificationDropdown({ locale }: { locale: string }) {
             </div>
 
             {/* محتوى الإشعارات */}
-            <div className="flex-1 max-h-[350px] overflow-y-auto">
+            <div className="flex-1 max-h-96 overflow-y-auto">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                  <p className="text-sm text-slate-400">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">
                     {isAr ? "جاري تحميل الإشعارات..." : "Chargement des notifications..."}
                   </p>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800/40 flex items-center justify-center border border-dashed border-slate-200 dark:border-slate-700">
-                    <Inbox className="w-8 h-8 text-slate-400" />
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border border-dashed border-border">
+                    <Inbox className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-300">
+                    <h3 className="font-semibold text-foreground">
                       {isAr ? "علبة الوارد فارغة" : "Boîte de réception vide"}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto">
+                    <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                       {isAr ? "لا توجد إشعارات في الوقت الحالي." : "Aucune notification pour le moment."}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                <div className="divide-y divide-border">
                     {notifications.map((notification) => {
                       const config = getNotificationConfig(notification.type);
                       return (
                         <div
                           key={notification.id}
-                          className={`p-4 transition-all hover:bg-slate-50/70 dark:hover:bg-slate-800/20 relative group border-r-4 ${notification.is_read
+                          className={`p-4 transition-all hover:bg-muted/70 relative group border-r-4 ${notification.is_read
                               ? "border-r-transparent"
-                              : "border-r-blue-500 bg-blue-50/20 dark:bg-blue-950/5"
+                              : "border-r-primary bg-primary/5"
                             }`}
                         >
                           <div className="flex gap-3">
                             {/* الأيقونة */}
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${config.bgColor} flex-shrink-0 shadow-sm`}>
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${config.bgColor} flex-shrink-0 shadow-sm`}>
                               {config.icon}
                             </div>
 
                             {/* تفاصيل الإشعار */}
                             <div className="flex-1 min-w-0 pr-2">
-                              <h4 className={`text-sm font-semibold text-slate-800 dark:text-slate-200 truncate ${!notification.is_read && "text-slate-900 dark:text-white"}`}>
+                              <h4 className="text-sm font-semibold text-foreground truncate">
                                 {isAr ? notification.title_ar : notification.title_fr}
                               </h4>
-                              <p className={`text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed ${!notification.is_read && "text-slate-700 dark:text-slate-300 font-medium"}`}>
+                              <p className={`text-xs text-muted-foreground mt-1 leading-relaxed ${!notification.is_read && "font-medium"}`}>
                                 {isAr ? notification.content_ar : notification.content_fr}
                               </p>
 
                               {/* تاريخ ووقت الإشعار */}
-                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-400">
+                              <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
                                 <span>{formatTime(notification.created_at)}</span>
                               </div>
@@ -441,7 +441,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                                 <a
                                   href={`/${locale}/projects/${notification.metadata.project_id}`}
                                   onClick={() => setIsOpen(false)}
-                                  className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline mt-2.5"
+                                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline mt-2.5"
                                 >
                                   <span>{isAr ? "عرض التفاصيل" : "Voir les détails"}</span>
                                   <ExternalLink className="w-3 h-3" />
@@ -456,7 +456,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                                   variant="ghost"
                                   size="icon"
                                   onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                  className="w-7 h-7 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                  className="w-7 h-7 rounded-full text-primary hover:text-primary hover:bg-primary/10"
                                   aria-label={isAr ? "تحديد كمقروء" : "Marquer comme lu"}
                                 >
                                   <Check className="w-4 h-4" />
@@ -466,7 +466,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                                 variant="ghost"
                                 size="icon"
                                 onClick={(e) => handleDeleteNotification(notification.id, e)}
-                                className="w-7 h-7 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                className="w-7 h-7 rounded-full text-destructive hover:bg-destructive/10"
                                 aria-label={isAr ? "حذف الإشعار" : "Supprimer"}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -481,8 +481,8 @@ export function NotificationDropdown({ locale }: { locale: string }) {
             </div>
 
             {/* ذيل القائمة */}
-            <div className="p-3 text-center border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
-              <span className="text-[11px] text-slate-400">
+            <div className="p-3 text-center border-t border-border bg-muted/50">
+              <span className="text-xs text-muted-foreground">
                 {isAr ? "منصة بناء لإدارة مشاريع الإنشاءات" : "Binaa - Construction Project Management"}
               </span>
             </div>

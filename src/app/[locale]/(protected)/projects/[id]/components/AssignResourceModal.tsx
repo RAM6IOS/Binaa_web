@@ -300,7 +300,7 @@ export function AssignResourceModal({
       </DialogTrigger>
 
       <DialogContent
-        className="sm:max-w-[600px] flex flex-col h-[85vh]"
+        className="sm:max-w-2xl flex flex-col h-[85vh]"
         dir={isAr ? "rtl" : "ltr"}
       >
         <DialogHeader>
@@ -321,7 +321,7 @@ export function AssignResourceModal({
             <div className="relative">
               <Search
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400",
+                  "absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground",
                   isAr ? "right-3" : "left-3"
                 )}
               />
@@ -339,26 +339,26 @@ export function AssignResourceModal({
             {isLoading ? (
               /* ── تحميل ── */
               <div className="flex items-center justify-center h-32">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : totalCount === 0 ? (
               /* ── الحالة A: لا يوجد أي مورد في المنصة ── */
               <div className="flex flex-col items-center justify-center h-full gap-5 py-10 px-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                  <Frown className="w-8 h-8 text-slate-400" />
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <Frown className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div className="space-y-2 max-w-sm">
-                  <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {emptyStateTitle}
                   </p>
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {emptyStateDesc}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
                   <Button
                     size="sm"
-                    className="gap-2 bg-blue-600 hover:bg-blue-700 flex-1"
+                    className="gap-2 flex-1"
                     onClick={handleAddNewClick}
                   >
                     <UserPlus className="w-4 h-4" />
@@ -380,21 +380,21 @@ export function AssignResourceModal({
             ) : allAssigned ? (
               /* ── الحالة C: جميع الموارد معيّنة ── */
               <div className="flex flex-col items-center justify-center h-full gap-5 py-10 px-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                <div className="w-16 h-16 rounded-full bg-success/15 flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-success" />
                 </div>
                 <div className="space-y-2 max-w-sm">
-                  <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {allAssignedTitle}
                   </p>
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {allAssignedDesc}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
                   <Button
                     size="sm"
-                    className="gap-2 bg-blue-600 hover:bg-blue-700 flex-1"
+                    className="gap-2 flex-1"
                     onClick={handleAddNewClick}
                   >
                     <UserPlus className="w-4 h-4" />
@@ -434,8 +434,8 @@ export function AssignResourceModal({
             ) : filtered.length === 0 ? (
               /* ── لا نتائج بحث ── */
               <div className="flex flex-col items-center justify-center h-32 gap-3 text-center px-4">
-                <Search className="w-8 h-8 text-slate-300" />
-                <p className="text-sm text-slate-500">{noResultsText}</p>
+                <Search className="w-8 h-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">{noResultsText}</p>
               </div>
             ) : (
               /* ── قائمة العمال/العتاد المتاح ── */
@@ -444,20 +444,20 @@ export function AssignResourceModal({
                   <div
                     key={item.id}
                     className={cn(
-                      "p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition-colors",
+                      "p-3 flex items-center justify-between hover:bg-muted cursor-pointer transition-colors",
                       selectedIds.includes(item.id) &&
-                        "bg-blue-50 dark:bg-blue-900/20",
+                        "bg-primary/10",
                       !isAr &&
                         selectedIds.includes(item.id) &&
-                        "border-l-4 border-l-blue-500",
+                        "border-l-4 border-l-primary",
                       isAr &&
                         selectedIds.includes(item.id) &&
-                        "border-r-4 border-r-blue-500"
+                        "border-r-4 border-r-primary"
                     )}
                     onClick={() => toggleSelection(item.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
                         {isWorkerType && (item as Worker).photo_url ? (
                           <img
                             src={(item as Worker).photo_url}
@@ -465,9 +465,9 @@ export function AssignResourceModal({
                             className="w-full h-full object-cover"
                           />
                         ) : isWorkerType ? (
-                          <Users className="w-5 h-5 text-slate-400" />
+                          <Users className="w-5 h-5 text-muted-foreground" />
                         ) : (
-                          <Truck className="w-5 h-5 text-slate-400" />
+                          <Truck className="w-5 h-5 text-muted-foreground" />
                         )}
                       </div>
                       <div>
@@ -476,7 +476,7 @@ export function AssignResourceModal({
                             ? (item as Worker).full_name
                             : (item as Equipment).name}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                           {isWorkerType
                             ? (item as Worker).job_title
                             : (item as Equipment).type}
@@ -484,7 +484,7 @@ export function AssignResourceModal({
                       </div>
                     </div>
                     {selectedIds.includes(item.id) && (
-                      <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                      <Check className="w-4 h-4 text-primary shrink-0" />
                     )}
                   </div>
                 ))}
@@ -494,7 +494,7 @@ export function AssignResourceModal({
 
           {/* ── نموذج تفاصيل التعيين (عمال فقط) ── */}
           {isWorkerType && selectedIds.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="bg-muted p-4 rounded-lg border border-border space-y-4 animate-in fade-in slide-in-from-top-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
                   <Label>
@@ -535,7 +535,7 @@ export function AssignResourceModal({
 
           {/* ── ساعات العتاد ── */}
           {!isWorkerType && selectedIds.length > 0 && (
-            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="bg-muted p-4 rounded-lg border border-border space-y-4 animate-in fade-in slide-in-from-top-2">
               <div className="space-y-2">
                 <Label>
                   {isAr ? "ساعات العمل اليومية" : "Heures / jour"}
@@ -557,7 +557,6 @@ export function AssignResourceModal({
           <Button
             disabled={selectedIds.length === 0 || isSubmitting}
             onClick={handleAssign}
-            className="bg-blue-600 hover:bg-blue-700"
           >
             {isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -689,7 +688,7 @@ function AddWorkerInlineForm({
       <button
         type="button"
         onClick={onCancel}
-        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mb-1"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         {isAr ? "العودة للقائمة" : "Retour à la liste"}
@@ -697,7 +696,7 @@ function AddWorkerInlineForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الاسم الكامل" : "Nom complet"}
           </Label>
           <Input
@@ -712,7 +711,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             CIN
           </Label>
           <Input
@@ -726,7 +725,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "رقم الهاتف" : "Téléphone"}
           </Label>
           <Input
@@ -741,7 +740,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "المسمى الوظيفي" : "Poste"}
           </Label>
           <Select
@@ -795,7 +794,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الأجر اليومي (دج)" : "Taux journalier (DZD)"}
           </Label>
           <Input
@@ -814,7 +813,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الولاية" : "Wilaya"}
           </Label>
           <Input
@@ -829,7 +828,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "حالة التوفر" : "Disponibilité"}
           </Label>
           <Select
@@ -862,7 +861,7 @@ function AddWorkerInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "المهارات" : "Compétences"}
           </Label>
           <Textarea
@@ -875,7 +874,7 @@ function AddWorkerInlineForm({
                 ? "المهارات الخاصة بالعامل..."
                 : "Compétences spécifiques..."
             }
-            className="min-h-[70px]"
+            className="min-h-16"
             dir={isAr ? "rtl" : "ltr"}
           />
         </div>
@@ -889,7 +888,7 @@ function AddWorkerInlineForm({
           type="submit"
           disabled={isLoading}
           size="sm"
-          className="bg-blue-600 hover:bg-blue-700 gap-2"
+          className="gap-2"
         >
           {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
           {isAr ? "حفظ وإضافة" : "Enregistrer"}
@@ -1017,7 +1016,7 @@ function AddEquipmentInlineForm({
       <button
         type="button"
         onClick={onCancel}
-        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mb-1"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         {isAr ? "العودة للقائمة" : "Retour à la liste"}
@@ -1025,7 +1024,7 @@ function AddEquipmentInlineForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
         <div className="space-y-1.5 col-span-2">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "اسم المعدة" : "Nom de l'équipement"}
           </Label>
           <Input
@@ -1040,7 +1039,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "النوع" : "Type"}
           </Label>
           <Input
@@ -1055,7 +1054,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الفئة" : "Catégorie"}
           </Label>
           <Input
@@ -1070,7 +1069,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "العلامة التجارية" : "Marque"}
           </Label>
           <Input
@@ -1085,7 +1084,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الموديل" : "Modèle"}
           </Label>
           <Input
@@ -1100,7 +1099,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الرقم التسلسلي" : "N° de série"}
           </Label>
           <Input
@@ -1115,7 +1114,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الأجر بالساعة (دج)" : "Taux horaire (DZD)"}
           </Label>
           <Input
@@ -1134,7 +1133,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الأجر اليومي (دج)" : "Taux journalier (DZD)"}
           </Label>
           <Input
@@ -1153,7 +1152,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الولاية" : "Wilaya"}
           </Label>
           <Input
@@ -1168,7 +1167,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "الحالة التشغيلية" : "Statut"}
           </Label>
           <Select
@@ -1201,7 +1200,7 @@ function AddEquipmentInlineForm({
         </div>
 
         <div className="space-y-1.5 col-span-2 md:col-span-1">
-          <Label className="text-slate-700 dark:text-slate-300 font-semibold text-xs">
+          <Label className="text-foreground font-semibold text-xs">
             {isAr ? "نوع الملكية" : "Type de propriété"}
           </Label>
           <Select
@@ -1239,7 +1238,7 @@ function AddEquipmentInlineForm({
           type="submit"
           disabled={isLoading}
           size="sm"
-          className="bg-emerald-600 hover:bg-emerald-700 gap-2"
+          className="gap-2"
         >
           {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
           {isAr ? "حفظ وإضافة" : "Enregistrer"}

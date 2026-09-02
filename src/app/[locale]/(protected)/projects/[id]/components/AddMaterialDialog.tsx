@@ -135,8 +135,8 @@ export function AddMaterialDialog({ isAr, projectId, onSuccess, trigger, editIte
       }
     }}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-emerald-600 to-teal-500 text-white">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="p-6 border-b bg-success text-success-foreground">
           <DialogTitle className="text-xl flex items-center gap-2">
             <Package className="w-5 h-5" />
             {isEdit
@@ -148,7 +148,7 @@ export function AddMaterialDialog({ isAr, projectId, onSuccess, trigger, editIte
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-xs font-bold">
-              <span className="text-red-500">*</span>
+              <span className="text-destructive">*</span>
               {isAr ? "اسم المادة" : "Nom du matériel"}
             </Label>
             <Input
@@ -162,7 +162,7 @@ export function AddMaterialDialog({ isAr, projectId, onSuccess, trigger, editIte
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-xs font-bold">
-                <span className="text-red-500">*</span>
+                <span className="text-destructive">*</span>
                 {isAr ? "الوحدة" : "Unité"}
               </Label>
               <Select value={formData.unit} onValueChange={(v) => setFormData({ ...formData, unit: v })}>
@@ -206,9 +206,9 @@ export function AddMaterialDialog({ isAr, projectId, onSuccess, trigger, editIte
           </div>
 
           {formData.initial_quantity > 0 && formData.unit_price > 0 && (
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl flex justify-between items-center border border-emerald-100">
-              <span className="text-xs font-bold text-emerald-600">{isAr ? "القيمة الإجمالية" : "Valeur totale"}</span>
-              <span className="text-lg font-black text-emerald-700">
+            <div className="bg-success/10 p-3 rounded-lg flex justify-between items-center border border-success/20">
+              <span className="text-xs font-bold text-success">{isAr ? "القيمة الإجمالية" : "Valeur totale"}</span>
+              <span className="text-lg font-bold text-success">
                 {(formData.initial_quantity * formData.unit_price).toLocaleString()} <span className="text-xs">DZD</span>
               </span>
             </div>

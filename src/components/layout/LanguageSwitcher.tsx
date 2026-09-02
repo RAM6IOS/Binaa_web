@@ -32,13 +32,13 @@ export function LanguageSwitcher() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-semibold"
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary font-semibold"
         >
           <Globe className="h-4 w-4" />
           <span>{currentLocale.toUpperCase()}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-32 rounded-xl">
+      <DropdownMenuContent align="end" className="w-32 rounded-lg">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
@@ -49,7 +49,7 @@ export function LanguageSwitcher() {
               {lang.name}
             </span>
             {currentLocale === lang.code && (
-              <Check className="h-4 w-4 text-blue-600" />
+              <Check className="h-4 w-4 text-primary" />
             )}
           </DropdownMenuItem>
         ))}

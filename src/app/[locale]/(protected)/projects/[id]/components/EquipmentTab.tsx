@@ -70,7 +70,7 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
     return (
       <div className="py-10 grid grid-cols-2 gap-3">
         {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-24 rounded-2xl" />
+          <Skeleton key={i} className="h-24 rounded-lg" />
         ))}
       </div>
     );
@@ -78,13 +78,13 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-500" dir={isAr ? "rtl" : "ltr"}>
-      <Card className="border-none md:border shadow-xl rounded-3xl overflow-hidden">
-        <CardHeader className="bg-emerald-50/10 border-b border-dashed border-emerald-200 p-4 flex-row items-center justify-between">
+      <Card className="border-none md:border shadow-sm rounded-lg overflow-hidden">
+        <CardHeader className="bg-success/10 border-b border-dashed border-success/20 p-4 flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-inner">
+            <div className="p-2 bg-success text-success-foreground rounded-lg shadow-inner">
               <Construction size={16} />
             </div>
-            <CardTitle className="text-base font-black">
+            <CardTitle className="text-base font-bold">
               {isAr ? "المعدات" : "Équipements"}
             </CardTitle>
           </div>
@@ -101,29 +101,29 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
           {/* موبايل */}
           <div className="md:hidden">
             {assignedEquipment.length === 0 && (
-              <div className="py-12 text-center text-slate-400">
+              <div className="py-12 text-center text-muted-foreground">
                 <Truck className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-xs font-bold">{isAr ? "لا يوجد عتاد" : "Aucun engin"}</p>
               </div>
             )}
             {assignedEquipment.map((pe) => (
-              <div key={pe.id} className="p-4 border-b flex items-center justify-between bg-white text-start">
+              <div key={pe.id} className="p-4 border-b flex items-center justify-between bg-card text-start">
                 <div className="flex items-center gap-4">
-                  <div className="h-11 w-11 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 border">
+                  <div className="h-11 w-11 rounded-lg bg-warning/10 text-warning flex items-center justify-center shrink-0 border">
                     <Truck size={20} />
                   </div>
                   <div className="min-w-0">
                     <h4 className="font-bold text-sm truncate">
                       {pe.equipment?.name}
                       {pe.equipment?.deleted_at && (
-                        <Badge variant="outline" className="text-[8px] ms-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">
+                        <Badge variant="outline" className="text-xs ms-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">
                           {isAr ? "معطل" : "Inactif"}
                         </Badge>
                       )}
                     </h4>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Clock size={11} className="text-blue-500" />
-                      <span className="text-[10px] font-black">{pe.usage_hours_per_day}h/j</span>
+                      <Clock size={11} className="text-primary" />
+                      <span className="text-xs font-bold">{pe.usage_hours_per_day}h/j</span>
                     </div>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setDeleteTarget({ id: pe.id, name: pe.equipment?.name || "" })}
-                  className="text-slate-300 rounded-full h-11 w-11"
+                  className="text-muted-foreground rounded-full h-11 w-11"
                 >
                   <Trash2 size={18} />
                 </Button>
@@ -142,7 +142,7 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
           {/* ديسكتوب */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50 uppercase font-black text-[10px]">
+              <TableHeader className="bg-muted/50 uppercase font-bold text-xs">
                 <TableRow>
                   <TableHead className="ps-6">الآلة</TableHead>
                   <TableHead>التصنيف</TableHead>
@@ -153,7 +153,7 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
               <TableBody>
                 {assignedEquipment.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-12 text-slate-400 text-sm font-bold">
+                    <TableCell colSpan={4} className="text-center py-12 text-muted-foreground text-sm font-bold">
                       {isAr ? "لا يوجد عتاد" : "Aucun engin"}
                     </TableCell>
                   </TableRow>
@@ -162,25 +162,25 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
                   <TableRow key={pe.id} className="group h-16">
                     <TableCell className="ps-6 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-orange-50 text-orange-600"><Truck size={16} /></div>
+                        <div className="p-2 rounded-lg bg-warning/10 text-warning"><Truck size={16} /></div>
                         <div className="font-bold text-sm">
                           {pe.equipment?.name}
                           {pe.equipment?.deleted_at && (
-                            <Badge variant="outline" className="text-[8px] ms-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">
+                            <Badge variant="outline" className="text-xs ms-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">
                               {isAr ? "معطل" : "Inactif"}
                             </Badge>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="secondary" className="text-[9px] font-black">{pe.equipment?.type}</Badge></TableCell>
-                    <TableCell className="font-mono font-bold text-blue-600 bg-blue-50/30 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell>
+                    <TableCell><Badge variant="secondary" className="text-xs font-bold">{pe.equipment?.type}</Badge></TableCell>
+                    <TableCell className="font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell>
                     <TableCell className="text-right pe-6">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setDeleteTarget({ id: pe.id, name: pe.equipment?.name || "" })}
-                        className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 rounded-full h-8 w-8"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive rounded-full h-8 w-8"
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -195,31 +195,31 @@ export function EquipmentTab({ project, isAr }: EquipmentTabProps) {
 
       {/* ── مودال الحذف ── */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(val) => !val && setDeleteTarget(null)}>
-        <AlertDialogContent className="sm:max-w-[420px] rounded-[32px] p-0 overflow-hidden shadow-2xl border-none" dir={isAr ? "rtl" : "ltr"}>
-          <div className="bg-red-50 p-8 flex flex-col items-center gap-4 text-center border-b">
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center animate-bounce shadow-inner border border-white">
-              <AlertTriangle className="text-red-600" size={32} />
+        <AlertDialogContent className="sm:max-w-105 rounded-lg p-0 overflow-hidden shadow-sm border-none" dir={isAr ? "rtl" : "ltr"}>
+          <div className="bg-destructive/10 p-8 flex flex-col items-center gap-4 text-center border-b">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center animate-bounce shadow-inner border border-background">
+              <AlertTriangle className="text-destructive" size={32} />
             </div>
-            <AlertDialogTitle className="text-xl font-black">
+            <AlertDialogTitle className="text-xl font-bold">
               {isAr ? "هل تود فك الارتباط؟" : "Retirer cet engin ?"}
             </AlertDialogTitle>
-            <p className="text-xs font-black text-red-600/50 uppercase bg-white/50 px-3 py-1 rounded-full border border-red-50">
+            <p className="text-xs font-bold text-destructive/50 uppercase bg-background/50 px-3 py-1 rounded-full border border-destructive/10">
               {deleteTarget?.name}
             </p>
           </div>
           <div className="p-8 pt-6 space-y-6">
-            <p className="text-xs font-bold leading-relaxed text-slate-600 text-center opacity-80">
+            <p className="text-xs font-bold leading-relaxed text-muted-foreground text-center opacity-80">
               {isAr
                 ? "سيتم سحب العتاد من سجلات المشروع الحالية."
                 : "Retire l'équipement de ce projet uniquement."}
             </p>
             <AlertDialogFooter className="flex-row gap-3">
-              <AlertDialogCancel className="h-12 flex-1 rounded-2xl font-black border-slate-100">
+              <AlertDialogCancel className="h-12 flex-1 rounded-lg font-bold border-border">
                 {isAr ? "إلغاء" : "Annuler"}
               </AlertDialogCancel>
               <Button
                 variant="destructive"
-                className="h-12 flex-1 rounded-2xl font-black shadow-lg shadow-red-200"
+                className="h-12 flex-1 rounded-lg font-bold"
                 disabled={isDeleting}
                 onClick={handleConfirmDelete}
               >

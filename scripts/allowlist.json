@@ -1,0 +1,30 @@
+{
+  "_comment": "الاستثناءات من قاعدة الألوان الخام — تُضاف فقط للحالات المبررة فعلياً مع السبب. المفتاح file هو المسار النسبي من جذر المشروع، و pattern نمط regex يطابق النص المخالف المسموح.",
+  "allowances": [
+    {
+      "file": "src/app/[locale]/(protected)/projects/[id]/components/GanttTab.tsx",
+      "pattern": "^(w-\\[300px\\]|min-w-\\[1200px\\]|left-\\[324px\\])$",
+      "reason": "هندسة قماش مخطط Gantt برقم ثابت: عمود المهام 300px + حشوة 24px = 324px لبداية شبكة الأيام، مرتبطة بحساب inline للخط 'اليوم' بـ calc(300px + (100% - 348px) * p). لا مقابل لها على مقياس Tailwind ويُفسد تحويلها المحاذاة."
+    },
+    {
+      "file": "src/components/daily-log/DailyLogPDF.tsx",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
+      "reason": "توليد PDF عبر jsPDF يتطلب ألواناً hex حرفية تُمرَّر إلى أوامر الإخراج (setFillColor/setTextColor...) — الـ tokens هي CSS vars وقت التشغيل لا يستطيع jsPDF قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
+    },
+    {
+      "file": "src/components/daily-log/SituationPDF.tsx",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
+      "reason": "توليد PDF عبر jsPDF يتطلب hex حرفية (setFillColor/setTextColor...) — الـ tokens هي CSS vars وقت التشغيل لا يستطيع jsPDF قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
+    },
+    {
+      "file": "src/components/daily-log/WorkAttachmentPDF.tsx",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
+      "reason": "توليد PDF عبر jsPDF يتطلب hex حرفية (setFillColor/setTextColor...) — الـ tokens هي CSS vars وقت التشغيل لا يستطيع jsPDF قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
+    },
+    {
+      "file": "src/components/situations/SituationOfficialPDF.tsx",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
+      "reason": "توليد PDF رسمي عبر jsPDF يتطلب hex حرفية (setFillColor/setTextColor...) — الـ tokens هي CSS vars وقت التشغيل لا يستطيع jsPDF قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
+    }
+  ]
+}

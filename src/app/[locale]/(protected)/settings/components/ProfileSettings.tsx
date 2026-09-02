@@ -319,7 +319,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -327,7 +327,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
   if (!profile) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">
+        <p className="text-muted-foreground">
           {isAr ? "لم يتم العثور على الملف الشخصي" : "Profil introuvable"}
         </p>
       </div>
@@ -350,9 +350,9 @@ export function ProfileSettings({ locale }: { locale: string }) {
             {/* Profile Picture */}
             <div className="flex flex-col items-center sm:flex-row sm:items-end gap-6">
               <div className="relative group">
-                <Avatar className="w-24 h-24 border-4 border-white dark:border-slate-800 shadow-md">
+                <Avatar className="w-24 h-24 border-4 border-card shadow-sm">
                 <AvatarImage src={profile.avatar_url ?? profile.profile_picture_url} />
-                  <AvatarFallback className="text-2xl font-bold bg-blue-100 text-blue-700">
+                  <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
                     {profile.full_name?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -360,7 +360,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-sm hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                 </button>
@@ -374,7 +374,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
               </div>
               <div className="space-y-1 text-center sm:text-start">
                 <h3 className="font-semibold">{isAr ? 'صورة الملف الشخصي' : 'Photo de profil'}</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {isAr ? 'JPG أو PNG. الحد الأقصى 2 ميجا بايت' : 'JPG ou PNG. Max 2 Mo'}
                 </p>
               </div>
@@ -388,7 +388,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   value={profile.full_name || ""} 
                   onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                   placeholder="Ahmed Mansouri"
-                  className="bg-white dark:bg-slate-900"
+                  className="bg-card"
                 />
               </div>
               <div className="space-y-2">
@@ -397,7 +397,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   <Input 
                     disabled
                     value={currentEmail} 
-                    className="bg-slate-50 dark:bg-slate-900/50 flex-1"
+                    className="bg-muted flex-1"
                   />
                   <Button 
                     type="button" 
@@ -412,16 +412,16 @@ export function ProfileSettings({ locale }: { locale: string }) {
                 </div>
                 {pendingEmail && (
                   <div className="mt-6 space-y-3">
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <h4 className="text-sm font-semibold text-foreground">
                       {isAr ? 'تغييرات معلقة' : 'Changements en attente'}
                     </h4>
-                    <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-900/30">
+                    <div className="flex items-center justify-between p-4 bg-warning/10 rounded-lg border border-warning/20">
                       <div>
-                        <p className="text-sm text-amber-800 dark:text-amber-300 font-medium flex items-center gap-2">
+                        <p className="text-sm text-warning font-medium flex items-center gap-2">
                           <Loader2 className="w-4 h-4 animate-spin" />
                           {isAr ? 'تغيير البريد الإلكتروني قيد الانتظار' : 'Changement d\'e-mail en attente'}
                         </p>
-                        <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1.5">
+                        <p className="text-xs text-warning/80 mt-1.5">
                           {isAr ? 'البريد الجديد: ' : 'Nouvel e-mail : '}
                           <span className="font-semibold" dir="ltr">{pendingEmail}</span>
                         </p>
@@ -431,7 +431,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                         variant="outline" 
                         size="sm"
                         onClick={handleCancelEmailChange}
-                        className="bg-white hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-transparent dark:hover:bg-amber-900/40 dark:border-amber-900/50 dark:text-amber-400"
+                        className="bg-card hover:bg-warning/10 text-warning border-warning/30"
                       >
                         {isAr ? 'إلغاء الطلب' : 'Annuler la demande'}
                       </Button>
@@ -446,7 +446,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   value={profile.phone || ""} 
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   placeholder="0550123456"
-                  className="bg-white dark:bg-slate-900"
+                  className="bg-card"
                 />
               </div>
               <div className="space-y-2">
@@ -456,7 +456,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   value={profile.job_title || ""} 
                   onChange={(e) => setProfile({ ...profile, job_title: e.target.value })}
                   placeholder="Directeur de Projets"
-                  className="bg-white dark:bg-slate-900"
+                  className="bg-card"
                 />
               </div>
             </div>
@@ -468,7 +468,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                   value={profile.language} 
                   onValueChange={(val: 'ar' | 'fr') => setProfile({ ...profile, language: val })}
                 >
-                  <SelectTrigger className="bg-white dark:bg-slate-900">
+                  <SelectTrigger className="bg-card">
                     <SelectValue placeholder={isAr ? 'اختر اللغة' : 'Choisir une langue'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -486,7 +486,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
                     setTheme(val);
                   }}
                 >
-                  <SelectTrigger className="bg-white dark:bg-slate-900">
+                  <SelectTrigger className="bg-card">
                     <SelectValue placeholder={isAr ? 'اختر المظهر' : 'Choisir un thème'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -498,11 +498,11 @@ export function ProfileSettings({ locale }: { locale: string }) {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="px-0 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <CardFooter className="px-0 pt-6 border-t border-border">
             <Button 
               type="submit" 
               disabled={isSaving}
-              className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
+              className="min-w-30"
             >
               {isSaving ? (
                 <>
@@ -520,7 +520,7 @@ export function ProfileSettings({ locale }: { locale: string }) {
       <Card className="border-none shadow-none bg-transparent">
         <form onSubmit={handleChangePassword}>
           <CardHeader className="px-0 pt-0">
-            <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">
+            <CardTitle className="text-xl font-bold text-foreground">
               {isAr ? 'الأمان' : 'Sécurité'}
             </CardTitle>
             <CardDescription>
@@ -537,12 +537,12 @@ export function ProfileSettings({ locale }: { locale: string }) {
                     type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword} 
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="bg-white dark:bg-slate-900 pr-10 rtl:pr-3 rtl:pl-10"
+                    className="bg-card pr-10 rtl:pr-3 rtl:pl-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-muted-foreground hover:text-foreground"
                   >
                     {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -557,12 +557,12 @@ export function ProfileSettings({ locale }: { locale: string }) {
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword} 
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="bg-white dark:bg-slate-900 pr-10 rtl:pr-3 rtl:pl-10"
+                    className="bg-card pr-10 rtl:pr-3 rtl:pl-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-muted-foreground hover:text-foreground"
                   >
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -577,12 +577,12 @@ export function ProfileSettings({ locale }: { locale: string }) {
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword} 
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-white dark:bg-slate-900 pr-10 rtl:pr-3 rtl:pl-10"
+                    className="bg-card pr-10 rtl:pr-3 rtl:pl-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rtl:right-auto rtl:left-3 text-muted-foreground hover:text-foreground"
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -590,12 +590,12 @@ export function ProfileSettings({ locale }: { locale: string }) {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="px-0 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <CardFooter className="px-0 pt-6 border-t border-border">
             <Button 
               type="submit" 
               disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
               variant="destructive"
-              className="min-w-[120px]"
+              className="min-w-30"
             >
               {isChangingPassword ? (
                 <>
@@ -620,26 +620,26 @@ export function ProfileSettings({ locale }: { locale: string }) {
                 {isAr ? 'سيتم إرسال رسائل تأكيد.' : 'Des e-mails de confirmation seront envoyés.'}
               </DialogDescription>
               {isAr ? (
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-start mt-4">
-                  <p className="text-slate-800 dark:text-slate-200 font-medium mb-3">سيتم إرسال:</p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                    <li>رسالة إشعار إلى بريدك القديم (<span dir="ltr" className="text-slate-800 dark:text-slate-300 font-medium">{currentEmail}</span>)</li>
+                <div className="bg-muted p-4 rounded-lg border text-start mt-4">
+                  <p className="text-foreground font-medium mb-3">سيتم إرسال:</p>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>رسالة إشعار إلى بريدك القديم (<span dir="ltr" className="text-foreground font-medium">{currentEmail}</span>)</li>
                     <li>رسالة تأكيد إلى البريد الجديد الذي أدخلته</li>
                   </ul>
-                  <p className="font-semibold text-blue-600 dark:text-blue-400 mt-4 text-sm flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 inline-block"></span>
+                  <p className="font-semibold text-primary mt-4 text-sm flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
                     يرجى التحقق من كلا البريدين لإكمال العملية.
                   </p>
                 </div>
               ) : (
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 text-start mt-4">
-                  <p className="text-slate-800 dark:text-slate-200 font-medium mb-3">Il sera envoyé :</p>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                    <li>Un e-mail de notification à votre ancienne adresse (<span dir="ltr" className="text-slate-800 dark:text-slate-300 font-medium">{currentEmail}</span>)</li>
+                <div className="bg-muted p-4 rounded-lg border text-start mt-4">
+                  <p className="text-foreground font-medium mb-3">Il sera envoyé :</p>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Un e-mail de notification à votre ancienne adresse (<span dir="ltr" className="text-foreground font-medium">{currentEmail}</span>)</li>
                     <li>Un e-mail de confirmation à la nouvelle adresse saisie</li>
                   </ul>
-                  <p className="font-semibold text-blue-600 dark:text-blue-400 mt-4 text-sm flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 inline-block"></span>
+                  <p className="font-semibold text-primary mt-4 text-sm flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
                     Veuillez vérifier vos deux boîtes de réception pour terminer.
                   </p>
                 </div>

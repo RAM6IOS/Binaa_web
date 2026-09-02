@@ -45,7 +45,7 @@ export function CompanySettings({ locale }: { locale: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-success" />
       </div>
     );
   }
@@ -67,22 +67,22 @@ export function CompanySettings({ locale }: { locale: string }) {
           {/* Company Logo */}
           <div className="flex flex-col items-center sm:flex-row sm:items-end gap-6">
             <div className="relative group">
-              <Avatar className="w-24 h-24 rounded-2xl border-4 border-white dark:border-slate-800 shadow-md">
+              <Avatar className="w-24 h-24 rounded-lg border-4 border-card shadow-sm">
                 <AvatarImage src={company.logo_url} className="object-cover" />
-                <AvatarFallback className="rounded-2xl text-2xl font-bold bg-green-100 text-green-700">
+                <AvatarFallback className="rounded-lg text-2xl font-bold bg-success/10 text-success">
                   {company.company_name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <button 
                 type="button"
-                className="absolute bottom-0 right-0 p-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition-colors"
+                className="absolute bottom-0 right-0 p-2 bg-success text-success-foreground rounded-lg shadow-sm hover:bg-success transition-colors"
               >
                 <Camera className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-1 text-center sm:text-start">
               <h3 className="font-semibold">{isAr ? 'شعار الشركة' : 'Logo de l\'entreprise'}</h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {isAr ? 'يفضل أن يكون بخلفية شفافة PNG' : 'Format PNG transparent recommandé'}
               </p>
             </div>
@@ -95,7 +95,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="company_name" 
                 value={company.company_name} 
                 onChange={(e) => setCompany({ ...company, company_name: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2">
@@ -104,7 +104,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="wilaya" 
                 value={company.wilaya} 
                 onChange={(e) => setCompany({ ...company, wilaya: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -113,7 +113,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="address" 
                 value={company.address} 
                 onChange={(e) => setCompany({ ...company, address: e.target.value })}
-                className="bg-white dark:bg-slate-900 min-h-[80px]"
+                className="bg-card min-h-20"
               />
             </div>
             <div className="space-y-2">
@@ -122,7 +122,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="tax_id" 
                 value={company.tax_id} 
                 onChange={(e) => setCompany({ ...company, tax_id: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2">
@@ -131,7 +131,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="registration_number" 
                 value={company.registration_number} 
                 onChange={(e) => setCompany({ ...company, registration_number: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2">
@@ -140,7 +140,7 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="company_phone" 
                 value={company.phone} 
                 onChange={(e) => setCompany({ ...company, phone: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2">
@@ -149,12 +149,12 @@ export function CompanySettings({ locale }: { locale: string }) {
                 id="company_email" 
                 value={company.email} 
                 onChange={(e) => setCompany({ ...company, email: e.target.value })}
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="website" className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-slate-400" />
+                <Globe className="w-4 h-4 text-muted-foreground" />
                 {isAr ? 'الموقع الإلكتروني (اختياري)' : 'Site web (optionnel)'}
               </Label>
               <Input 
@@ -162,16 +162,16 @@ export function CompanySettings({ locale }: { locale: string }) {
                 value={company.website || ''} 
                 onChange={(e) => setCompany({ ...company, website: e.target.value })}
                 placeholder="https://www.example.com"
-                className="bg-white dark:bg-slate-900"
+                className="bg-card"
               />
             </div>
           </div>
         </CardContent>
-        <CardFooter className="px-0 pt-6 border-t border-slate-100 dark:border-slate-800">
+        <CardFooter className="px-0 pt-6 border-t border-border">
           <Button 
             type="submit" 
             disabled={isSaving}
-            className="bg-green-600 hover:bg-green-700 text-white min-w-[120px]"
+            className="min-w-30"
           >
             {isSaving ? (
               <>

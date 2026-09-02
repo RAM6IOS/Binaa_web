@@ -129,7 +129,7 @@ export function AreaChart({
               y1={t.y}
               x2={w - 20}
               y2={t.y}
-              stroke="#e5e7eb"
+              stroke="hsl(var(--border))"
               strokeOpacity={0.5}
               strokeDasharray="4 4"
             />
@@ -138,7 +138,7 @@ export function AreaChart({
               y={t.y + 4}
               textAnchor="end"
               fontSize={11}
-              fill="#888"
+              fill="hsl(var(--muted-foreground))"
             >
               {t.label}
             </text>
@@ -153,7 +153,7 @@ export function AreaChart({
             y={h - 8}
             textAnchor="middle"
             fontSize={11}
-            fill="#888"
+            fill="hsl(var(--muted-foreground))"
           >
             {xl.label}
           </text>

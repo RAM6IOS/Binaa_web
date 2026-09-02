@@ -82,13 +82,13 @@ interface DragState {
 }
 
 const PRESET_COLORS = [
-    { value: "", label: "تلقائي", class: "bg-slate-300 dark:bg-slate-700" },
-    { value: "blue", label: "أزرق", class: "bg-blue-500" },
-    { value: "green", label: "أخضر", class: "bg-emerald-500" },
-    { value: "amber", label: "برتقالي", class: "bg-amber-500" },
-    { value: "purple", label: "بنفسجي", class: "bg-purple-500" },
-    { value: "rose", label: "وردي", class: "bg-rose-500" },
-    { value: "slate", label: "رمادي", class: "bg-slate-500" }
+    { value: "", label: "تلقائي", class: "bg-muted" },
+    { value: "blue", label: "أزرق", class: "bg-primary" },
+    { value: "green", label: "أخضر", class: "bg-success" },
+    { value: "amber", label: "برتقالي", class: "bg-warning" },
+    { value: "purple", label: "بنفسجي", class: "bg-info" },
+    { value: "rose", label: "وردي", class: "bg-destructive" },
+    { value: "slate", label: "رمادي", class: "bg-muted-foreground" }
 ];
 
 export function GanttChart({ projectId, isAr }: GanttChartProps) {
@@ -842,39 +842,45 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
             switch (task.color) {
                 case "blue":
                     return {
-                        bg: "bg-blue-100 dark:bg-blue-950 border-blue-300 dark:border-blue-800",
-                        fill: "bg-blue-500 shadow-md shadow-blue-500/20 text-white",
-                        text: "text-blue-600 dark:text-blue-400"
+                        bg: "bg-primary/10 border-primary/20",
+                        fill: "bg-primary shadow-sm text-primary-foreground",
+                        text: "text-primary",
+                        label: "text-primary-foreground"
                     };
                 case "green":
                     return {
-                        bg: "bg-emerald-100 dark:bg-emerald-950 border-emerald-300 dark:border-emerald-800",
-                        fill: "bg-emerald-500 shadow-md shadow-emerald-500/20 text-white",
-                        text: "text-emerald-600 dark:text-emerald-400"
+                        bg: "bg-success/10 border-success/20",
+                        fill: "bg-success shadow-sm text-success-foreground",
+                        text: "text-success",
+                        label: "text-success-foreground"
                     };
                 case "amber":
                     return {
-                        bg: "bg-amber-100 dark:bg-amber-950 border-amber-300 dark:border-amber-800",
-                        fill: "bg-amber-500 shadow-md shadow-amber-500/20 text-white",
-                        text: "text-amber-600 dark:text-amber-400"
+                        bg: "bg-warning/10 border-warning/20",
+                        fill: "bg-warning shadow-sm text-warning-foreground",
+                        text: "text-warning",
+                        label: "text-warning-foreground"
                     };
                 case "purple":
                     return {
-                        bg: "bg-purple-100 dark:bg-purple-950 border-purple-300 dark:border-purple-800",
-                        fill: "bg-purple-500 shadow-md shadow-purple-500/20 text-white",
-                        text: "text-purple-600 dark:text-purple-400"
+                        bg: "bg-info/10 border-info/20",
+                        fill: "bg-info shadow-sm text-info-foreground",
+                        text: "text-info",
+                        label: "text-info-foreground"
                     };
                 case "rose":
                     return {
-                        bg: "bg-rose-100 dark:bg-rose-950 border-rose-300 dark:border-rose-800",
-                        fill: "bg-rose-500 shadow-md shadow-rose-500/20 text-white",
-                        text: "text-rose-600 dark:text-rose-400"
+                        bg: "bg-destructive/10 border-destructive/20",
+                        fill: "bg-destructive shadow-sm text-destructive-foreground",
+                        text: "text-destructive",
+                        label: "text-destructive-foreground"
                     };
                 case "slate":
                     return {
-                        bg: "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700",
-                        fill: "bg-slate-500 shadow-md shadow-slate-500/20 text-white",
-                        text: "text-slate-600 dark:text-slate-400"
+                        bg: "bg-muted border-border",
+                        fill: "bg-muted-foreground shadow-sm text-background",
+                        text: "text-muted-foreground",
+                        label: "text-background"
                     };
                 default:
                     break;
@@ -884,28 +890,32 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
         switch (task.status) {
             case "done":
                 return {
-                    bg: "bg-emerald-500/10 border-emerald-500/30 dark:bg-emerald-500/5",
-                    fill: "bg-gradient-to-r from-emerald-500 to-green-600 shadow shadow-emerald-500/15 text-white",
-                    text: "text-emerald-600 dark:text-emerald-400"
+                    bg: "bg-success/10 border-success/30",
+                    fill: "bg-success shadow-sm text-success-foreground",
+                    text: "text-success",
+                    label: "text-success-foreground"
                 };
             case "in_progress":
                 return {
-                    bg: "bg-blue-500/10 border-blue-500/30 dark:bg-blue-500/5",
-                    fill: "bg-gradient-to-r from-blue-500 to-indigo-600 shadow shadow-blue-500/15 text-white",
-                    text: "text-blue-600 dark:text-blue-400"
+                    bg: "bg-primary/10 border-primary/30",
+                    fill: "bg-primary shadow-sm text-primary-foreground",
+                    text: "text-primary",
+                    label: "text-primary-foreground"
                 };
             case "delayed":
                 return {
-                    bg: "bg-red-500/10 border-red-500/30 dark:bg-red-500/5",
-                    fill: "bg-gradient-to-r from-red-500 to-rose-600 shadow shadow-red-500/15 text-white",
-                    text: "text-red-600 dark:text-red-400"
+                    bg: "bg-destructive/10 border-destructive/30",
+                    fill: "bg-destructive shadow-sm text-destructive-foreground",
+                    text: "text-destructive",
+                    label: "text-destructive-foreground"
                 };
             case "todo":
             default:
                 return {
-                    bg: "bg-slate-500/10 border-slate-500/20 dark:bg-slate-500/5",
-                    fill: "bg-gradient-to-r from-slate-400 to-slate-500 dark:from-slate-600 dark:to-slate-700 text-white",
-                    text: "text-slate-600 dark:text-slate-400"
+                    bg: "bg-muted-foreground/10 border-muted-foreground/20",
+                    fill: "bg-muted-foreground shadow-sm text-background",
+                    text: "text-muted-foreground",
+                    label: "text-background"
                 };
         }
     };
@@ -942,8 +952,8 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
     if (loading) {
         return (
-            <div className="flex h-96 flex-col items-center justify-center gap-4 text-slate-500 font-sans">
-                <span className="h-10 w-10 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600" />
+            <div className="flex h-96 flex-col items-center justify-center gap-4 text-muted-foreground font-sans">
+                <span className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
                 <p className="animate-pulse">
                     {isAr ? "جاري تحميل مخطط Gantt..." : "Chargement du diagramme de Gantt..."}
                 </p>
@@ -953,7 +963,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
     return (
         <TooltipProvider>
-            <Card className="animate-in fade-in duration-500 shadow-xl border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 font-sans">
+            <Card className="animate-in fade-in duration-500 shadow-sm border-border overflow-hidden bg-card font-sans">
                 {/* Header Toolbar */}
 
 
@@ -972,18 +982,18 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
 
                 {/* Header Toolbar - تصميم محسن وأنظف */}
-                <div className="border-b bg-white dark:bg-slate-950 px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="border-b bg-card px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full lg:w-auto">
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-100 dark:bg-blue-950 rounded-2xl">
-                                    <SlidersHorizontal className="w-6 h-6 text-blue-600" />
+                                <div className="p-2.5 bg-primary/10 rounded-lg">
+                                    <SlidersHorizontal className="w-6 h-6 text-primary" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                    <h2 className="text-xl font-bold text-foreground">
                                         {isAr ? "مخطط غانت التفاعلي" : "Gantt Chart"}
                                     </h2>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 -mt-0.5">
+                                    <p className="text-sm text-muted-foreground -mt-0.5">
                                         {isAr ? "جدولة زمنية، تبعيات، وسحب وإسقاط" : "Timeline, dependencies & drag & drop"}
                                     </p>
                                 </div>
@@ -995,14 +1005,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                         </div>
 
                         {/* View Switcher for Mobile Devices */}
-                        <div className="flex md:hidden items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 dark:border-slate-800 w-full sm:w-64">
+                        <div className="flex md:hidden items-center bg-muted rounded-lg p-1 border border-border w-full sm:w-64">
                             <button
                                 type="button"
                                 onClick={() => setMobileViewMode("list")}
                                 className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
                                     mobileViewMode === "list"
-                                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
-                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                                        ? "bg-card text-primary shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 {isAr ? "قائمة الجدول الزمني" : "Liste"}
@@ -1012,8 +1022,8 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                 onClick={() => setMobileViewMode("gantt")}
                                 className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${
                                     mobileViewMode === "gantt"
-                                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
-                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                                        ? "bg-card text-primary shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 {isAr ? "مخطط غانت" : "Gantt"}
@@ -1026,18 +1036,18 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                         {/* Search */}
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute right-4 top-3 h-4 w-4 text-slate-400" />
+                            <Search className="absolute right-4 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder={isAr ? "بحث في المهام..." : "Rechercher une tâche..."}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-4 pr-11 h-11 bg-slate-50 dark:bg-slate-900 border-slate-200 focus-visible:ring-blue-500"
+                                className="pl-4 pr-11 h-11 bg-muted border-border focus-visible:ring-primary"
                             />
                         </div>
 
                         {/* Status Filter */}
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="h-11 w-full sm:w-40 bg-slate-50 dark:bg-slate-900 border-slate-200">
+                            <SelectTrigger className="h-11 w-full sm:w-40 bg-muted border-border">
                                 <SelectValue placeholder={isAr ? "كل الحالات" : "Tous les statuts"} />
                             </SelectTrigger>
                             <SelectContent>
@@ -1050,7 +1060,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                         </Select>
 
                         {/* Zoom Controls */}
-                        <div className={`items-center bg-slate-100 dark:bg-slate-900 rounded-xl p-1 border border-slate-200 ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
+                        <div className={`items-center bg-muted rounded-lg p-1 border border-border ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
                             <Button
                                 variant={zoomLevel === "day" ? "default" : "ghost"}
                                 size="sm"
@@ -1094,7 +1104,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                 });
                                 setIsDialogOpen(true);
                             }}
-                            className="bg-blue-600 hover:bg-blue-700 h-11 w-full sm:w-auto px-6 font-semibold shadow-sm flex items-center justify-center gap-2 text-sm"
+                            className="h-11 w-full sm:w-auto px-6 font-semibold shadow-sm flex items-center justify-center gap-2 text-sm"
                         >
                             <Plus className="w-5 h-5" />
                             {isAr ? "إضافة مهمة" : "Nouvelle tâche"}
@@ -1105,45 +1115,45 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
 
                 {/* Sub Legend Bar */}
-                <div className={`border-b px-6 py-2 flex flex-wrap gap-x-6 gap-y-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/20 ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
+                <div className={`border-b px-6 py-2 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-muted-foreground bg-muted/20 ${mobileViewMode === "list" ? "hidden md:flex" : "flex"}`}>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground" />
                         <span>{isAr ? "للقيام بها" : "À faire"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.3)]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-sm" />
                         <span>{isAr ? "قيد الإنجاز" : "En cours"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.3)]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-success shadow-sm" />
                         <span>{isAr ? "مكتملة" : "Terminée"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.3)]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-destructive shadow-sm" />
                         <span>{isAr ? "متأخرة" : "En retard"}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 border-l pl-6 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-6 border-slate-200 dark:border-slate-800">
-                        <span className="w-3.5 h-3.5 rotate-45 bg-amber-500 inline-block border border-white dark:border-slate-900 shadow-sm" />
+                    <div className="flex items-center gap-1.5 border-l pl-6 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-6 border-border">
+                        <span className="w-3.5 h-3.5 rotate-45 bg-warning inline-block border border-border shadow-sm" />
                         <span>{isAr ? "معلم رئيسي (Milestone)" : "Jalon"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <span className="w-5 h-0.5 border-t-2 border-dashed border-red-500 inline-block" />
-                        <span className="text-red-500 font-semibold">{isAr ? "تعارض جدولة" : "Conflit"}</span>
+                        <span className="w-5 h-0.5 border-t-2 border-dashed border-destructive inline-block" />
+                        <span className="text-destructive font-semibold">{isAr ? "تعارض جدولة" : "Conflit"}</span>
                     </div>
                 </div>
 
                 {/* Mobile Timeline List Feed View */}
                 {mobileViewMode === "list" ? (
-                    <div className="md:hidden px-4 py-6 space-y-4 bg-slate-50/50 dark:bg-slate-900/10 min-h-[400px]">
+                    <div className="md:hidden px-4 py-6 space-y-4 bg-muted/50 min-h-96">
                         {visibleTasks.length === 0 ? (
-                            <div className="text-center text-slate-400 py-16 bg-white dark:bg-slate-950 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-20 text-slate-500" />
+                            <div className="text-center text-muted-foreground py-16 bg-card rounded-lg border-2 border-dashed border-border">
+                                <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-20 text-muted-foreground" />
                                 <p className="text-sm font-medium">
                                     {isAr ? "لا توجد مهام مطابقة للمواصفات" : "Aucune tâche disponible"}
                                 </p>
                             </div>
                         ) : (
-                            <div className="space-y-4 relative before:absolute before:bottom-0 before:top-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800 before:left-4 rtl:before:left-auto rtl:before:right-4">
+                            <div className="space-y-4 relative before:absolute before:bottom-0 before:top-4 before:w-0.5 before:bg-border before:left-4 rtl:before:left-auto rtl:before:right-4">
                                 {visibleTasks.map((item) => {
                                     const { task, level, hasChildren } = item;
                                     const isExpanded = expandedTasks[task.id] !== false;
@@ -1166,18 +1176,18 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             }}
                                         >
                                             {/* Connecting node marker */}
-                                            <div className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 z-10 border border-white dark:border-slate-950" />
+                                            <div className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-5 w-1.5 h-1.5 rounded-full bg-muted-foreground z-10 border border-card" />
 
                                             {/* Card */}
                                             <Card
-                                                className={`bg-white dark:bg-slate-950 border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden ${
+                                                className={`shadow-sm transition-all duration-200 overflow-hidden ${
                                                     task.status === "in_progress"
-                                                        ? "border-l-4 border-l-blue-500 shadow-blue-500/5"
+                                                        ? "border-l-4 border-l-primary"
                                                         : task.status === "done"
-                                                        ? "border-l-4 border-l-emerald-500 shadow-emerald-500/5"
+                                                        ? "border-l-4 border-l-success"
                                                         : task.status === "delayed"
-                                                        ? "border-l-4 border-l-red-500 shadow-red-500/5"
-                                                        : "border-l-4 border-l-slate-400"
+                                                        ? "border-l-4 border-l-destructive"
+                                                        : "border-l-4 border-l-muted-foreground"
                                                 }`}
                                             >
                                                 <CardContent className="p-4 space-y-3">
@@ -1185,24 +1195,24 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                         <div className="space-y-1 flex-1">
                                                             <div className="flex items-center gap-1.5 flex-wrap">
                                                                 {level > 0 && (
-                                                                    <Badge variant="outline" className="text-[9px] px-1 py-0 bg-slate-50 dark:bg-slate-900 border-slate-200">
+                                                                    <Badge variant="outline" className="text-xs px-1 py-0 bg-muted border-border">
                                                                         {isAr ? "مهمة فرعية" : "Sous-tâche"}
                                                                     </Badge>
                                                                 )}
                                                                 {task.is_milestone && (
-                                                                    <Badge className="text-[9px] px-1.5 py-0 bg-amber-500 hover:bg-amber-600 text-white border-none font-bold">
+                                                                    <Badge className="text-xs px-1.5 py-0 bg-warning hover:bg-warning text-warning-foreground border-none font-bold">
                                                                         {isAr ? "🔸 معلم رئيسي" : "🔸 Jalon"}
                                                                     </Badge>
                                                                 )}
                                                                 <Badge
-                                                                    className={`text-[9px] px-1.5 py-0 rounded font-semibold uppercase ${
+                                                                    className={`text-xs px-1.5 py-0 rounded font-semibold uppercase ${
                                                                         task.priority === "urgent"
-                                                                            ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                                                                            ? "bg-destructive/10 text-destructive"
                                                                             : task.priority === "high"
-                                                                            ? "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400"
+                                                                            ? "bg-warning/10 text-warning"
                                                                             : task.priority === "low"
-                                                                            ? "bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400"
-                                                                            : "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
+                                                                            ? "bg-muted text-muted-foreground"
+                                                                            : "bg-primary/10 text-primary"
                                                                     }`}
                                                                 >
                                                                     {isAr ? getPriorityArabic(task.priority) : task.priority}
@@ -1211,7 +1221,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                             
                                                             <h3
                                                                 onClick={() => handleDoubleClickTask(task)}
-                                                                className="text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 cursor-pointer transition-colors leading-tight"
+                                                                className="text-sm font-bold text-foreground hover:text-primary cursor-pointer transition-colors leading-tight"
                                                             >
                                                                 {task.title}
                                                             </h3>
@@ -1224,7 +1234,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                         cx="18"
                                                                         cy="18"
                                                                         r="14"
-                                                                        className="stroke-slate-100 dark:stroke-slate-800"
+                                                                        className="stroke-muted"
                                                                         strokeWidth="2.5"
                                                                         fill="transparent"
                                                                     />
@@ -1234,12 +1244,12 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                         r="14"
                                                                         className={
                                                                             task.status === "done"
-                                                                                ? "stroke-emerald-500"
+                                                                                ? "stroke-success"
                                                                                 : task.status === "in_progress"
-                                                                                ? "stroke-blue-500"
+                                                                                ? "stroke-primary"
                                                                                 : task.status === "delayed"
-                                                                                ? "stroke-red-500"
-                                                                                : "stroke-slate-400"
+                                                                                ? "stroke-destructive"
+                                                                                : "stroke-muted-foreground"
                                                                         }
                                                                         strokeWidth="2.5"
                                                                         fill="transparent"
@@ -1250,7 +1260,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                         strokeLinecap="round"
                                                                     />
                                                                 </svg>
-                                                                <span className="absolute text-[8px] font-black text-slate-800 dark:text-slate-200">
+                                                                <span className="absolute text-xs font-bold text-foreground">
                                                                     {task.progress}%
                                                                 </span>
                                                             </div>
@@ -1258,14 +1268,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                     </div>
 
                                                     {task.description && (
-                                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 bg-slate-50 dark:bg-slate-900/40 p-2 rounded-lg border border-slate-100 dark:border-slate-800/40 italic">
+                                                        <p className="text-xs text-muted-foreground line-clamp-2 bg-muted p-2 rounded-lg border border-border italic">
                                                             "{task.description}"
                                                         </p>
                                                     )}
 
-                                                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-900 text-xs">
-                                                        <div className="flex items-center gap-1 text-slate-500 font-medium">
-                                                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-border text-xs">
+                                                        <div className="flex items-center gap-1 text-muted-foreground font-medium">
+                                                            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                                                             <span>
                                                                 {task.start_date} → {task.due_date}
                                                             </span>
@@ -1273,25 +1283,25 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                                                         <div className="flex items-center gap-2">
                                                             {task.assigned_worker ? (
-                                                                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/60 pl-2 pr-1 py-0.5 rounded-full border border-slate-100 dark:border-slate-800">
-                                                                    <Avatar className="w-5 h-5 bg-slate-200 dark:bg-slate-800 text-[8px] font-bold">
+                                                                <div className="flex items-center gap-1.5 bg-muted pl-2 pr-1 py-0.5 rounded-full border border-border">
+                                                                    <Avatar className="w-5 h-5 bg-muted text-xs font-bold">
                                                                         <AvatarFallback>{workerInitials}</AvatarFallback>
                                                                     </Avatar>
-                                                                    <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 max-w-[80px] truncate">
+                                                                    <span className="text-xs font-semibold text-muted-foreground max-w-20 truncate">
                                                                         {task.assigned_worker.full_name}
                                                                     </span>
                                                                 </div>
                                                             ) : (
-                                                                <div className="flex items-center gap-1 text-slate-400">
+                                                                <div className="flex items-center gap-1 text-muted-foreground">
                                                                     <User className="w-3.5 h-3.5" />
-                                                                    <span className="text-[10px] font-medium">{isAr ? "غير معين" : "Non assigné"}</span>
+                                                                    <span className="text-xs font-medium">{isAr ? "غير معين" : "Non assigné"}</span>
                                                                 </div>
                                                             )}
 
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="h-8 px-2.5 rounded-lg border-slate-200 hover:bg-slate-100 text-slate-600 dark:text-slate-350 hover:text-blue-600 flex items-center gap-1"
+                                                                className="h-8 px-2.5 rounded-lg border-border hover:bg-muted text-muted-foreground hover:text-primary flex items-center gap-1"
                                                                 onClick={() => handleDoubleClickTask(task)}
                                                             >
                                                                 <Edit2 className="w-3 h-3" />
@@ -1322,14 +1332,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                             style={{ width: `${sidebarWidth + totalDays * dayWidth}px` }}
                         >
                             {/* 1. Header Grid Row */}
-                            <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 select-none z-30 sticky top-0">
+                            <div className="flex border-b border-border bg-muted/50 select-none z-30 sticky top-0">
                                 {/* Left Sidebar Header */}
                                 <div
-                                    className="flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-40 h-16 shadow-[5px_0_10px_-3px_rgba(0,0,0,0.07)]"
+                                    className="flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-muted border-r border-border sticky left-0 z-40 h-16"
                                     dir={isAr ? "rtl" : "ltr"}
                                     style={{ width: `${sidebarWidth}px` }}
                                 >
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">
                                         {isAr ? "الهيكل الهرمي للمهام" : "Structure des tâches"}
                                     </span>
                                 </div>
@@ -1337,11 +1347,11 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                 {/* Timeline Header calendar */}
                                 <div className="flex-1 flex flex-col relative h-16">
                                     {/* Parent Level: Month / Year */}
-                                    <div className="flex h-8 border-b border-slate-100 dark:border-slate-800/60 font-sans">
+                                    <div className="flex h-8 border-b border-border font-sans">
                                         {parentHeaderCells.map((pCell) => (
                                             <div
                                                 key={pCell.key}
-                                                className="border-r border-slate-100 dark:border-slate-800/40 text-[10px] font-extrabold text-slate-500 tracking-wider flex items-center justify-center bg-slate-50/30 dark:bg-slate-900/10 truncate px-2"
+                                                className="border-r border-border text-xs font-bold text-muted-foreground tracking-wider flex items-center justify-center bg-muted/30 truncate px-2"
                                                 style={{ width: pCell.width }}
                                             >
                                                 {pCell.label}
@@ -1353,13 +1363,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                         {subHeaderCells.map((sCell) => (
                                             <div
                                                 key={sCell.key}
-                                                className="border-r border-slate-100 dark:border-slate-800/40 flex flex-col items-center justify-center flex-shrink-0 bg-white/40 dark:bg-slate-950/20"
+                                                className="border-r border-border flex flex-col items-center justify-center flex-shrink-0 bg-background/40"
                                                 style={{ width: sCell.width }}
                                             >
-                                                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">
+                                                <span className="text-xs font-bold text-foreground">
                                                     {sCell.label}
                                                 </span>
-                                                <span className="text-[8px] font-medium text-slate-400 -mt-0.5">
+                                                <span className="text-xs font-medium text-muted-foreground -mt-0.5">
                                                     {sCell.subLabel}
                                                 </span>
                                             </div>
@@ -1369,10 +1379,10 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                             </div>
 
                             {/* 2. Tasks Rows Grid */}
-                            <div className="flex flex-col relative z-10 bg-white dark:bg-slate-950">
+                            <div className="flex flex-col relative z-10 bg-card">
                                 {visibleTasks.length === 0 ? (
-                                    <div className="text-center text-slate-400 py-24 bg-slate-50/10 dark:bg-slate-900/5 border-b">
-                                        <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-20 text-slate-500" />
+                                    <div className="text-center text-muted-foreground py-24 bg-muted/10 border-b">
+                                        <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-20 text-muted-foreground" />
                                         <p className="text-sm font-medium">
                                             {isAr ? "لا توجد مهام مطابقة للمواصفات" : "Aucune tâche disponible"}
                                         </p>
@@ -1387,7 +1397,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             {subHeaderCells.map((cell) => (
                                                 <div
                                                     key={cell.key}
-                                                    className="h-full border-r border-slate-100/60 dark:border-slate-800/30 last:border-r-0"
+                                                    className="h-full border-r border-border last:border-r-0"
                                                     style={{ width: cell.width }}
                                                 />
                                             ))}
@@ -1395,10 +1405,10 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             {/* Today line overlay inside timeline */}
                                             {todayIndicator.active && (
                                                 <div
-                                                    className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-15 pointer-events-none opacity-60 shadow-[0_0_6px_rgba(239,68,68,0.5)]"
+                                                    className="absolute top-0 bottom-0 w-0.5 bg-destructive z-15 pointer-events-none opacity-60"
                                                     style={{ left: todayIndicator.x }}
                                                 >
-                                                    <div className="absolute top-0 -left-[5px] w-3.5 h-3.5 rounded-full bg-red-500 border-2 border-white dark:border-slate-950 shadow-md" />
+                                                    <div className="absolute top-0 -left-1.5 w-3.5 h-3.5 rounded-full bg-destructive border-2 border-card shadow-sm" />
                                                 </div>
                                             )}
                                         </div>
@@ -1419,7 +1429,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                         markerHeight="6"
                                                         orient="auto-start-reverse"
                                                     >
-                                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#94a3b8" />
+                                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="hsl(var(--muted-foreground))" />
                                                     </marker>
                                                     <marker
                                                         id="arrow-conflict"
@@ -1430,7 +1440,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                         markerHeight="6"
                                                         orient="auto-start-reverse"
                                                     >
-                                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ef4444" />
+                                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="hsl(var(--destructive))" />
                                                     </marker>
                                                 </defs>
                                                 {dependencyLines.map((line) => (
@@ -1438,7 +1448,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                         key={line.id}
                                                         d={line.path}
                                                         fill="none"
-                                                        stroke={line.isConflict ? "#ef4444" : "#cbd5e1"}
+                                                        stroke={line.isConflict ? "hsl(var(--destructive))" : "hsl(var(--border))"}
                                                         strokeWidth={line.isConflict ? 2 : 1.5}
                                                         strokeDasharray={line.isConflict ? "3 3" : "0"}
                                                         markerEnd={`url(#${line.isConflict ? "arrow-conflict" : "arrow"})`}
@@ -1469,11 +1479,11 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             return (
                                                 <div
                                                     key={task.id}
-                                                    className="flex border-b border-slate-100 dark:border-slate-900/60 items-center hover:bg-slate-50/40 dark:hover:bg-slate-900/5 group h-14 relative"
+                                                    className="flex border-b border-border items-center hover:bg-muted/40 dark:hover:bg-muted/5 group h-14 relative"
                                                 >
                                                     {/* Left Sidebar Sticky Cell (Hierarchical list) */}
                                                     <div
-                                                        className="flex-shrink-0 flex items-center justify-between px-2 md:px-4 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800/60 sticky left-0 z-30 h-full shadow-[5px_0_10px_-3px_rgba(0,0,0,0.05)]"
+                                                        className="flex-shrink-0 flex items-center justify-between px-2 md:px-4 bg-card border-r border-border sticky left-0 z-30 h-full"
                                                         dir={isAr ? "rtl" : "ltr"}
                                                         style={{ width: `${sidebarWidth}px` }}
                                                         onDoubleClick={() => handleDoubleClickTask(task)}
@@ -1496,7 +1506,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                             [task.id]: !isExpanded
                                                                         }));
                                                                     }}
-                                                                    className="w-4 h-4 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-500"
+                                                                    className="w-4 h-4 flex items-center justify-center hover:bg-muted rounded text-muted-foreground"
                                                                 >
                                                                     {isExpanded ? (
                                                                         <ChevronDown className="w-3.5 h-3.5" />
@@ -1507,7 +1517,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                     )}
                                                                 </button>
                                                             ) : (
-                                                                <div className="w-4 h-4 flex items-center justify-center text-slate-300">
+                                                                <div className="w-4 h-4 flex items-center justify-center text-muted-foreground">
                                                                     {level > 0 && (
                                                                         isAr ? (
                                                                             <CornerDownLeft className="w-3 h-3 opacity-60" />
@@ -1520,13 +1530,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                                                             <div className="flex flex-col truncate">
                                                                 <span
-                                                                    className={`text-xs truncate cursor-pointer hover:text-blue-600 transition-colors ${level === 0 ? "font-bold text-slate-800 dark:text-slate-200" : "font-semibold text-slate-600 dark:text-slate-350"
+                                                                    className={`text-xs truncate cursor-pointer hover:text-primary transition-colors ${level === 0 ? "font-bold text-foreground" : "font-semibold text-muted-foreground"
                                                                         }`}
                                                                     title={task.title}
                                                                 >
                                                                     {task.title}
                                                                 </span>
-                                                                <span className="text-[9px] text-slate-400 font-medium hidden md:inline">
+                                                                <span className="text-xs text-muted-foreground font-medium hidden md:inline">
                                                                     {task.start_date} → {task.due_date}
                                                                 </span>
                                                             </div>
@@ -1537,8 +1547,8 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                             {task.assigned_worker ? (
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <Avatar className="w-6 h-6 border border-slate-150 bg-slate-100 dark:bg-slate-800 text-[9px] font-bold">
-                                                                            <AvatarFallback className="text-[9.5px]">
+                                                                        <Avatar className="w-6 h-6 border border-border bg-muted text-xs font-bold">
+                                                                            <AvatarFallback className="text-xs">
                                                                                 {workerInitials}
                                                                             </AvatarFallback>
                                                                         </Avatar>
@@ -1549,13 +1559,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             ) : (
-                                                                <User className="w-3.5 h-3.5 text-slate-300" />
+                                                                <User className="w-3.5 h-3.5 text-muted-foreground" />
                                                             )}
 
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="w-7 h-7 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 transition-colors rounded-full"
+                                                                className="w-7 h-7 hover:bg-muted text-muted-foreground hover:text-primary transition-colors rounded-full"
                                                                 onClick={() => handleDoubleClickTask(task)}
                                                             >
                                                                 <Edit2 className="w-3 h-3" />
@@ -1573,7 +1583,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
                                                                     <div
-                                                                        className="absolute w-5 h-5 rotate-45 border-2 border-white dark:border-slate-950 bg-amber-500 hover:bg-amber-600 cursor-pointer shadow shadow-amber-500/30 transition-all hover:scale-110 active:scale-95 z-20 flex items-center justify-center animate-in fade-in"
+                                                                        className="absolute w-5 h-5 rotate-45 border-2 border-card bg-warning hover:bg-warning cursor-pointer shadow-sm transition-all hover:scale-110 active:scale-95 z-20 flex items-center justify-center animate-in fade-in"
                                                                         style={{
                                                                             left: `${startX + taskW / 2 - 10}px`,
                                                                             top: "18px"
@@ -1588,14 +1598,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                             handleDoubleClickTask(task)
                                                                         }
                                                                     >
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-white rotate-45" />
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-warning-foreground rotate-45" />
                                                                     </div>
                                                                 </TooltipTrigger>
                                                                 <TooltipContent className="text-xs p-3 space-y-1">
-                                                                    <p className="font-bold text-amber-600 flex items-center gap-1.5">
+                                                                    <p className="font-bold text-warning flex items-center gap-1.5">
                                                                         🔸 {isAr ? "معلم رئيسي" : "Jalon"}: {task.title}
                                                                     </p>
-                                                                    <p className="text-slate-500">
+                                                                    <p className="text-muted-foreground">
                                                                         📅 {isAr ? "التاريخ" : "Date"}: {task.due_date}
                                                                     </p>
                                                                 </TooltipContent>
@@ -1605,7 +1615,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
                                                                     <div
-                                                                        className={`absolute h-8 rounded-lg border cursor-grab active:cursor-grabbing hover:shadow-lg transition-all z-20 group/bar flex items-center overflow-visible select-none ${colorSpec.bg}`}
+                                                                        className={`absolute h-8 rounded-lg border cursor-grab active:cursor-grabbing hover:shadow-sm transition-all z-20 group/bar flex items-center overflow-visible select-none ${colorSpec.bg}`}
                                                                         style={{
                                                                             left: `${startX}px`,
                                                                             width: `${taskW}px`,
@@ -1623,7 +1633,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                     >
                                                                         {/* Drag left handler */}
                                                                         <div
-                                                                            className="absolute left-0 top-0 bottom-0 w-2.5 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 rounded-l-lg transition-opacity flex items-center justify-center"
+                                                                            className="absolute left-0 top-0 bottom-0 w-2.5 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-foreground/10 dark:hover:bg-foreground/10 rounded-l-lg transition-opacity flex items-center justify-center"
                                                                             onMouseDown={(e) =>
                                                                                 handleDragStart(
                                                                                     e,
@@ -1651,18 +1661,18 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                                                                         {/* Task text inside/outside */}
                                                                         {showTextInside ? (
-                                                                            <span className="absolute inset-0 flex items-center justify-start px-3 text-[10px] font-black text-white pointer-events-none truncate drop-shadow">
+                                                                            <span className={`absolute inset-0 flex items-center justify-start px-3 text-xs font-bold ${colorSpec.label} pointer-events-none truncate drop-shadow`}>
                                                                                 {task.progress}% | {task.title}
                                                                             </span>
                                                                         ) : (
-                                                                            <span className="absolute left-full ml-3 text-[10px] font-bold whitespace-nowrap text-slate-700 dark:text-slate-300 pointer-events-none bg-white/70 dark:bg-slate-900/70 px-1 py-0.5 rounded shadow-sm border border-slate-100 dark:border-slate-800">
+                                                                            <span className="absolute left-full ml-3 text-xs font-bold whitespace-nowrap text-foreground pointer-events-none bg-background/70 px-1 py-0.5 rounded shadow-sm border border-border">
                                                                                 {task.progress}% | {task.title}
                                                                             </span>
                                                                         )}
 
                                                                         {/* Drag right handler */}
                                                                         <div
-                                                                            className="absolute right-0 top-0 bottom-0 w-2.5 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 rounded-r-lg transition-opacity flex items-center justify-center"
+                                                                            className="absolute right-0 top-0 bottom-0 w-2.5 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-foreground/10 dark:hover:bg-foreground/10 rounded-r-lg transition-opacity flex items-center justify-center"
                                                                             onMouseDown={(e) =>
                                                                                 handleDragStart(
                                                                                     e,
@@ -1680,15 +1690,15 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                         />
                                                                     </div>
                                                                 </TooltipTrigger>
-                                                                <TooltipContent className="p-4 w-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-2xl rounded-xl z-50">
+                                                                <TooltipContent className="p-4 w-72 bg-background/95 dark:bg-background/95 backdrop-blur-md border-border shadow-sm rounded-lg z-50">
                                                                     <div className="space-y-3" dir={isAr ? "rtl" : "ltr"}>
                                                                         <div className="flex justify-between items-start">
-                                                                            <p className="font-bold text-slate-900 dark:text-white leading-tight">
+                                                                            <p className="font-bold text-foreground leading-tight">
                                                                                 {task.title}
                                                                             </p>
                                                                             <Badge
                                                                                 variant="outline"
-                                                                                className={`text-[9px] font-bold px-2 py-0.5 uppercase ${colorSpec.text}`}
+                                                                                className={`text-xs font-bold px-2 py-0.5 uppercase ${colorSpec.text}`}
                                                                             >
                                                                                 {isAr
                                                                                     ? getStatusArabic(task.status)
@@ -1696,13 +1706,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                             </Badge>
                                                                         </div>
                                                                         <div className="grid grid-cols-2 gap-3 text-xs">
-                                                                            <div className="flex items-center gap-2 text-slate-500">
+                                                                            <div className="flex items-center gap-2 text-muted-foreground">
                                                                                 <Calendar className="w-3.5 h-3.5" />
                                                                                 <span>
                                                                                     {task.start_date} → {task.due_date}
                                                                                 </span>
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 text-slate-500">
+                                                                            <div className="flex items-center gap-2 text-muted-foreground">
                                                                                 <User className="w-3.5 h-3.5" />
                                                                                 <span className="truncate">
                                                                                     {task.assigned_worker
@@ -1712,14 +1722,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                                             : "Non assigné"}
                                                                                 </span>
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 text-slate-500">
+                                                                            <div className="flex items-center gap-2 text-muted-foreground">
                                                                                 <Clock className="w-3.5 h-3.5" />
                                                                                 <span>
                                                                                     {isAr ? "الإنجاز" : "Avancement"}:{" "}
                                                                                     {task.progress}%
                                                                                 </span>
                                                                             </div>
-                                                                            <div className="flex items-center gap-2 text-slate-500">
+                                                                            <div className="flex items-center gap-2 text-muted-foreground">
                                                                                 <GitBranch className="w-3.5 h-3.5" />
                                                                                 <span>
                                                                                     {isAr ? "التبعيات" : "Deps"}:{" "}
@@ -1728,7 +1738,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                                             </div>
                                                                         </div>
                                                                         {task.description && (
-                                                                            <p className="text-[11px] text-slate-600 dark:text-slate-400 border-t pt-2 mt-2 leading-relaxed italic">
+                                                                            <p className="text-xs text-muted-foreground border-t pt-2 mt-2 leading-relaxed italic">
                                                                                 "{task.description}"
                                                                             </p>
                                                                         )}
@@ -1751,14 +1761,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
             {/* Edit / Create Task Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent
-                    className={`sm:max-w-[650px] max-h-[95vh] overflow-y-auto p-0 gap-0 border-none shadow-2xl ${isAr ? "rtl font-sans" : "ltr"
+                    className={`sm:max-w-2xl max-h-[95vh] overflow-y-auto p-0 gap-0 border-none shadow-sm ${isAr ? "rtl font-sans" : "ltr"
                         }`}
                 >
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                    <div className="bg-primary p-6 text-primary-foreground relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-foreground/20 rounded-full -mr-16 -mt-16 blur-2xl" />
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-                                <div className="p-2 bg-white/20 rounded-lg">
+                                <div className="p-2 bg-primary-foreground/20 rounded-lg">
                                     <Calendar className="w-6 h-6" />
                                 </div>
                                 {activeTask?.id
@@ -1772,14 +1782,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                         </DialogHeader>
                     </div>
 
-                    <form onSubmit={handleSaveTask} className="p-6 space-y-6 bg-white dark:bg-slate-950">
+                    <form onSubmit={handleSaveTask} className="p-6 space-y-6 bg-card">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Title */}
                             <div className="space-y-2 col-span-1 md:col-span-2">
                                 <Label htmlFor="title" className="text-sm font-semibold flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4 text-blue-500" />
+                                    <AlertCircle className="w-4 h-4 text-primary" />
                                     {isAr ? "عنوان المهمة" : "Titre"}
-                                    <span className="text-red-500">*</span>
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="title"
@@ -1787,7 +1797,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     placeholder={isAr ? "أدخل عنوان المهمة..." : "Titre..."}
                                     value={activeTask?.title || ""}
                                     onChange={(e) => setActiveTask({ ...activeTask, title: e.target.value })}
-                                    className="h-11 focus-visible:ring-blue-500 bg-white dark:bg-slate-900 border-slate-200"
+                                    className="h-11 focus-visible:ring-primary"
                                 />
                             </div>
 
@@ -1804,7 +1814,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     onChange={(e) =>
                                         setActiveTask({ ...activeTask, description: e.target.value })
                                     }
-                                    className="resize-none focus-visible:ring-blue-500 bg-white dark:bg-slate-900 border-slate-200"
+                                    className="resize-none focus-visible:ring-primary"
                                 />
                             </div>
 
@@ -1817,7 +1827,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     value={activeTask?.priority || "medium"}
                                     onValueChange={(v) => setActiveTask({ ...activeTask, priority: v })}
                                 >
-                                    <SelectTrigger id="priority" className="h-11 bg-white dark:bg-slate-900">
+                                    <SelectTrigger id="priority" className="h-11">
                                         <SelectValue placeholder={isAr ? "اختر الأولوية" : "Choisir"} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1843,7 +1853,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                         setActiveTask({ ...activeTask, status: v, progress: prog });
                                     }}
                                 >
-                                    <SelectTrigger id="status" className="h-11 bg-white dark:bg-slate-900">
+                                    <SelectTrigger id="status" className="h-11">
                                         <SelectValue placeholder={isAr ? "اختر الحالة" : "Choisir"} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1861,7 +1871,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     htmlFor="start_date"
                                     className="text-sm font-semibold flex items-center gap-2"
                                 >
-                                    <Calendar className="w-4 h-4 text-blue-500" />
+                                    <Calendar className="w-4 h-4 text-primary" />
                                     {isAr ? "تاريخ البدء" : "Date de début"}
                                 </Label>
                                 <Input
@@ -1872,7 +1882,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     onChange={(e) =>
                                         setActiveTask({ ...activeTask, start_date: e.target.value })
                                     }
-                                    className="h-11 bg-white dark:bg-slate-900 border-slate-200"
+                                    className="h-11"
                                 />
                             </div>
 
@@ -1881,7 +1891,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     htmlFor="due_date"
                                     className="text-sm font-semibold flex items-center gap-2"
                                 >
-                                    <Calendar className="w-4 h-4 text-orange-500" />
+                                    <Calendar className="w-4 h-4 text-warning" />
                                     {activeTask?.is_milestone
                                         ? isAr
                                             ? "تاريخ المعلم الرئيسي"
@@ -1906,7 +1916,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             start_date: startD
                                         });
                                     }}
-                                    className="h-11 bg-white dark:bg-slate-900 border-slate-200"
+                                    className="h-11"
                                 />
                             </div>
 
@@ -1914,10 +1924,10 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                             <div className="space-y-2 col-span-1 md:col-span-2">
                                 <div className="flex justify-between items-center">
                                     <Label htmlFor="progress" className="text-sm font-semibold flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-slate-500" />
+                                        <Clock className="w-4 h-4 text-muted-foreground" />
                                         {isAr ? "نسبة الإنجاز" : "Progrès"}
                                     </Label>
-                                    <span className="text-xs font-black text-blue-600 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded">
+                                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                         {activeTask?.progress || 0}%
                                     </span>
                                 </div>
@@ -1936,7 +1946,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             if (prog === 0 && stat === "done") stat = "todo";
                                             setActiveTask({ ...activeTask, progress: prog, status: stat });
                                         }}
-                                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                                     />
                                 </div>
                             </div>
@@ -1944,14 +1954,14 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                             {/* Assignee */}
                             <div className="space-y-2 col-span-1 md:col-span-2">
                                 <Label htmlFor="assigned_to" className="text-sm font-semibold flex items-center gap-2">
-                                    <User className="w-4 h-4 text-emerald-500" />
+                                    <User className="w-4 h-4 text-success" />
                                     {isAr ? "تعيين عامل (المسؤول)" : "Assigner à"}
                                 </Label>
                                 <Select
                                     value={activeTask?.assigned_to || "unassigned"}
                                     onValueChange={(v) => setActiveTask({ ...activeTask, assigned_to: v })}
                                 >
-                                    <SelectTrigger id="assigned_to" className="h-11 bg-white dark:bg-slate-900">
+                                    <SelectTrigger id="assigned_to" className="h-11">
                                         <SelectValue placeholder={isAr ? "غير معين" : "Choisir"} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1974,7 +1984,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                     value={activeTask?.parent_task_id || "none"}
                                     onValueChange={(v) => setActiveTask({ ...activeTask, parent_task_id: v })}
                                 >
-                                    <SelectTrigger id="parent_task" className="h-11 bg-white dark:bg-slate-900">
+                                    <SelectTrigger id="parent_task" className="h-11">
                                         <SelectValue placeholder={isAr ? "بدون مهمة أب" : "Aucune"} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1994,15 +2004,15 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                            
                             <div className="space-y-2 col-span-1 md:col-span-2">
                                 <Label className="text-sm font-semibold flex items-center gap-2">
-                                    <ArrowRightLeft className="w-4 h-4 text-purple-500" />
+                                    <ArrowRightLeft className="w-4 h-4 text-info" />
                                     {isAr ? "المهام السابقة (التبعيات)" : "Tâches précédentes (Dépendances)"}
                                 </Label>
                                 {tasks.filter((t) => t.id !== activeTask?.id).length === 0 ? (
-                                    <p className="text-xs text-slate-500 italic">
+                                    <p className="text-xs text-muted-foreground italic">
                                         {isAr ? "لا توجد مهام أخرى لربطها." : "Aucune autre tâche."}
                                     </p>
                                 ) : (
-                                    <div className="border rounded-lg p-3 max-h-[140px] overflow-y-auto space-y-2 bg-slate-50 dark:bg-slate-900/50 border-slate-200">
+                                    <div className="border rounded-lg p-3 max-h-36 overflow-y-auto space-y-2 bg-muted border-border">
                                         {tasks
                                             .filter((t) => t.id !== activeTask?.id)
                                             .map((t) => {
@@ -2012,11 +2022,11 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                 return (
                                                     <label
                                                         key={t.id}
-                                                        className="flex items-center gap-2 text-xs font-semibold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded transition-all"
+                                                        className="flex items-center gap-2 text-xs font-semibold cursor-pointer hover:bg-muted p-1.5 rounded transition-all"
                                                     >
                                                         <input
                                                             type="checkbox"
-                                                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                                                            className="rounded border-border text-primary focus:ring-primary h-3.5 w-3.5"
                                                             checked={isChecked}
                                                             onChange={(e) => {
                                                                 const checked = e.target.checked;
@@ -2036,7 +2046,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                                             }}
                                                         />
                                                         <span className="truncate flex-1">{t.title}</span>
-                                                        <Badge variant="outline" className="text-[9px] px-1">
+                                                        <Badge variant="outline" className="text-xs px-1">
                                                             {isAr ? getStatusArabic(t.status) : t.status}
                                                         </Badge>
                                                     </label>
@@ -2049,12 +2059,12 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
 
                             {/* Milestone Toggle */}
                             {/*
-                            <div className="flex items-center justify-between border rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30 col-span-1 md:col-span-2 border-slate-200">
+                            <div className="flex items-center justify-between border rounded-lg p-3 bg-muted/50 col-span-1 md:col-span-2 border-border">
                                 <div className="space-y-0.5">
                                     <Label htmlFor="milestone" className="text-sm font-semibold">
                                         {isAr ? "معلم رئيسي (Milestone)" : "Jalon"}
                                     </Label>
-                                    <p className="text-xs text-slate-500">
+                                    <p className="text-xs text-muted-foreground">
                                         {isAr
                                             ? "المعلم الرئيسي يمثل نقطة زمنية محددة بدون مدة"
                                             : "Un jalon représente un point clé sans durée"}
@@ -2089,13 +2099,13 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                             onClick={() => setActiveTask({ ...activeTask, color: c.value })}
                                             className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${c.class
                                                 } ${activeTask?.color === c.value
-                                                    ? "border-blue-600 dark:border-white scale-110 shadow-lg"
+                                                    ? "border-primary scale-110 shadow-sm"
                                                     : "border-transparent hover:scale-105"
                                                 }`}
                                             title={c.label}
                                         >
                                             {activeTask?.color === c.value && (
-                                                <div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-background" />
                                             )}
                                         </button>
                                     ))}
@@ -2112,7 +2122,7 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                         variant="ghost"
                                         onClick={handleDeleteTask}
                                         disabled={isSaving}
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 gap-1.5 text-xs font-bold"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 px-3 gap-1.5 text-xs font-bold"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                         {isAr ? "حذف المهمة" : "Supprimer"}
@@ -2132,10 +2142,10 @@ export function GanttChart({ projectId, isAr }: GanttChartProps) {
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px] font-bold text-xs"
+                                    className="min-w-32 font-bold text-xs"
                                 >
                                     {isSaving && (
-                                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                                     )}
                                     {isAr ? "حفظ التغييرات" : "Enregistrer"}
                                 </Button>

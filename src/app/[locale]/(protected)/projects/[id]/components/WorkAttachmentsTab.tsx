@@ -69,7 +69,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -86,13 +86,13 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
       />
 
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start gap-4">
+      <div className="bg-gradient-to-r from-primary to-primary/70 text-primary-foreground rounded-lg p-6 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-3">
             <FileText className="w-7 h-7" />
             {isAr ? "محاضر قيس الأشغال (Attachements)" : "Attachements Minute des Travaux"}
           </h2>
-          <p className="text-blue-100 mt-1">
+          <p className="text-primary-foreground/80 mt-1">
             {isAr
               ? "إعداد واعتماد محاضر قيس الكميات الدورية للفواتير ووضعيات الأشغال"
               : "Établissement et validation des attachements périodiques des métrés"}
@@ -115,11 +115,11 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
       {attachments.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <FileText className="mx-auto w-16 h-16 text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-slate-600 mb-2">
+            <FileText className="mx-auto w-16 h-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-bold text-foreground mb-2">
               {isAr ? "لا توجد محاضر قيس بعد" : "Aucun attachement enregistré"}
             </h3>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {isAr
                 ? "انقر على زر 'محضر قيس جديد' لإنشاء أول محضر للأشغال"
                 : "Cliquez sur 'Nouvel Attachement' pour commencer le suivi"}
@@ -135,7 +135,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
+              <FileText className="w-5 h-5 text-primary" />
               {isAr ? "قائمة محاضر القيس" : "Liste des attachements"}
             </CardTitle>
           </CardHeader>
@@ -144,7 +144,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
             <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50 dark:bg-slate-900/60">
+                  <TableRow className="bg-muted dark:bg-muted">
                     <TableHead className="w-20 font-bold text-xs">{isAr ? "رقم المحضر" : "N° Att."}</TableHead>
                     <TableHead className="font-bold text-xs">{isAr ? "الفترة" : "Période"}</TableHead>
                     <TableHead className="text-center font-bold text-xs">{isAr ? "الحالة" : "Statut"}</TableHead>
@@ -157,31 +157,31 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
                   {attachments.map((att) => (
                     <TableRow
                       key={att.id}
-                      className="cursor-pointer hover:bg-blue-50/60 dark:hover:bg-blue-900/20 transition-colors"
+                      className="cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/10 transition-colors"
                       onClick={() => {
                         setSelectedAttachmentId(att.id);
                         setIsDetailOpen(true);
                       }}
                     >
-                      <TableCell className="font-mono font-bold text-xs text-blue-600">
+                      <TableCell className="font-mono font-bold text-xs text-primary">
                         N° {att.attachment_number}
                       </TableCell>
                       <TableCell className="text-xs font-medium flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                         {att.period_start} → {att.period_end}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge
                           variant={att.status === "validated" ? "default" : "secondary"}
-                          className={att.status === "validated" ? "bg-green-600" : "bg-amber-500 text-white"}
+                          className={att.status === "validated" ? "bg-success" : "bg-warning text-warning-foreground"}
                         >
                           {att.status === "validated" ? (isAr ? "معتمد" : "Validé") : (isAr ? "مسودة" : "Brouillon")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500 max-w-[200px] truncate">
+                      <TableCell className="text-xs text-muted-foreground max-w-50 truncate">
                         {att.notes || "-"}
                       </TableCell>
-                      <TableCell className="text-center text-xs text-slate-400">
+                      <TableCell className="text-center text-xs text-muted-foreground">
                         {att.created_at ? new Date(att.created_at).toLocaleDateString(isAr ? "ar-DZ" : "fr-FR") : "-"}
                       </TableCell>
                       <TableCell className="text-right">
@@ -189,7 +189,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-blue-600 hover:bg-blue-100"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
                             onClick={() => {
                               setSelectedAttachmentId(att.id);
                               setIsDetailOpen(true);
@@ -201,7 +201,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:bg-red-100"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
                               onClick={() => handleDelete(att.id, att.status)}
                               disabled={deletingId === att.id}
                             >
@@ -225,7 +225,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
               {attachments.map((att) => (
                 <div
                   key={att.id}
-                  className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3 cursor-pointer hover:bg-blue-50/60 transition-colors"
+                  className="border rounded-lg p-4 bg-card dark:bg-card shadow-sm space-y-3 cursor-pointer hover:bg-primary/10 transition-colors"
                   onClick={() => {
                     setSelectedAttachmentId(att.id);
                     setIsDetailOpen(true);
@@ -233,27 +233,27 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      <p className="text-sm font-bold text-foreground">
                         {isAr ? `محضر رقم ${att.attachment_number}` : `Attachement N° ${att.attachment_number}`}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {att.period_start} → {att.period_end}
                       </p>
                     </div>
                     <Badge
                       variant={att.status === "validated" ? "default" : "secondary"}
-                      className={att.status === "validated" ? "bg-green-600" : "bg-amber-500 text-white"}
+                      className={att.status === "validated" ? "bg-success" : "bg-warning text-warning-foreground"}
                     >
                       {att.status === "validated" ? (isAr ? "معتمد" : "Validé") : (isAr ? "مسودة" : "Brouillon")}
                     </Badge>
                   </div>
                   {att.notes && (
-                    <p className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
+                    <p className="text-xs text-muted-foreground bg-muted dark:bg-muted p-2 rounded-lg">
                       {att.notes}
                     </p>
                   )}
                   <div className="flex justify-between items-center pt-2 border-t text-xs">
-                    <span className="text-slate-400">
+                    <span className="text-muted-foreground">
                       {att.created_at ? new Date(att.created_at).toLocaleDateString() : ""}
                     </span>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -273,7 +273,7 @@ export function WorkAttachmentsTab({ project, isAr }: Props) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 text-xs text-red-500 hover:bg-red-50"
+                          className="h-7 text-xs text-destructive hover:bg-destructive/10"
                           onClick={() => handleDelete(att.id, att.status)}
                           disabled={deletingId === att.id}
                         >

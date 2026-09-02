@@ -185,8 +185,8 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
       }
     }}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className={mode === 'bulk' ? 'sm:max-w-[900px] max-h-[90vh] overflow-y-auto' : 'sm:max-w-[550px] max-h-[90vh] overflow-y-auto'}>
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-500 text-white">
+      <DialogContent className={mode === 'bulk' ? 'sm:max-w-4xl max-h-[90vh] overflow-y-auto' : 'sm:max-w-xl max-h-[90vh] overflow-y-auto'}>
+        <DialogHeader className="p-6 border-b bg-primary text-primary-foreground">
           <DialogTitle className="text-xl flex items-center gap-2">
             <Ruler className="w-5 h-5" />
             {isEdit
@@ -197,7 +197,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
 
         {/* Toggle Single / Bulk — hidden in edit mode */}
         {!isEdit && (
-        <div className="flex gap-2 p-4 border-b bg-slate-50 dark:bg-slate-900/40">
+        <div className="flex gap-2 p-4 border-b bg-muted/40">
           <Button
             type="button"
             variant={mode === "single" ? "default" : "outline"}
@@ -226,7 +226,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-xs font-bold">
-                  <span className="text-red-500">*</span>
+                  <span className="text-destructive">*</span>
                   {isAr ? "رقم البند" : "N° Article"}
                 </Label>
                 <Input
@@ -238,7 +238,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-xs font-bold">
-                  <span className="text-red-500">*</span>
+                  <span className="text-destructive">*</span>
                   {isAr ? "الوحدة" : "Unité"}
                 </Label>
                 <Select value={formData.unit} onValueChange={(v) => setFormData({ ...formData, unit: v })}>
@@ -252,7 +252,7 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-xs font-bold">
-                <span className="text-red-500">*</span>
+                <span className="text-destructive">*</span>
                 {isAr ? "وصف البند / بيان الأشغال" : "Désignation des travaux"}
               </Label>
               <Input
@@ -290,9 +290,9 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
             </div>
 
             {formData.quantity > 0 && formData.unit_price > 0 && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl flex justify-between items-center border border-blue-100">
-                <span className="text-xs font-bold text-blue-600">{isAr ? "المبلغ الإجمالي" : "Montant total"}</span>
-                <span className="text-lg font-black text-blue-700">
+              <div className="bg-primary/10 p-3 rounded-lg flex justify-between items-center border border-primary/20">
+                <span className="text-xs font-bold text-primary">{isAr ? "المبلغ الإجمالي" : "Montant total"}</span>
+                <span className="text-lg font-bold text-primary">
                   {(formData.quantity * formData.unit_price).toLocaleString()} <span className="text-xs">DZD</span>
                 </span>
               </div>
@@ -319,17 +319,17 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
           </form>
         ) : (
           <div className="p-6 space-y-4">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               {isAr ? "أضف عدة بنود في المرة الواحدة" : "Ajoutez plusieurs articles en une fois"}
             </p>
 
             <div className="space-y-3">
               {bulkItems.map((item, idx) => (
-                <div key={idx} className="flex gap-2 items-start border p-3 rounded-xl bg-white dark:bg-slate-900 shadow-sm relative group">
+                <div key={idx} className="flex gap-2 items-start border p-3 rounded-lg bg-card shadow-sm relative group">
                   <button
                     type="button"
                     onClick={() => removeBulkRow(idx)}
-                    className="absolute top-2 left-2 text-slate-300 hover:text-red-500 transition-colors"
+                    className="absolute top-2 left-2 text-muted-foreground hover:text-destructive transition-colors"
                     disabled={bulkItems.length <= 1}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -385,8 +385,8 @@ export function AddContractItemDialog({ isAr, projectId, onSuccess, trigger, edi
               <Plus className="w-4 h-4" /> {isAr ? "إضافة سطر" : "Ajouter une ligne"}
             </Button>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100">
-              <div className="flex justify-between text-sm font-bold text-blue-700">
+            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
+              <div className="flex justify-between text-sm font-bold text-primary">
                 <span>{isAr ? "الإجمالي" : "Total"}</span>
                 <span>
                   {bulkItems.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0).toLocaleString()} DZD

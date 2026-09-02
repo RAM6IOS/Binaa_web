@@ -34,7 +34,7 @@ export default function LandingPage() {
   const isAr = locale === 'ar';
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-700">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
       {/* 1. Navbar */}
       <Navbar locale={locale} />
 
@@ -42,52 +42,52 @@ export default function LandingPage() {
       <section className="relative pt-24 pb-16 md:pt-40 md:pb-32 overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 -z-10 w-full h-full">
-          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-green-50 rounded-full blur-[100px]" />
+          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-success/10 rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in-up text-right">
-              <Badge className="mb-6 bg-blue-50 text-blue-700 border-blue-100 px-4 py-1.5 text-sm font-medium hover:bg-blue-100 transition-colors">
+              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium hover:bg-primary/20 transition-colors">
                 مستقبل إدارة الإنشاءات في الجزائر 🇩🇿
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.2] text-slate-900 mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2] text-foreground mb-6">
                 <span className="block mb-2">سيّر مشروعك بذكاء</span>
-                <span className="block text-3xl md:text-4xl lg:text-5xl font-bold text-slate-500">
+                <span className="block text-3xl md:text-4xl lg:text-5xl font-bold text-muted-foreground">
                   من البناء الخاص إلى{" "}
-                  <span className="text-blue-600 font-extrabold">الأشغال العمومية</span>
+                  <span className="text-primary font-bold">الأشغال العمومية</span>
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-xl ml-auto">
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed max-w-xl ml-auto">
                 منصة جزائرية متكاملة تساعد المقاولين على متابعة المشاريع، العمال، والمعدات في الوقت الفعلي ومن أي مكان.
               </p>
               <div className="flex flex-col sm:flex-row-reverse gap-4 justify-start">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-xl shadow-xl shadow-blue-200 group" asChild>
+                <Button size="lg" className="w-full sm:w-auto h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground text-lg rounded-lg shadow-sm group" asChild>
                   <LinkNext href={`/${locale}/auth/register`}>
                     ابدأ تجربة مجانية
                     <ArrowLeft className="mr-2 w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                   </LinkNext>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-xl border-slate-200 hover:bg-slate-50" onClick={() => alert(isAr ? "سيتم توفير فيديو توضيحي قريباً" : "Vidéo de présentation bientôt disponible")}>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-lg border-border hover:bg-muted" onClick={() => alert(isAr ? "سيتم توفير فيديو توضيحي قريباً" : "Vidéo de présentation bientôt disponible")}>
                   شاهد الفيديو
                 </Button>
               </div>
 
-              <div className="mt-12 flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 justify-end text-sm text-slate-500">
+              <div className="mt-12 flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 justify-end text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <CheckCircle2 className="w-4 h-4 text-success" />
                   <span>لا يلزم بطاقة ائتمان</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <CheckCircle2 className="w-4 h-4 text-success" />
                   <span>دعم فني 24/7</span>
                 </div>
               </div>
             </div>
 
             <div className="animate-fade-in-right relative">
-              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
+              <div className="relative z-10 rounded-lg overflow-hidden shadow-sm border-8 border-background">
                 <Image
                   src="/images/hero_dashboard.png"
                   alt="Binaa Dashboard"
@@ -98,21 +98,21 @@ export default function LandingPage() {
                 />
               </div>
               {/* Decorative elements */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl" />
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl" />
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-success/10 rounded-full blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
             </div>
           </div>
         </div>
       </section>
 
       {/* 4. Features Section */}
-      <section id="features" className="py-24 bg-white">
+      <section id="features" className="py-24 bg-background">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
               كل ما تحتاجه لإدارة مشاريعك في مكان واحد
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-muted-foreground">
               صممنا Binaa لتغطي كافة جوانب إدارة المشاريع الإنشائية، من الموقع الميداني إلى التقارير الإدارية النهائية.
             </p>
           </div>
@@ -123,47 +123,47 @@ export default function LandingPage() {
                 title: "إدارة المشاريع والجدول الزمني",
                 desc: "تابع تقدم المشروع لحظة بلحظة مع أدوات تخطيط متقدمة ورسوم بيانية تفاعلية.",
                 icon: Calendar,
-                color: "bg-blue-50 text-blue-600"
+                color: "bg-primary/10 text-primary"
               },
               {
                 title: "إدارة العمال والقوى العاملة",
                 desc: "سجل حضور وانصراف العمال، وزع المهام، وتابع الإنتاجية في مختلف المواقع.",
                 icon: Users,
-                color: "bg-green-50 text-green-600"
+                color: "bg-success/10 text-success"
               },
               {
                 title: "إدارة العتاد والمعدات + الصيانة",
                 desc: "تتبع مواقع المعدات، استهلاك الوقود، وجدول الصيانة الدورية لتجنب التوقف المفاجئ.",
                 icon: Wrench,
-                color: "bg-orange-50 text-orange-600"
+                color: "bg-warning/10 text-warning"
               },
               {
                 title: "رفع التقارير الميدانية والصور",
                 desc: "ارسل التقارير اليومية والصور من الموقع مباشرة عبر الهاتف لتصل للإدارة فوراً.",
                 icon: Smartphone,
-                color: "bg-purple-50 text-purple-600"
+                color: "bg-info/10 text-info"
               },
               {
                 title: "متابعة التكاليف والميزانية",
                 desc: "راقب المصاريف، الفواتير، والمدفوعات لضمان عدم تجاوز الميزانية المحددة للمشروع.",
                 icon: BarChart3,
-                color: "bg-red-50 text-red-600"
+                color: "bg-destructive/10 text-destructive"
               },
               {
                 title: "تنبيهات وإشعارات في الوقت الفعلي",
                 desc: "احصل على تنبيهات فورية عند حدوث تأخير، نقص في المواد، أو اقتراب موعد تسليم.",
                 icon: Bell,
-                color: "bg-amber-50 text-amber-600"
+                color: "bg-warning/10 text-warning"
               }
             ].map((feature, idx) => (
               <div key={idx} className="animate-fade-in-up" style={{ animationDelay: `${idx * 0.1}s` }}>
-                <Card className="h-full border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 transition-all duration-300 group">
+                <Card className="h-full border-border hover:border-primary/20 hover:shadow-sm transition-all duration-300 group">
                   <CardContent className="p-8">
-                    <div className={`w-14 h-14 ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-14 h-14 ${feature.color} rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                       <feature.icon className="w-7 h-7" />
                     </div>
-                    <h3 className="text-xl font-bold mb-4 text-slate-900">{feature.title}</h3>
-                    <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
+                    <h3 className="text-xl font-bold mb-4 text-foreground">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -173,10 +173,10 @@ export default function LandingPage() {
       </section>
 
       {/* 5. Benefits / Why Binaa */}
-      <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+      <section className="py-24 bg-inverse text-inverse-foreground overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-green-500 rounded-full blur-[120px]" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-success rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto px-4 md:px-8 relative z-10">
@@ -207,39 +207,39 @@ export default function LandingPage() {
                   }
                 ].map((item, idx) => (
                   <div key={idx} className="flex flex-row-reverse gap-6">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-                      <item.icon className="w-6 h-6 text-blue-400" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-inverse-foreground/10 rounded-lg flex items-center justify-center">
+                      <item.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                      <p className="text-slate-400 leading-relaxed">{item.desc}</p>
+                      <p className="text-inverse-foreground/60 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="relative lg:block hidden">
-              <div className="bg-gradient-to-tr from-blue-600 to-green-500 p-1 rounded-3xl">
-                <div className="bg-slate-900 rounded-3xl p-8 border border-white/10">
+              <div className="border-2 border-primary p-1 rounded-lg">
+                <div className="bg-inverse rounded-lg p-8 border border-inverse-foreground/10">
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                    <div className="flex items-center justify-between border-b border-inverse-foreground/5 pb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full" />
+                        <div className="w-10 h-10 bg-primary rounded-full" />
                         <div>
                           <p className="text-sm font-bold">مشروع سكنات عدل - الجزائر</p>
-                          <p className="text-xs text-slate-500">منذ 5 دقائق</p>
+                          <p className="text-xs text-inverse-foreground/60">منذ 5 دقائق</p>
                         </div>
                       </div>
-                      <Badge className="bg-green-500/20 text-green-400 border-none">قيد الإنجاز</Badge>
+                      <Badge className="bg-success/20 text-success border-none">قيد الإنجاز</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white/5 p-4 rounded-xl">
-                        <p className="text-xs text-slate-500 mb-1">نسبة الإنجاز</p>
+                      <div className="bg-inverse-foreground/5 p-4 rounded-lg">
+                        <p className="text-xs text-inverse-foreground/60 mb-1">نسبة الإنجاز</p>
                         <p className="text-xl font-bold">75%</p>
                       </div>
-                      <div className="bg-white/5 p-4 rounded-xl">
-                        <p className="text-xs text-slate-500 mb-1">الميزانية المستهلكة</p>
-                        <p className="text-xl font-bold text-red-400">420.5M DA</p>
+                      <div className="bg-inverse-foreground/5 p-4 rounded-lg">
+                        <p className="text-xs text-inverse-foreground/60 mb-1">الميزانية المستهلكة</p>
+                        <p className="text-xl font-bold text-destructive">420.5M DA</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -247,20 +247,20 @@ export default function LandingPage() {
                         <span>الجدول الزمني</span>
                         <span>متأخر بـ 3 أيام</span>
                       </div>
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                        <div className="bg-blue-500 h-full w-[70%]" />
+                      <div className="w-full bg-inverse-foreground/5 h-2 rounded-full overflow-hidden">
+                        <div className="bg-primary h-full w-[70%]" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 bg-white text-slate-900 p-6 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+              <div className="absolute -bottom-6 -right-6 bg-background text-foreground p-6 rounded-lg shadow-sm border border-border flex items-center gap-4">
+                <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-success" />
                 </div>
                 <div>
                   <p className="text-sm font-bold">تم توفير 15%</p>
-                  <p className="text-xs text-slate-500">من تكاليف المعدات هذا الشهر</p>
+                  <p className="text-xs text-muted-foreground">من تكاليف المعدات هذا الشهر</p>
                 </div>
               </div>
             </div>
@@ -269,11 +269,11 @@ export default function LandingPage() {
       </section>
 
       {/* 6. Testimonials */}
-      <section id="pricing" className="py-24 bg-white">
+      <section id="pricing" className="py-24 bg-background">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">آراء شركائنا في النجاح</h2>
-            <p className="text-lg text-slate-600">نفتخر بدعم كبرى شركات المقاولات في الجزائر لتحقيق أهدافها.</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">آراء شركائنا في النجاح</h2>
+            <p className="text-lg text-muted-foreground">نفتخر بدعم كبرى شركات المقاولات في الجزائر لتحقيق أهدافها.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -297,22 +297,22 @@ export default function LandingPage() {
                 image: "/images/contractor_3.png"
               }
             ].map((t, idx) => (
-              <Card key={idx} className="border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={idx} className="border-border shadow-sm hover:shadow-sm transition-shadow">
                 <CardContent className="p-8">
                   <div className="flex gap-1 mb-6">
                     {[1, 2, 3, 4, 5].map(s => (
-                      <span key={s} className="text-amber-400 text-lg">★</span>
+                      <span key={s} className="text-warning text-lg">★</span>
                     ))}
                   </div>
-                  <p className="text-slate-700 italic mb-8 leading-relaxed">"{t.text}"</p>
+                  <p className="text-foreground italic mb-8 leading-relaxed">"{t.text}"</p>
                   <div className="flex items-center gap-4 flex-row-reverse">
-                    <Avatar className="w-12 h-12 border-2 border-white shadow-sm">
+                    <Avatar className="w-12 h-12 border-2 border-background shadow-sm">
                       <AvatarImage src={t.image} alt={t.name} className="object-cover" />
                       <AvatarFallback>{t.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="text-right">
-                      <p className="font-bold text-slate-900">{t.name}</p>
-                      <p className="text-xs text-slate-500">{t.role}</p>
+                      <p className="font-bold text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.role}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -325,9 +325,9 @@ export default function LandingPage() {
       {/* 7. CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="bg-blue-600 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-blue-200">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-400/20 rounded-full -ml-32 -mb-32 blur-3xl" />
+          <div className="bg-primary rounded-lg p-12 md:p-20 text-center text-primary-foreground relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-foreground/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-success/20 rounded-full -ml-32 -mb-32 blur-3xl" />
 
             <div className="animate-scale-in relative z-10 max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
@@ -335,18 +335,18 @@ export default function LandingPage() {
               </h2>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="w-full sm:w-auto h-16 px-10 bg-white text-blue-600 hover:bg-blue-50 text-xl font-bold rounded-2xl shadow-xl transition-all hover:scale-105" asChild>
+                <Button size="lg" className="w-full sm:w-auto h-16 px-10 bg-background text-primary hover:bg-background/90 text-xl font-bold rounded-lg shadow-sm transition-all hover:scale-105" asChild>
                   <LinkNext href={`/${locale}/auth/register`}>
                     ابدأ الآن مجاناً
                   </LinkNext>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-10 bg-transparent border-white/20 text-white hover:bg-white/10 text-xl font-bold rounded-2xl" asChild>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-10 bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-xl font-bold rounded-lg" asChild>
                   <LinkNext href="#contact">
                     تواصل مع المبيعات
                   </LinkNext>
                 </Button>
               </div>
-              <p className="mt-8 text-sm text-blue-200">
+              <p className="mt-8 text-sm text-primary-foreground/70">
                 لا يلزم بطاقة ائتمان – إعداد سريع في أقل من دقيقتين
               </p>
             </div>
@@ -355,74 +355,74 @@ export default function LandingPage() {
       </section>
 
       {/* 8. Footer */}
-      <footer id="contact" className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
+      <footer id="contact" className="bg-muted border-t border-border pt-20 pb-10">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-16 text-right">
             <div className="col-span-1 md:col-span-1">
               <LinkNext href={`/${locale}`} className="flex items-center gap-2 justify-end mb-6">
-                <span className="text-2xl font-bold tracking-tight text-blue-900">Binaa</span>
-                <div className="bg-blue-600 p-1.5 rounded-lg">
-                  <Building2 className="w-5 h-5 text-white" />
+                <span className="text-2xl font-bold tracking-tight text-primary">Binaa</span>
+                <div className="bg-primary p-1.5 rounded-lg">
+                  <Building2 className="w-5 h-5 text-primary-foreground" />
                 </div>
               </LinkNext>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 المنصة الأولى في الجزائر المتخصصة في إدارة مشاريع الأشغال العمومية والإنشاءات الكبرى.
               </p>
               <div className="mt-8 flex gap-4 justify-end">
                 {/* Social links placeholders */}
-                <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 cursor-pointer transition-colors">
+                <div className="w-10 h-10 bg-background border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-primary cursor-pointer transition-colors">
                   <FileText className="w-5 h-5" />
                 </div>
-                <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 cursor-pointer transition-colors">
+                <div className="w-10 h-10 bg-background border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-primary cursor-pointer transition-colors">
                   <Users className="w-5 h-5" />
                 </div>
               </div>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">المنصة</h4>
-              <ul className="space-y-4 text-slate-600 text-sm">
-                <li><LinkNext href="#features" className="hover:text-blue-600">المميزات</LinkNext></li>
-                <li><LinkNext href="#pricing" className="hover:text-blue-600">الأسعار</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-blue-600">تحديثات النظام</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-blue-600">دليل الاستخدام</LinkNext></li>
+              <h4 className="font-bold text-foreground mb-6">المنصة</h4>
+              <ul className="space-y-4 text-muted-foreground text-sm">
+                <li><LinkNext href="#features" className="hover:text-primary">المميزات</LinkNext></li>
+                <li><LinkNext href="#pricing" className="hover:text-primary">الأسعار</LinkNext></li>
+                <li><LinkNext href="#" className="hover:text-primary">تحديثات النظام</LinkNext></li>
+                <li><LinkNext href="#" className="hover:text-primary">دليل الاستخدام</LinkNext></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">الشركة</h4>
-              <ul className="space-y-4 text-slate-600 text-sm">
-                <li><LinkNext href="#" className="hover:text-blue-600">عن بيناء</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-blue-600">الوظائف</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-blue-600">المدونة</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-blue-600">شركاء النجاح</LinkNext></li>
+              <h4 className="font-bold text-foreground mb-6">الشركة</h4>
+              <ul className="space-y-4 text-muted-foreground text-sm">
+                <li><LinkNext href="#" className="hover:text-primary">عن بيناء</LinkNext></li>
+                <li><LinkNext href="#" className="hover:text-primary">الوظائف</LinkNext></li>
+                <li><LinkNext href="#" className="hover:text-primary">المدونة</LinkNext></li>
+                <li><LinkNext href="#" className="hover:text-primary">شركاء النجاح</LinkNext></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">اتصل بنا</h4>
-              <ul className="space-y-4 text-slate-600 text-sm">
+              <h4 className="font-bold text-foreground mb-6">اتصل بنا</h4>
+              <ul className="space-y-4 text-muted-foreground text-sm">
                 <li className="flex items-center gap-3 justify-end">
                   <span>contact@binaa.dz</span>
-                  <FileText className="w-4 h-4 text-blue-600" />
+                  <FileText className="w-4 h-4 text-primary" />
                 </li>
                 <li className="flex items-center gap-3 justify-end">
                   <span>+213 (0) 23 45 67 89</span>
-                  <Phone className="w-4 h-4 text-blue-600" />
+                  <Phone className="w-4 h-4 text-primary" />
                 </li>
                 <li className="flex items-center gap-3 justify-end text-left">
                   <span>سيدي عبد الله، الجزائر العاصمة</span>
-                  <Building2 className="w-4 h-4 text-blue-600" />
+                  <Building2 className="w-4 h-4 text-primary" />
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
             <div className="flex gap-6">
-              <LinkNext href="#" className="hover:text-blue-600">سياسة الخصوصية</LinkNext>
-              <LinkNext href="#" className="hover:text-blue-600">شروط الخدمة</LinkNext>
-              <LinkNext href="#" className="hover:text-blue-600">ملفات تعريف الارتباط</LinkNext>
+              <LinkNext href="#" className="hover:text-primary">سياسة الخصوصية</LinkNext>
+              <LinkNext href="#" className="hover:text-primary">شروط الخدمة</LinkNext>
+              <LinkNext href="#" className="hover:text-primary">ملفات تعريف الارتباط</LinkNext>
             </div>
             <p>© 2026 Binaa - جميع الحقوق محفوظة لشركة بيناء تكنولوجي.</p>
           </div>

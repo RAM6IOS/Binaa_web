@@ -252,26 +252,26 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
     present: {
       label: isAr ? "حاضر" : "Présent",
       icon: CheckCircle2,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      color: "text-present",
+      bg: "bg-present/10",
+      border: "border-present/20",
+      badge: "bg-present/10 text-present border-present/20",
     },
     absent: {
       label: isAr ? "غائب" : "Absent",
       icon: XCircle,
-      color: "text-red-600",
-      bg: "bg-red-50",
-      border: "border-red-200",
-      badge: "bg-red-100 text-red-700 border-red-200",
+      color: "text-absent",
+      bg: "bg-absent/10",
+      border: "border-absent/20",
+      badge: "bg-absent/10 text-absent border-absent/20",
     },
     not_registered: {
       label: isAr ? "لم يسجل" : "Non pointé",
       icon: AlertTriangle,
-      color: "text-slate-500",
-      bg: "bg-slate-50",
-      border: "border-slate-200",
-      badge: "bg-slate-100 text-slate-600 border-slate-200",
+      color: "text-muted-foreground",
+      bg: "bg-muted",
+      border: "border-border",
+      badge: "bg-muted text-muted-foreground border-border",
     },
   };
 
@@ -289,7 +289,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
             variant={isSameDay(selectedDate, today) ? "default" : "outline"}
             size="sm"
             className={`h-9 rounded-full text-xs font-bold px-4 gap-1.5 shrink-0 ${
-              isSameDay(selectedDate, today) ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""
+              isSameDay(selectedDate, today) ? "bg-present text-present-foreground hover:bg-present/90" : ""
             }`}
             onClick={goToToday}
           >
@@ -299,14 +299,14 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
             variant={isSameDay(selectedDate, subDays(today, 1)) ? "default" : "outline"}
             size="sm"
             className={`h-9 rounded-full text-xs font-bold px-4 gap-1.5 shrink-0 ${
-              isSameDay(selectedDate, subDays(today, 1)) ? "bg-slate-800 text-white" : ""
+              isSameDay(selectedDate, subDays(today, 1)) ? "bg-inverse text-inverse-foreground" : ""
             }`}
             onClick={goToYesterday}
           >
             {isAr ? "أمس" : "Hier"}
           </Button>
 
-          <div className="h-5 w-px bg-slate-200 shrink-0" />
+          <div className="h-5 w-px bg-border shrink-0" />
 
           <Button
             variant="outline"
@@ -320,7 +320,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="h-9 px-3 gap-1.5 font-bold text-xs flex-1 min-w-0 justify-center">
-                <CalendarIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <CalendarIcon className="w-3.5 h-3.5 text-present shrink-0" />
                 <span className="truncate">{format(selectedDate, "d MMM", { locale: dateLocale })}</span>
               </Button>
             </PopoverTrigger>
@@ -346,9 +346,9 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         </div>
 
         {isFuture && (
-          <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <p className="text-[11px] font-semibold text-amber-800">
+          <div className="px-3 py-2 bg-shift/10 border border-shift/20 rounded-lg flex items-center gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-shift shrink-0" />
+            <p className="text-xs font-semibold text-shift">
               {isAr ? "لا يمكن التسجيل لتاريخ مستقبلي" : "Futur impossible"}
             </p>
           </div>
@@ -366,10 +366,10 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               <button
                 key={filter}
                 onClick={() => setStatusFilter(filter)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all shrink-0 ${
                   isActive
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-500 border-slate-200"
+                    ? "bg-inverse text-inverse-foreground border-inverse"
+                    : "bg-background text-muted-foreground border-border"
                 }`}
               >
                 {filter === "all"
@@ -379,8 +379,8 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                   : filter === "absent"
                   ? isAr ? "غائب" : "Absent"
                   : isAr ? "لم يسجل" : "Non pointé"}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full leading-none ${
-                  isActive ? "bg-white/20" : "bg-slate-100"
+                <span className={`text-xs px-1.5 py-0.5 rounded-full leading-none ${
+                  isActive ? "bg-inverse-foreground/20" : "bg-muted"
                 }`}>{count}</span>
               </button>
             );
@@ -391,11 +391,11 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         {isLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-[72px] rounded-2xl" />
+              <Skeleton key={i} className="h-20 rounded-lg" />
             ))}
           </div>
         ) : filteredAttendances.length === 0 ? (
-          <div className="text-center py-14 text-slate-400">
+          <div className="text-center py-14 text-muted-foreground">
             <UserX className="w-8 h-8 mx-auto mb-2 opacity-30" />
             <p className="text-xs font-bold">
               {isAr ? "لا يوجد عمال" : "Aucun ouvrier"}
@@ -414,47 +414,47 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               return (
                 <div
                   key={pw.worker_id}
-                  className={`bg-white rounded-2xl border ${cfg.border} px-3.5 py-3 shadow-sm`}
+                  className={`bg-card rounded-lg border ${cfg.border} px-3.5 py-3 shadow-sm`}
                 >
                   {/* صف واحد: معلومات العامل + الحالة */}
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 ring-1 ring-white shadow-sm shrink-0">
+                    <Avatar className="h-10 w-10 ring-1 ring-background shadow-sm shrink-0">
                       {worker?.photo_url && (
                         <AvatarImage src={worker.photo_url} alt={worker.full_name} />
                       )}
-                      <AvatarFallback className={`${cfg.bg} ${cfg.color} text-[10px] font-bold`}>
+                      <AvatarFallback className={`${cfg.bg} ${cfg.color} text-xs font-bold`}>
                         {worker?.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-[13px] text-slate-900 truncate">{worker?.full_name}</p>
-                        <Badge variant="outline" className={`${cfg.badge} text-[9px] font-bold gap-1 shrink-0 px-1.5 py-0 h-4`}>
+                        <p className="font-bold text-sm text-foreground truncate">{worker?.full_name}</p>
+                        <Badge variant="outline" className={`${cfg.badge} text-xs font-bold gap-1 shrink-0 px-1.5 py-0 h-4`}>
                           <StatusIcon className="w-2.5 h-2.5" />
                           {cfg.label}
                         </Badge>
                       </div>
-                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight truncate">
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight truncate">
                         {worker?.job_title}{pw.assigned_role ? ` · ${pw.assigned_role}` : ""}
                       </p>
                       {/* معلومات الوقت مختصرة */}
                       {att.status !== "not_registered" && (
-                        <div className="flex items-center gap-2 mt-1 text-[10px] font-bold tabular-nums text-slate-500">
+                        <div className="flex items-center gap-2 mt-1 text-xs font-bold tabular-nums text-muted-foreground">
                           {att.checkIn && (
                             <span className="flex items-center gap-0.5">
-                              <LogIn className="w-2.5 h-2.5 text-emerald-500" />
+                              <LogIn className="w-2.5 h-2.5 text-present" />
                               {att.checkIn}
                             </span>
                           )}
                           {att.checkOut && (
                             <span className="flex items-center gap-0.5">
-                              <LogOut className="w-2.5 h-2.5 text-amber-500" />
+                              <LogOut className="w-2.5 h-2.5 text-shift" />
                               {att.checkOut}
                             </span>
                           )}
                           {att.hoursWorked > 0 && (
-                            <span className="flex items-center gap-0.5 text-blue-600">
+                            <span className="flex items-center gap-0.5 text-info">
                               <Timer className="w-2.5 h-2.5" />
                               {att.hoursWorked}h
                             </span>
@@ -468,7 +468,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       {!isFuture && isNotRegistered && (
                         <Button
                           size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold gap-1 h-10 px-4 shadow-sm shadow-emerald-200"
+                          className="bg-present text-present-foreground hover:bg-present/90 rounded-lg text-xs font-bold gap-1 h-10 px-4 shadow-sm"
                           onClick={() => handleClockIn(pw.worker_id)}
                           disabled={isSubmitting && clockInWorkerId === pw.worker_id}
                         >
@@ -484,7 +484,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       {!isFuture && isClockedIn && (
                         <Button
                           size="sm"
-                          className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[11px] font-bold gap-1 h-10 px-4 shadow-sm shadow-amber-200"
+                          className="bg-shift text-shift-foreground hover:bg-shift/90 rounded-lg text-xs font-bold gap-1 h-10 px-4 shadow-sm"
                           onClick={() => handleClockOut(pw.worker_id)}
                           disabled={isSubmitting && clockOutWorkerId === pw.worker_id}
                         >
@@ -498,7 +498,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       )}
 
                       {isFuture && isNotRegistered && (
-                        <span className="text-[10px] text-slate-300 italic px-1">
+                        <span className="text-xs text-muted-foreground italic px-1">
                           {isAr ? " مستقبل" : " futur"}
                         </span>
                       )}
@@ -506,7 +506,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-9 w-9 rounded-xl text-slate-300 hover:text-slate-600 hover:bg-slate-50"
+                        className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
                         onClick={() => handleEdit(att)}
                         disabled={isFuture}
                       >
@@ -528,14 +528,14 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         {/* ── Date Header ── */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-100 rounded-xl">
-              <CalendarDays className="w-5 h-5 text-emerald-600" />
+            <div className="p-2.5 bg-present/10 rounded-lg">
+              <CalendarDays className="w-5 h-5 text-present" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-900 capitalize">
+              <h2 className="text-xl font-bold text-foreground capitalize">
                 {selectedDateLabel}
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-muted-foreground font-medium">
                 {isAr ? "حضور العمال لهذا اليوم" : "Présence des ouvriers"}
               </p>
             </div>
@@ -543,7 +543,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         </div>
 
         {/* ── Date Navigator ── */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm">
+        <div className="bg-card rounded-lg border border-border p-3 shadow-sm">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -557,7 +557,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="h-9 px-4 gap-2 font-bold text-sm">
-                  <CalendarIcon className="w-4 h-4 text-emerald-600" />
+                  <CalendarIcon className="w-4 h-4 text-present" />
                   {format(selectedDate, "d MMM yyyy", { locale: dateLocale })}
                 </Button>
               </PopoverTrigger>
@@ -581,13 +581,13 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               {isAr ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </Button>
 
-            <div className="h-6 w-px bg-slate-200 mx-1" />
+            <div className="h-6 w-px bg-border mx-1" />
 
             <Button
               variant={isSameDay(selectedDate, today) ? "default" : "outline"}
               size="sm"
               className={`h-8 rounded-full text-xs font-bold gap-1 ${
-                isSameDay(selectedDate, today) ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""
+                isSameDay(selectedDate, today) ? "bg-present text-present-foreground hover:bg-present/90" : ""
               }`}
               onClick={goToToday}
             >
@@ -597,7 +597,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               variant={isSameDay(selectedDate, subDays(today, 1)) ? "default" : "outline"}
               size="sm"
               className={`h-8 rounded-full text-xs font-bold gap-1 ${
-                isSameDay(selectedDate, subDays(today, 1)) ? "bg-slate-800 hover:bg-slate-900 text-white" : ""
+                isSameDay(selectedDate, subDays(today, 1)) ? "bg-inverse text-inverse-foreground hover:bg-inverse/90" : ""
               }`}
               onClick={goToYesterday}
             >
@@ -606,9 +606,9 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
           </div>
 
           {isFuture && (
-            <div className="mt-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <p className="text-xs font-semibold text-amber-800">
+            <div className="mt-2 px-3 py-2 bg-shift/10 border border-shift/20 rounded-lg flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-shift shrink-0" />
+              <p className="text-xs font-semibold text-shift">
                 {isAr
                   ? "لا يمكن تسجيل الحضور لتاريخ مستقبلي"
                   : "Enregistrement impossible pour une date future"}
@@ -658,14 +658,14 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                 variant={statusFilter === filter ? "default" : "outline"}
                 size="sm"
                 className={`rounded-full text-xs font-bold whitespace-nowrap ${
-                  statusFilter === filter ? "bg-slate-900 text-white hover:bg-slate-800" : ""
+                  statusFilter === filter ? "bg-inverse text-inverse-foreground hover:bg-inverse/90" : ""
                 }`}
                 onClick={() => setStatusFilter(filter)}
               >
                 {filter === "all"
                   ? isAr ? "الكل" : "Tous"
                   : statusConfig[filter].label}
-                <Badge variant="secondary" className="ms-1.5 h-5 px-1.5 text-[10px]">
+                <Badge variant="secondary" className="ms-1.5 h-5 px-1.5 text-xs">
                   {count}
                 </Badge>
               </Button>
@@ -677,13 +677,13 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-28 rounded-2xl" />
+              <Skeleton key={i} className="h-28 rounded-lg" />
             ))}
           </div>
         ) : (
           <div className="space-y-3">
             {filteredAttendances.length === 0 && (
-              <div className="text-center py-16 text-slate-400">
+              <div className="text-center py-16 text-muted-foreground">
                 <UserX className="w-10 h-10 mx-auto mb-2 opacity-40" />
                 <p className="text-sm font-bold">
                   {isAr ? "لا يوجد عمال في هذا الفلتر" : "Aucun ouvrier pour ce filtre"}
@@ -700,13 +700,13 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               return (
                 <div
                   key={pw.worker_id}
-                  className={`bg-white rounded-2xl border ${cfg.border} p-4 shadow-sm transition-all hover:shadow-md`}
+                  className={`bg-card rounded-lg border ${cfg.border} p-4 shadow-sm transition-all hover:shadow-sm`}
                 >
                   <div className="flex flex-col gap-3">
                     {/* Worker info + status */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-11 w-11 ring-2 ring-white shadow-sm">
+                        <Avatar className="h-11 w-11 ring-2 ring-background shadow-sm">
                           {worker?.photo_url && (
                             <AvatarImage src={worker.photo_url} alt={worker.full_name} />
                           )}
@@ -722,15 +722,15 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-bold text-sm text-slate-900">{worker?.full_name}</p>
-                          <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">
+                          <p className="font-bold text-sm text-foreground">{worker?.full_name}</p>
+                          <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight">
                             {worker?.job_title} · {pw.assigned_role}
                           </p>
                         </div>
                       </div>
                       <Badge
                         variant="outline"
-                        className={`${cfg.badge} text-[10px] font-bold gap-1`}
+                        className={`${cfg.badge} text-xs font-bold gap-1`}
                       >
                         <StatusIcon className="w-3 h-3" />
                         {cfg.label}
@@ -743,17 +743,17 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                         <TimeBox
                           label={isAr ? "دخول" : "Entrée"}
                           value={att.checkIn}
-                          icon={<LogIn className="w-3 h-3 text-emerald-500" />}
+                          icon={<LogIn className="w-3 h-3 text-present" />}
                         />
                         <TimeBox
                           label={isAr ? "خروج" : "Sortie"}
                           value={att.checkOut}
-                          icon={<LogOut className="w-3 h-3 text-amber-500" />}
+                          icon={<LogOut className="w-3 h-3 text-shift" />}
                         />
                         <TimeBox
                           label={isAr ? "ساعات" : "Heures"}
                           value={att.hoursWorked > 0 ? `${att.hoursWorked}h` : "—"}
-                          icon={<Timer className="w-3 h-3 text-blue-500" />}
+                          icon={<Timer className="w-3 h-3 text-info" />}
                           highlight
                         />
                       </div>
@@ -764,7 +764,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       {!isFuture && att.status === "not_registered" && (
                         <Button
                           size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold gap-1.5 h-9"
+                          className="bg-present text-present-foreground hover:bg-present/90 rounded-lg text-xs font-bold gap-1.5 h-9"
                           onClick={() => handleClockIn(pw.worker_id)}
                           disabled={isSubmitting && clockInWorkerId === pw.worker_id}
                         >
@@ -781,7 +781,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-amber-300 text-amber-700 hover:bg-amber-50 rounded-xl text-xs font-bold gap-1.5 h-9"
+                          className="border-shift/30 text-shift hover:bg-shift/10 rounded-lg text-xs font-bold gap-1.5 h-9"
                           onClick={() => handleClockOut(pw.worker_id)}
                           disabled={isSubmitting && clockOutWorkerId === pw.worker_id}
                         >
@@ -795,7 +795,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       )}
 
                       {isFuture && att.status === "not_registered" && (
-                        <span className="text-[10px] text-slate-400 italic">
+                        <span className="text-xs text-muted-foreground italic">
                           {isAr ? "تاريخ مستقبلي" : "Date future"}
                         </span>
                       )}
@@ -803,7 +803,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-slate-400 hover:text-slate-700 rounded-xl text-xs font-bold gap-1 h-9"
+                        className="text-muted-foreground hover:text-foreground rounded-lg text-xs font-bold gap-1 h-9"
                         onClick={() => handleEdit(att)}
                         disabled={isFuture}
                       >
@@ -826,7 +826,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
         <DialogContent className="sm:max-w-md" dir={isAr ? "rtl" : "ltr"}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil className="w-5 h-5 text-blue-600" />
+              <Pencil className="w-5 h-5 text-primary" />
               {isAr ? "تعديل الحضور" : "Modifier la présence"}
             </DialogTitle>
             <DialogDescription>
@@ -884,9 +884,9 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
             </div>
 
             {previewHours !== null && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl">
-                <Timer className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-bold text-blue-700">
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+                <Timer className="w-4 h-4 text-primary" />
+                <span className="text-sm font-bold text-primary">
                   {isAr ? "الساعات المحسوبة:" : "Heures calculées:"} {previewHours}h
                 </span>
               </div>
@@ -898,7 +898,7 @@ export function PointageTab({ project, isAr }: PointageTabProps) {
               {isAr ? "إلغاء" : "Annuler"}
             </Button>
             <Button
-              className="bg-blue-600 hover:bg-blue-700 gap-2"
+              className="gap-2"
               onClick={handleSaveEdit}
               disabled={isSubmitting}
             >
@@ -932,17 +932,17 @@ function StatPill({
   color: string;
 }) {
   const colors: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    red: "bg-red-50 text-red-700 border-red-200",
-    slate: "bg-slate-50 text-slate-600 border-slate-200",
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
+    emerald: "bg-present/10 text-present border-present/20",
+    red: "bg-absent/10 text-absent border-absent/20",
+    slate: "bg-muted text-muted-foreground border-border",
+    blue: "bg-info/10 text-info border-info/20",
   };
   return (
-    <div className={`rounded-2xl border p-3.5 flex items-center gap-3 ${colors[color]}`}>
+    <div className={`rounded-lg border p-3.5 flex items-center gap-3 ${colors[color]}`}>
       <div className="opacity-70">{icon}</div>
       <div>
-        <p className="text-[10px] font-bold uppercase opacity-60">{label}</p>
-        <p className="text-lg font-black tabular-nums">{value}</p>
+        <p className="text-xs font-bold uppercase opacity-60">{label}</p>
+        <p className="text-lg font-bold tabular-nums">{value}</p>
       </div>
     </div>
   );
@@ -961,17 +961,17 @@ function TimeBox({
 }) {
   return (
     <div
-      className={`rounded-xl border p-2.5 text-center ${
-        highlight ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-100"
+      className={`rounded-lg border p-2.5 text-center ${
+        highlight ? "bg-info/10 border-info/20" : "bg-muted border-border"
       }`}
     >
       <div className="flex items-center justify-center gap-1 mb-0.5">
         {icon}
-        <span className="text-[9px] font-bold uppercase text-slate-400">{label}</span>
+        <span className="text-xs font-bold uppercase text-muted-foreground">{label}</span>
       </div>
       <p
         className={`text-sm font-bold tabular-nums ${
-          highlight ? "text-blue-700" : "text-slate-700"
+          highlight ? "text-info" : "text-foreground"
         }`}
       >
         {value || "—"}

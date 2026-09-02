@@ -1,4 +1,6 @@
+import { CalendarRange, HardHat, Clock4, CheckCircle2, Ban } from "lucide-react";
 import { ProjectStatus } from "@/lib/types/projects";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   status: ProjectStatus;
@@ -6,19 +8,23 @@ interface Props {
 }
 
 export function ProjectStatusBadge({ status, isAr }: Props) {
-  const statusConfig: Record<ProjectStatus, { color: string; label: string }> = {
-    planning: { color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", label: isAr ? 'قيد التخطيط' : 'En planification' },
-    in_progress: { color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300", label: isAr ? 'قيد الإنجاز' : 'En cours' },
-    delayed: { color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300", label: isAr ? 'متأخر' : 'En retard' },
-    completed: { color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300", label: isAr ? 'مكتمل' : 'Terminé' },
-    cancelled: { color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300", label: isAr ? 'ملغى' : 'Annulé' },
+  const statusConfig: Record<
+    ProjectStatus,
+    { variant: "info" | "secondary" | "warning" | "success" | "destructive"; label: string; icon: React.ReactNode }
+  > = {
+    planning: { variant: "secondary", label: isAr ? 'قيد التخطيط' : 'En planification', icon: <CalendarRange className="h-3 w-3" /> },
+    in_progress: { variant: "info", label: isAr ? 'قيد الإنجاز' : 'En cours', icon: <HardHat className="h-3 w-3" /> },
+    delayed: { variant: "warning", label: isAr ? 'متأخر' : 'En retard', icon: <Clock4 className="h-3 w-3" /> },
+    completed: { variant: "success", label: isAr ? 'مكتمل' : 'Terminé', icon: <CheckCircle2 className="h-3 w-3" /> },
+    cancelled: { variant: "destructive", label: isAr ? 'ملغى' : 'Annulé', icon: <Ban className="h-3 w-3" /> },
   };
 
-  const config = statusConfig[status] || { color: "bg-slate-100 text-slate-700", label: status };
+  const config = statusConfig[status] || { variant: "secondary", label: status, icon: null };
 
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+    <Badge variant={config.variant as any} className="gap-1">
+      {config.icon}
       {config.label}
-    </span>
+    </Badge>
   );
 }

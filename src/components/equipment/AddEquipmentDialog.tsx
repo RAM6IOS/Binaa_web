@@ -141,13 +141,13 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ? trigger : (
-          <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+          <Button className="gap-2 bg-primary hover:bg-primary/90">
             <PlusCircle className="w-4 h-4" />
             {isAr ? 'إضافة عتاد جديد' : 'Ajouter un équipement'}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEdit 
@@ -160,115 +160,115 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
             
             {/* --- القسم الأول: المعلومات الأساسية --- */}
             <div className="col-span-2 border-b pb-2 mb-2">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 {isAr ? 'المعلومات الأساسية' : 'Informations de base'}
               </h3>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'اسم المعدة' : 'Nom de l\'équipement'}</Label>
+              <Label htmlFor="name" className="text-foreground font-semibold">{isAr ? 'اسم المعدة' : 'Nom de l\'équipement'}</Label>
               <Input 
                 id="name" 
                 required 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder={isAr ? 'مثال: حفارة هيدروليكية' : 'Ex: Pelle hydraulique'} 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'النوع' : 'Type'}</Label>
+              <Label htmlFor="type" className="text-foreground font-semibold">{isAr ? 'النوع' : 'Type'}</Label>
               <Input 
                 id="type" 
                 required 
                 value={formData.type}
                 onChange={(e) => setFormData({...formData, type: e.target.value})}
                 placeholder={isAr ? 'مثال: حفارة' : 'Ex: Excavatrice'} 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الفئة' : 'Catégorie'}</Label>
+              <Label htmlFor="category" className="text-foreground font-semibold">{isAr ? 'الفئة' : 'Catégorie'}</Label>
               <Input 
                 id="category" 
                 required 
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
                 placeholder={isAr ? 'مثال: آلات ثقيلة' : 'Ex: Engins lourds'} 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="brand" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'العلامة التجارية' : 'Marque'}</Label>
+              <Label htmlFor="brand" className="text-foreground font-semibold">{isAr ? 'العلامة التجارية' : 'Marque'}</Label>
               <Input 
                 id="brand" 
                 required 
                 value={formData.brand}
                 onChange={(e) => setFormData({...formData, brand: e.target.value})}
                 placeholder="Caterpillar, Liebherr..." 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الموديل' : 'Modèle'}</Label>
+              <Label htmlFor="model" className="text-foreground font-semibold">{isAr ? 'الموديل' : 'Modèle'}</Label>
               <Input 
                 id="model" 
                 required 
                 value={formData.model}
                 onChange={(e) => setFormData({...formData, model: e.target.value})}
                 placeholder="320D, HTM 904..." 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="serial_number" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الرقم التسلسلي' : 'N° de série'}</Label>
+              <Label htmlFor="serial_number" className="text-foreground font-semibold">{isAr ? 'الرقم التسلسلي' : 'N° de série'}</Label>
               <Input 
                 id="serial_number" 
                 required 
                 value={formData.serial_number}
                 onChange={(e) => setFormData({...formData, serial_number: e.target.value})}
                 placeholder="SN-123456" 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="plate_number" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'رقم اللوحة' : 'N° d\'immatriculation'}</Label>
+              <Label htmlFor="plate_number" className="text-foreground font-semibold">{isAr ? 'رقم اللوحة' : 'N° d\'immatriculation'}</Label>
               <Input 
                 id="plate_number" 
                 value={formData.plate_number || ""}
                 onChange={(e) => setFormData({...formData, plate_number: e.target.value})}
                 placeholder="12345-123-16" 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'سنة الصنع' : 'Année de fabrication'}</Label>
+              <Label htmlFor="year" className="text-foreground font-semibold">{isAr ? 'سنة الصنع' : 'Année de fabrication'}</Label>
               <Input 
                 id="year" 
                 type="number"
                 value={formData.year_of_manufacture || ""}
                 onChange={(e) => setFormData({...formData, year_of_manufacture: parseInt(e.target.value)})}
                 placeholder="2023" 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             {/* --- القسم الثاني: التكاليف والحالة --- */}
             <div className="col-span-2 border-b pb-2 mb-2 mt-4">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 {isAr ? 'التكاليف والتشغيل' : 'Coûts et Opérations'}
               </h3>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="hourly_rate" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الأجر بالساعة (دج)' : 'Taux horaire (DZD)'}</Label>
+              <Label htmlFor="hourly_rate" className="text-foreground font-semibold">{isAr ? 'الأجر بالساعة (دج)' : 'Taux horaire (DZD)'}</Label>
               <Input 
                 id="hourly_rate" 
                 type="number"
@@ -276,12 +276,12 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
                 value={formData.hourly_rate}
                 onChange={(e) => setFormData({...formData, hourly_rate: parseFloat(e.target.value)})}
                 placeholder="2500" 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="daily_rate" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الأجر اليومي (دج)' : 'Taux journalier (DZD)'}</Label>
+              <Label htmlFor="daily_rate" className="text-foreground font-semibold">{isAr ? 'الأجر اليومي (دج)' : 'Taux journalier (DZD)'}</Label>
               <Input 
                 id="daily_rate" 
                 type="number"
@@ -289,26 +289,26 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
                 value={formData.daily_rate}
                 onChange={(e) => setFormData({...formData, daily_rate: parseFloat(e.target.value)})}
                 placeholder="25000" 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="wilaya" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الولاية' : 'Wilaya'}</Label>
+              <Label htmlFor="wilaya" className="text-foreground font-semibold">{isAr ? 'الولاية' : 'Wilaya'}</Label>
               <Input 
                 id="wilaya" 
                 required 
                 value={formData.wilaya}
                 onChange={(e) => setFormData({...formData, wilaya: e.target.value})}
                 placeholder="Oran, Alger..." 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الحالة التشغيلية' : 'Statut'}</Label>
+              <Label htmlFor="status" className="text-foreground font-semibold">{isAr ? 'الحالة التشغيلية' : 'Statut'}</Label>
               <Select value={formData.status} onValueChange={(v: EquipmentStatus) => setFormData({...formData, status: v})}>
-                <SelectTrigger id="status" className="focus:ring-2 focus:ring-emerald-500/20">
+                <SelectTrigger id="status" className="focus:ring-2 focus:ring-ring">
                   <SelectValue placeholder={isAr ? "اختر الحالة" : "Choisir le statut"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -321,9 +321,9 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="owner_type" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'نوع الملكية' : 'Type de propriété'}</Label>
+              <Label htmlFor="owner_type" className="text-foreground font-semibold">{isAr ? 'نوع الملكية' : 'Type de propriété'}</Label>
               <Select value={formData.owner_type} onValueChange={(v: OwnerType) => setFormData({...formData, owner_type: v})}>
-                <SelectTrigger id="owner_type" className="focus:ring-2 focus:ring-emerald-500/20">
+                <SelectTrigger id="owner_type" className="focus:ring-2 focus:ring-ring">
                   <SelectValue placeholder={isAr ? "اختر النوع" : "Choisir le type"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,85 +335,85 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="location" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'الموقع الحالي بالتفصيل' : 'Emplacement actuel'}</Label>
+              <Label htmlFor="location" className="text-foreground font-semibold">{isAr ? 'الموقع الحالي بالتفصيل' : 'Emplacement actuel'}</Label>
               <Textarea 
                 id="location" 
                 value={formData.current_location || ""}
                 onChange={(e) => setFormData({...formData, current_location: e.target.value})}
                 placeholder={isAr ? 'وصف الموقع...' : 'Description de l\'emplacement...'} 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             {/* Photo */}
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="photo_url" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'رابط الصورة' : 'URL de la photo'}</Label>
+              <Label htmlFor="photo_url" className="text-foreground font-semibold">{isAr ? 'رابط الصورة' : 'URL de la photo'}</Label>
               <div className="flex items-center gap-2">
                 <Input 
                   id="photo_url" 
                   value={formData.photo_url || ""}
                   onChange={(e) => setFormData({...formData, photo_url: e.target.value})}
                   placeholder="https://..." 
-                  className="flex-1 focus:ring-2 focus:ring-emerald-500/20"
+                  className="flex-1 focus:ring-2 focus:ring-ring"
                 />
               </div>
             </div>
 
             {/* --- القسم الثالث: الصيانة والضمان --- */}
             <div className="col-span-2 border-b pb-2 mb-2 mt-4">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 {isAr ? 'الصيانة والضمان' : 'Maintenance et Garantie'}
               </h3>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="total_hours" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'إجمالي ساعات العمل' : 'Total heures utilisées'}</Label>
+              <Label htmlFor="total_hours" className="text-foreground font-semibold">{isAr ? 'إجمالي ساعات العمل' : 'Total heures utilisées'}</Label>
               <Input 
                 id="total_hours" 
                 type="number"
                 value={formData.total_hours_used || 0}
                 onChange={(e) => setFormData({...formData, total_hours_used: parseFloat(e.target.value)})}
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="maint_last" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'تاريخ آخر صيانة' : 'Date dernière maintenance'}</Label>
+              <Label htmlFor="maint_last" className="text-foreground font-semibold">{isAr ? 'تاريخ آخر صيانة' : 'Date dernière maintenance'}</Label>
               <Input 
                 id="maint_last" 
                 type="date"
                 value={formData.maintenance_last_date || ""}
                 onChange={(e) => setFormData({...formData, maintenance_last_date: e.target.value})}
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="maint_next" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'تاريخ الصيانة القادمة' : 'Prochaine maintenance'}</Label>
+              <Label htmlFor="maint_next" className="text-foreground font-semibold">{isAr ? 'تاريخ الصيانة القادمة' : 'Prochaine maintenance'}</Label>
               <Input 
                 id="maint_next" 
                 type="date"
                 value={formData.maintenance_next_due || ""}
                 onChange={(e) => setFormData({...formData, maintenance_next_due: e.target.value})}
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="maint_interval" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'فاصل الصيانة (ساعات)' : 'Intervalle maintenance (h)'}</Label>
+              <Label htmlFor="maint_interval" className="text-foreground font-semibold">{isAr ? 'فاصل الصيانة (ساعات)' : 'Intervalle maintenance (h)'}</Label>
               <Input 
                 id="maint_interval" 
                 type="number"
                 value={formData.maintenance_interval_hours || ""}
                 onChange={(e) => setFormData({...formData, maintenance_interval_hours: parseInt(e.target.value)})}
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="maint_status" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'حالة الصيانة' : 'Statut maintenance'}</Label>
+              <Label htmlFor="maint_status" className="text-foreground font-semibold">{isAr ? 'حالة الصيانة' : 'Statut maintenance'}</Label>
               <Select value={formData.maintenance_status} onValueChange={(v: MaintenanceStatus) => setFormData({...formData, maintenance_status: v})}>
-                <SelectTrigger id="maint_status" className="focus:ring-2 focus:ring-emerald-500/20">
+                <SelectTrigger id="maint_status" className="focus:ring-2 focus:ring-ring">
                   <SelectValue placeholder={isAr ? "اختر الحالة" : "Choisir le statut"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -425,35 +425,35 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="maint_notes" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'ملاحظات الصيانة' : 'Notes de maintenance'}</Label>
+              <Label htmlFor="maint_notes" className="text-foreground font-semibold">{isAr ? 'ملاحظات الصيانة' : 'Notes de maintenance'}</Label>
               <Textarea 
                 id="maint_notes" 
                 value={formData.maintenance_notes || ""}
                 onChange={(e) => setFormData({...formData, maintenance_notes: e.target.value})}
                 placeholder={isAr ? 'ملاحظات إضافية...' : 'Notes supplémentaires...'} 
-                className="min-h-[80px] focus:ring-2 focus:ring-emerald-500/20"
+                className="min-h-20 focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="warranty" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'انتهاء الضمان' : 'Fin de garantie'}</Label>
+              <Label htmlFor="warranty" className="text-foreground font-semibold">{isAr ? 'انتهاء الضمان' : 'Fin de garantie'}</Label>
               <Input 
                 id="warranty" 
                 type="date"
                 value={formData.warranty_expiry || ""}
                 onChange={(e) => setFormData({...formData, warranty_expiry: e.target.value})}
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="supplier_contact" className="text-slate-700 dark:text-slate-300 font-semibold">{isAr ? 'جهة اتصال الصيانة (المورد)' : 'Contact maintenance fournisseur'}</Label>
+              <Label htmlFor="supplier_contact" className="text-foreground font-semibold">{isAr ? 'جهة اتصال الصيانة (المورد)' : 'Contact maintenance fournisseur'}</Label>
               <Input 
                 id="supplier_contact" 
                 value={formData.supplier_maintenance_contact || ""}
                 onChange={(e) => setFormData({...formData, supplier_maintenance_contact: e.target.value})}
                 placeholder="Nom, Téléphone..." 
-                className="focus:ring-2 focus:ring-emerald-500/20"
+                className="focus:ring-2 focus:ring-ring"
               />
             </div>
 
@@ -462,7 +462,7 @@ export function AddEquipmentDialog({ isAr, onSuccess, equipment, trigger, open: 
             <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="px-6">
               {isAr ? 'إلغاء' : 'Annuler'}
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-700 px-8">
+            <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 px-8">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isAr ? 'حفظ بيانات المعدات' : 'Enregistrer'}
             </Button>

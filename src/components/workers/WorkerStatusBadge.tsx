@@ -1,3 +1,4 @@
+import { CircleCheck, CircleX, HardHat, CalendarOff } from "lucide-react";
 import { WorkerStatus } from "@/lib/types/projects";
 import { Badge } from "@/components/ui/badge";
 
@@ -7,17 +8,21 @@ interface Props {
 }
 
 export function WorkerStatusBadge({ status, isAr }: Props) {
-  const statusConfig: Record<WorkerStatus, { variant: "success" | "info" | "destructive" | "secondary" | "warning"; label: string }> = {
-    available: { variant: "success", label: isAr ? 'متاح' : 'Disponible' },
-    on_project: { variant: "info", label: isAr ? 'في مشروع' : 'Sur projet' },
-    unavailable: { variant: "destructive", label: isAr ? 'غير متاح' : 'Indisponible' },
-    vacation: { variant: "warning", label: isAr ? 'في إجازة' : 'En congé' },
+  const statusConfig: Record<
+    WorkerStatus,
+    { variant: "success" | "info" | "destructive" | "secondary" | "warning"; label: string; icon: React.ReactNode }
+  > = {
+    available: { variant: "success", label: isAr ? 'متاح' : 'Disponible', icon: <CircleCheck className="h-3 w-3" /> },
+    on_project: { variant: "info", label: isAr ? 'في مشروع' : 'Sur projet', icon: <HardHat className="h-3 w-3" /> },
+    unavailable: { variant: "destructive", label: isAr ? 'غير متاح' : 'Indisponible', icon: <CircleX className="h-3 w-3" /> },
+    vacation: { variant: "warning", label: isAr ? 'في إجازة' : 'En congé', icon: <CalendarOff className="h-3 w-3" /> },
   };
 
-  const config = statusConfig[status] || { variant: "secondary", label: status };
+  const config = statusConfig[status] || { variant: "secondary", label: status, icon: null };
 
   return (
-    <Badge variant={config.variant as any}>
+    <Badge variant={config.variant as any} className="gap-1">
+      {config.icon}
       {config.label}
     </Badge>
   );

@@ -66,16 +66,16 @@ export function CreateWorkAttachmentDialog({ projectId, isAr, onSuccess, trigger
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <Button className="gap-2">
             <Plus className="w-4 h-4" />
             {isAr ? "محضر قيس جديد" : "Nouvel Attachement"}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
+            <FileText className="w-5 h-5 text-primary" />
             {isAr ? "إنشاء محضر قيس أشغال جديد" : "Créer un nouvel attachement"}
           </DialogTitle>
         </DialogHeader>
@@ -113,7 +113,7 @@ export function CreateWorkAttachmentDialog({ projectId, isAr, onSuccess, trigger
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
               {isAr ? "إلغاء" : "Annuler"}
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {isAr ? "إنشاء المحضر" : "Créer"}
             </Button>

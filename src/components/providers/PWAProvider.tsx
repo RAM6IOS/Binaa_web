@@ -102,8 +102,8 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
       {children}
       {!isOnline && (
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:w-96 z-50 animate-pulse">
-          <div className="bg-amber-600 dark:bg-amber-700 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3 border border-amber-500/30 backdrop-blur-md bg-opacity-95">
-            <WifiOff className="w-5 h-5 mt-0.5 shrink-0 text-amber-100" />
+          <div className="bg-warning text-warning-foreground p-4 rounded-lg shadow-sm flex items-start gap-3 border border-warning-foreground/20">
+            <WifiOff className="w-5 h-5 mt-0.5 shrink-0 text-warning-foreground" />
             <div className="flex-1 text-sm font-medium leading-normal">
               {alertText}
             </div>

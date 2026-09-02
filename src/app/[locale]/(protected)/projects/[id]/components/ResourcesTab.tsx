@@ -112,7 +112,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
   if (isLoading && assignedWorkers.length === 0) {
     return (
       <div className="py-20 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-3xl" />)}
+        {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-lg" />)}
       </div>
     );
   }
@@ -128,11 +128,11 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
       </div>
 
       {/* 2. قسم العمال */}
-      <Card className="border-none md:border shadow-xl rounded-3xl overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900 border-b p-4 md:p-6 flex-row items-center justify-between">
+      <Card className="border-none md:border shadow-sm rounded-lg overflow-hidden">
+        <CardHeader className="bg-muted/50 dark:bg-muted border-b p-4 md:p-6 flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-lg"><HardHat size={18} /></div>
-            <CardTitle className="text-lg md:text-xl font-black">{isAr ? 'إدارة القوى العاملة' : 'Personnel Site'}</CardTitle>
+            <div className="p-2.5 bg-primary text-primary-foreground rounded-lg shadow-sm"><HardHat size={18} /></div>
+            <CardTitle className="text-lg md:text-xl font-bold">{isAr ? 'إدارة القوى العاملة' : 'Personnel Site'}</CardTitle>
           </div>
           <AssignResourceModal type="worker" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)} excludeIds={assignedWorkers.map(aw => aw.worker_id)} />
         </CardHeader>
@@ -141,10 +141,10 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
           {/* الموبايل: نظام بطاقات (بدلاً من الجداول لمنع بطء التمرير الجانبي) */}
           <div className="block md:hidden divide-y">
             {assignedWorkers.map((pw) => (
-              <div key={pw.id} className="p-4 bg-white dark:bg-slate-950 flex flex-col gap-4 active:bg-slate-50 transition-colors">
+              <div key={pw.id} className="p-4 bg-card flex flex-col gap-4 active:bg-muted transition-colors">
                 <div className="flex justify-between items-center text-start">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-11 w-11 rounded-full overflow-hidden border shadow-sm ring-1 ring-slate-100">
+                    <div className="relative h-11 w-11 rounded-full overflow-hidden border shadow-sm ring-1 ring-border">
                       {pw.worker?.photo_url ? (
                         <Image
                           src={getSmallThumbnail(pw.worker.photo_url)}
@@ -154,20 +154,20 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase">{pw.worker?.full_name?.charAt(0)}</div>
+                        <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground font-bold uppercase">{pw.worker?.full_name?.charAt(0)}</div>
                       )}
                     </div>
                     <div className="min-w-0 text-start">
                       <h4 className="font-bold text-sm truncate">{pw.worker?.full_name}</h4>
-                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                      <div className="text-xs text-muted-foreground font-bold uppercase tracking-tight">
                         {pw.worker?.job_title}
                         {pw.worker?.deleted_at && (
-                          <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>
+                          <Badge variant="outline" className="text-xs mr-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="text-slate-300" aria-label="Remove worker">
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="text-muted-foreground" aria-label="Remove worker">
                     <UserMinus size={18} />
                   </Button>
                 </div>
@@ -183,7 +183,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
           {/* الحاسوب: جدول منظف برمجياً من مسافات Hydration Error */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50 uppercase font-black text-[10px]">
+              <TableHeader className="bg-muted/50 uppercase font-bold text-xs">
                 <TableRow>
                   <TableHead className="ps-6">العامل والمهنة</TableHead>
                   <TableHead>الدور في المشروع</TableHead>
@@ -197,7 +197,7 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                   <TableRow key={pw.id} className="group h-16 transition-colors">
                     <TableCell className="ps-6 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-10 w-10 rounded-full overflow-hidden shadow-sm shrink-0 border border-slate-200">
+                        <div className="relative h-10 w-10 rounded-full overflow-hidden shadow-sm shrink-0 border border-border">
                           {pw.worker?.photo_url ? (
                             <Image
                               src={getSmallThumbnail(pw.worker.photo_url)}
@@ -206,23 +206,23 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
                               sizes="40px"
                               className="object-cover"
                             />
-                          ) : <div className="w-full h-full bg-slate-50 flex items-center justify-center font-bold text-slate-400 text-xs">{pw.worker?.full_name?.charAt(0)}</div>}
+                          ) : <div className="w-full h-full bg-muted flex items-center justify-center font-bold text-muted-foreground text-xs">{pw.worker?.full_name?.charAt(0)}</div>}
                         </div>
                         <div>
                           <div className="font-bold text-sm leading-none mb-1">
                             {pw.worker?.full_name}
                             {pw.worker?.deleted_at && (
-                              <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0 align-middle">{isAr ? 'معطل' : 'Inactif'}</Badge>
+                              <Badge variant="outline" className="text-xs mr-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0 align-middle">{isAr ? 'معطل' : 'Inactif'}</Badge>
                             )}
                           </div>
-                          <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">{pw.worker?.job_title}</p>
+                          <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight">{pw.worker?.job_title}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="border-blue-100 bg-blue-50/30 text-blue-700 font-bold px-3 text-[10px] uppercase">{pw.assigned_role}</Badge></TableCell>
-                    <TableCell className="font-mono font-black">{pw.daily_hours}h</TableCell>
-                    <TableCell className="font-black text-slate-800">{pw.worker?.daily_rate?.toLocaleString()} <span className="text-[9px] opacity-40 ml-0.5">DZD</span></TableCell>
-                    <TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all rounded-full h-9 w-9" aria-label="Remove worker"><Trash2 size={16} /></Button></TableCell>
+                    <TableCell><Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary font-bold px-3 text-xs uppercase">{pw.assigned_role}</Badge></TableCell>
+                    <TableCell className="font-mono font-bold">{pw.daily_hours}h</TableCell>
+                    <TableCell className="font-bold text-foreground">{pw.worker?.daily_rate?.toLocaleString()} <span className="text-xs opacity-40 ml-0.5">DZD</span></TableCell>
+                    <TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pw.id, type: "worker", name: pw.worker?.full_name || "" })} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-colors rounded-full h-9 w-9" aria-label="Remove worker"><Trash2 size={16} /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -232,11 +232,11 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
       </Card>
 
       {/* 3. قسم العتاد الثقيل (تصميم الهاتف مُفعل تلقائياً هنا) */}
-      <Card className="border-none md:border shadow-sm rounded-3xl overflow-hidden mt-6">
-        <CardHeader className="bg-emerald-50/10 border-b border-dashed border-emerald-200 p-4 md:p-6 flex-row items-center justify-between">
+      <Card className="border-none md:border shadow-sm rounded-lg overflow-hidden mt-6">
+        <CardHeader className="bg-success/10 border-b border-dashed border-success/20 p-4 md:p-6 flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-inner"><Construction size={18} /></div>
-            <CardTitle className="text-lg md:text-xl font-black">{isAr ? 'قائمة الآلات' : 'Parc Machines'}</CardTitle>
+            <div className="p-2 bg-success text-success-foreground rounded-lg shadow-sm"><Construction size={18} /></div>
+            <CardTitle className="text-lg md:text-xl font-bold">{isAr ? 'قائمة الآلات' : 'Parc Machines'}</CardTitle>
           </div>
           <AssignResourceModal type="equipment" projectId={project.id} isAr={isAr} onSuccess={() => fetchResources(true)} excludeIds={assignedEquipment.map(ae => ae.equipment_id)} />
         </CardHeader>
@@ -244,30 +244,30 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
         <CardContent className="p-0">
           <div className="md:hidden">
             {assignedEquipment.map((pe) => (
-              <div key={pe.id} className="p-4 border-b flex items-center justify-between bg-white text-start">
+              <div key={pe.id} className="p-4 border-b flex items-center justify-between bg-card text-start">
                 <div className="flex items-center gap-4">
-                  <div className="h-11 w-11 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 border"><Truck size={20} /></div>
+                  <div className="h-11 w-11 rounded-lg bg-warning/10 text-warning flex items-center justify-center shrink-0 border"><Truck size={20} /></div>
                   <div className="min-w-0">
                     <h4 className="font-bold text-sm truncate">
                       {pe.equipment?.name}
                       {pe.equipment?.deleted_at && (
-                        <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>
+                        <Badge variant="outline" className="text-xs mr-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>
                       )}
                     </h4>
-                    <div className="flex items-center gap-2 mt-0.5"><Clock size={11} className="text-blue-500" /><span className="text-[10px] font-black">{pe.usage_hours_per_day}h/j</span></div>
+                    <div className="flex items-center gap-2 mt-0.5"><Clock size={11} className="text-primary" /><span className="text-xs font-bold">{pe.usage_hours_per_day}h/j</span></div>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="text-slate-300 rounded-full h-11 w-11" aria-label="Remove equipment"><Trash2 size={18} /></Button>
+                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="text-muted-foreground rounded-full h-11 w-11" aria-label="Remove equipment"><Trash2 size={18} /></Button>
               </div>
             ))}
           </div>
 
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50 uppercase font-black text-[10px]"><TableRow><TableHead className="ps-6">الآلة</TableHead><TableHead>التصنيف</TableHead><TableHead>الاستعمال</TableHead><TableHead className="text-right pe-6">إجراءات</TableHead></TableRow></TableHeader>
+              <TableHeader className="bg-muted/50 uppercase font-bold text-xs"><TableRow><TableHead className="ps-6">الآلة</TableHead><TableHead>التصنيف</TableHead><TableHead>الاستعمال</TableHead><TableHead className="text-right pe-6">إجراءات</TableHead></TableRow></TableHeader>
               <TableBody>
                 {assignedEquipment.map(pe => (
-                  <TableRow key={pe.id} className="group h-16"><TableCell className="ps-6 text-start"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-orange-50 text-orange-600"><Truck size={16} /></div><div className="font-bold text-sm">{pe.equipment?.name}{pe.equipment?.deleted_at && <Badge variant="outline" className="text-[8px] mr-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>}</div></div></TableCell><TableCell><Badge variant="secondary" className="text-[9px] font-black">{pe.equipment?.type}</Badge></TableCell><TableCell className="font-mono font-bold text-blue-600 bg-blue-50/30 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell><TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 rounded-full h-8 w-8" aria-label="Remove equipment"><Trash2 size={14} /></Button></TableCell></TableRow>
+                  <TableRow key={pe.id} className="group h-16"><TableCell className="ps-6 text-start"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-warning/10 text-warning"><Truck size={16} /></div><div className="font-bold text-sm">{pe.equipment?.name}{pe.equipment?.deleted_at && <Badge variant="outline" className="text-xs mr-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">{isAr ? 'معطل' : 'Inactif'}</Badge>}</div></div></TableCell><TableCell><Badge variant="secondary" className="text-xs font-bold">{pe.equipment?.type}</Badge></TableCell><TableCell className="font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">{pe.usage_hours_per_day}h/j</TableCell><TableCell className="text-right pe-6"><Button variant="ghost" size="icon" onClick={() => setDeleteConfirm({ isOpen: true, id: pe.id, type: "equipment", name: pe.equipment?.name || "" })} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive rounded-full h-8 w-8" aria-label="Remove equipment"><Trash2 size={14} /></Button></TableCell></TableRow>
                 ))}
               </TableBody>
             </Table>
@@ -277,17 +277,17 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
 
       {/* المودال الموحد (كما هو دون تغيير في الوظائف) */}
       <AlertDialog open={deleteConfirm.isOpen} onOpenChange={(val) => setDeleteConfirm(prev => ({ ...prev, isOpen: val }))}>
-        <AlertDialogContent className="sm:max-w-[420px] rounded-[32px] p-0 overflow-hidden shadow-2xl border-none" dir={isAr ? "rtl" : "ltr"}>
-          <div className="bg-red-50 p-8 flex flex-col items-center gap-4 text-center border-b">
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center animate-bounce shadow-inner border border-white"><AlertTriangle className="text-red-600" size={32} /></div>
-            <AlertDialogTitle className="text-xl font-black">{isAr ? "هل تود فك الارتباط؟" : "Annuler l'affectation ?"}</AlertDialogTitle>
-            <p className="text-xs font-black text-red-600/50 uppercase bg-white/50 px-3 py-1 rounded-full border border-red-50">{deleteConfirm.name}</p>
+        <AlertDialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden border-none" dir={isAr ? "rtl" : "ltr"}>
+          <div className="bg-destructive/10 p-8 flex flex-col items-center gap-4 text-center border-b">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center animate-bounce shadow-inner border"><AlertTriangle className="text-destructive" size={32} /></div>
+            <AlertDialogTitle className="text-xl font-bold">{isAr ? "هل تود فك الارتباط؟" : "Annuler l'affectation ?"}</AlertDialogTitle>
+            <p className="text-xs font-bold text-destructive/50 uppercase bg-background/50 px-3 py-1 rounded-full border border-destructive/10">{deleteConfirm.name}</p>
           </div>
           <div className="p-8 pt-6 space-y-6">
-            <p className="text-xs font-bold leading-relaxed text-slate-600 text-center opacity-80">{isAr ? "تحذير: سيتم سحب هذا المورد من سجلات المشروع الحالية. لن يظهر هذا المورد في التقارير اليومية المستقبلية لهذا المشروع حتى يعاد تعيينه مجدداً." : "Retire la ressource de ce projet uniquement."}</p>
+            <p className="text-xs font-bold leading-relaxed text-muted-foreground text-center opacity-80">{isAr ? "تحذير: سيتم سحب هذا المورد من سجلات المشروع الحالية. لن يظهر هذا المورد في التقارير اليومية المستقبلية لهذا المشروع حتى يعاد تعيينه مجدداً." : "Retire la ressource de ce projet uniquement."}</p>
             <AlertDialogFooter className="flex-row gap-3">
-              <AlertDialogCancel className="h-12 flex-1 rounded-2xl font-black border-slate-100">إلغاء</AlertDialogCancel>
-              <Button variant="destructive" className="h-12 flex-1 rounded-2xl font-black shadow-lg shadow-red-200" disabled={isDeleting} onClick={handleConfirmDelete}>{isDeleting ? <Loader2 className="animate-spin" /> : "تأكيد"}</Button>
+              <AlertDialogCancel className="h-12 flex-1 rounded-lg font-bold border-border">إلغاء</AlertDialogCancel>
+              <Button variant="destructive" className="h-12 flex-1 rounded-lg font-bold" disabled={isDeleting} onClick={handleConfirmDelete}>{isDeleting ? <Loader2 className="animate-spin" /> : "تأكيد"}</Button>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -302,35 +302,35 @@ export function ResourcesTab({ project, isAr }: ResourcesTabProps) {
 
 function StatCard({ label, value, unit, icon, color, className }: any) {
   const styles: any = {
-    blue: "bg-blue-600 shadow-blue-100",
-    emerald: "bg-emerald-600 shadow-emerald-100",
-    orange: "bg-orange-500 shadow-orange-100"
+    blue: "bg-primary text-primary-foreground",
+    emerald: "bg-success text-success-foreground",
+    orange: "bg-warning text-warning-foreground"
   };
   return (
-    <div className={`p-4 rounded-[28px] text-white flex items-center justify-between shadow-xl transition-all active:scale-[0.98] ${styles[color]} ${className}`}>
+    <div className={`p-4 rounded-lg flex items-center justify-between shadow-sm transition-all active:scale-[0.98] ${styles[color]} ${className}`}>
       <div className="text-start space-y-0.5">
-        <p className="text-[9px] font-black uppercase opacity-60 tracking-wider mb-1">{label}</p>
+        <p className="text-xs font-bold uppercase opacity-60 tracking-wider mb-1">{label}</p>
         <div className="flex items-baseline gap-1.5 leading-none">
-          <h3 className="text-2xl font-black tabular-nums">{value}</h3>
-          {unit && <span className="text-[10px] font-black opacity-50 uppercase">{unit}</span>}
+          <h3 className="text-2xl font-bold tabular-nums">{value}</h3>
+          {unit && <span className="text-xs font-bold opacity-50 uppercase">{unit}</span>}
         </div>
       </div>
-      <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/20 ring-4 ring-white/5">{icon}</div>
+      <div className="bg-primary-foreground/10 p-2.5 rounded-lg backdrop-blur-md border border-primary-foreground/20 ring-4 ring-primary-foreground/10">{icon}</div>
     </div>
   );
 }
 
 function DetailBox({ label, value, highlight = false }: any) {
   return (
-    <div className={`${highlight ? 'bg-emerald-50/50' : 'bg-slate-50/50 dark:bg-slate-900'} p-2 rounded-[18px] border dark:border-slate-800 text-center flex flex-col justify-center`}>
-      <span className={`text-[8px] font-black uppercase block mb-0.5 ${highlight ? 'text-emerald-500' : 'text-slate-400'}`}>{label}</span>
-      <p className={`text-[10px] font-black truncate px-0.5 ${highlight ? 'text-emerald-700' : 'text-slate-700'}`}>{value}</p>
+    <div className={`${highlight ? 'bg-success/10' : 'bg-muted/50 dark:bg-muted'} p-2 rounded-lg border text-center flex flex-col justify-center`}>
+      <span className={`text-xs font-bold uppercase block mb-0.5 ${highlight ? 'text-success' : 'text-muted-foreground'}`}>{label}</span>
+      <p className={`text-xs font-bold truncate px-0.5 ${highlight ? 'text-success' : 'text-foreground'}`}>{value}</p>
     </div>
   );
 }
 
 function EmptyMobile({ isAr }: { isAr: boolean }) {
   return (
-    <div className="py-20 flex flex-col items-center justify-center grayscale opacity-30"><Construction size={40} /><p className="text-[10px] font-black mt-2 tracking-widest uppercase">{isAr ? "فارغ" : "Liste Vide"}</p></div>
+    <div className="py-20 flex flex-col items-center justify-center grayscale opacity-30"><Construction size={40} /><p className="text-xs font-bold mt-2 tracking-widest uppercase">{isAr ? "فارغ" : "Liste Vide"}</p></div>
   );
 }

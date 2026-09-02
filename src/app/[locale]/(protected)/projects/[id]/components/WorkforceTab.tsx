@@ -31,17 +31,17 @@ export function WorkforceTab({ project, isAr }: WorkforceTabProps) {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="w-full h-12 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
+      <TabsList className="w-full h-12 bg-muted dark:bg-secondary rounded-lg p-1 gap-1">
         <TabsTrigger
           value="workers"
-          className="flex-1 rounded-lg text-sm font-black gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-950 data-[state=active]:shadow-md h-10"
+          className="flex-1 rounded-lg text-sm font-bold gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm h-10"
         >
           <HardHat className="w-4 h-4" />
           {isAr ? "العمال" : "Ouvriers"}
         </TabsTrigger>
         <TabsTrigger
           value="attendance"
-          className="flex-1 rounded-lg text-sm font-black gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-950 data-[state=active]:shadow-md h-10"
+          className="flex-1 rounded-lg text-sm font-bold gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm h-10"
         >
           <Clock className="w-4 h-4" />
           {isAr ? "تسجيل الحضور" : "Pointage"}
@@ -123,7 +123,7 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
     return (
       <div className="py-10 grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-24 rounded-2xl" />
+          <Skeleton key={i} className="h-24 rounded-lg" />
         ))}
       </div>
     );
@@ -138,13 +138,13 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
       </div>
 
       {/* ── العمال ── */}
-      <Card className="border-none md:border shadow-xl rounded-3xl overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900 border-b p-4 flex-row items-center justify-between">
+      <Card className="border-none md:border shadow-sm rounded-lg overflow-hidden">
+        <CardHeader className="bg-muted/50 dark:bg-secondary border-b p-4 flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-lg">
+            <div className="p-2.5 bg-primary text-primary-foreground rounded-lg shadow-sm">
               <HardHat size={16} />
             </div>
-            <CardTitle className="text-base font-black">
+            <CardTitle className="text-base font-bold">
               {isAr ? "إدارة القوى العاملة" : "Personnel"}
             </CardTitle>
           </div>
@@ -161,29 +161,29 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
           {/* موبايل */}
           <div className="md:hidden divide-y">
             {assignedWorkers.length === 0 && (
-              <div className="py-12 text-center text-slate-400">
+              <div className="py-12 text-center text-muted-foreground">
                 <HardHat className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-xs font-bold">{isAr ? "لم يُعيَّن بعد" : "Aucun ouvrier"}</p>
               </div>
             )}
             {assignedWorkers.map((pw) => (
-              <div key={pw.id} className="p-4 bg-white dark:bg-slate-950 flex flex-col gap-3 active:bg-slate-50 transition-colors">
+              <div key={pw.id} className="p-4 bg-card flex flex-col gap-3 active:bg-muted transition-colors">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-11 w-11 ring-2 ring-white shadow-sm">
+                    <Avatar className="h-11 w-11 ring-2 ring-background shadow-sm">
                       {pw.worker?.photo_url && (
                         <AvatarImage src={getThumb(pw.worker.photo_url)} alt={pw.worker.full_name} />
                       )}
-                      <AvatarFallback className="bg-blue-50 text-blue-600 text-xs font-bold">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                         {pw.worker?.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 text-start">
                       <h4 className="font-bold text-sm truncate">{pw.worker?.full_name}</h4>
-                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                      <div className="text-xs text-muted-foreground font-bold uppercase tracking-tight">
                         {pw.worker?.job_title}
                         {pw.worker?.deleted_at && (
-                          <Badge variant="outline" className="text-[8px] ms-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0">
+                          <Badge variant="outline" className="text-xs ms-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0">
                             {isAr ? "معطل" : "Inactif"}
                           </Badge>
                         )}
@@ -194,7 +194,7 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
                     variant="ghost"
                     size="icon"
                     onClick={() => setDeleteTarget({ id: pw.id, name: pw.worker?.full_name || "" })}
-                    className="text-slate-300 hover:text-red-500"
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <UserMinus size={18} />
                   </Button>
@@ -211,7 +211,7 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
           {/* ديسكتوب */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50 uppercase font-black text-[10px]">
+              <TableHeader className="bg-muted/50 uppercase font-bold text-xs">
                 <TableRow>
                   <TableHead className="ps-6">العامل</TableHead>
                   <TableHead>الدور</TableHead>
@@ -223,7 +223,7 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
               <TableBody>
                 {assignedWorkers.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-slate-400 text-sm font-bold">
+                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground text-sm font-bold">
                       {isAr ? "لم يُعيَّن عمال بعد" : "Aucun ouvrier assigné"}
                     </TableCell>
                   </TableRow>
@@ -232,11 +232,11 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
                   <TableRow key={pw.id} className="group h-16 transition-colors">
                     <TableCell className="ps-6 text-start">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 ring-1 ring-slate-100 shrink-0">
+                        <Avatar className="h-10 w-10 ring-1 ring-border shrink-0">
                           {pw.worker?.photo_url && (
                             <AvatarImage src={getThumb(pw.worker.photo_url)} alt={pw.worker.full_name} />
                           )}
-                          <AvatarFallback className="bg-slate-50 text-slate-400 text-xs font-bold">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
                             {pw.worker?.full_name?.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -244,30 +244,30 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
                           <div className="font-bold text-sm leading-none mb-1">
                             {pw.worker?.full_name}
                             {pw.worker?.deleted_at && (
-                              <Badge variant="outline" className="text-[8px] ms-1 border-amber-200 bg-amber-50 text-amber-700 font-black px-1.5 py-0 align-middle">
+                              <Badge variant="outline" className="text-xs ms-1 border-warning/20 bg-warning/10 text-warning font-bold px-1.5 py-0 align-middle">
                                 {isAr ? "معطل" : "Inactif"}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">{pw.worker?.job_title}</p>
+                          <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight">{pw.worker?.job_title}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="border-blue-100 bg-blue-50/30 text-blue-700 font-bold px-3 text-[10px] uppercase">
+                      <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary font-bold px-3 text-xs uppercase">
                         {pw.assigned_role}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono font-black">{pw.daily_hours}h</TableCell>
-                    <TableCell className="font-black text-slate-800">
-                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-[9px] opacity-40">DZD</span>
+                    <TableCell className="font-mono font-bold">{pw.daily_hours}h</TableCell>
+                    <TableCell className="font-bold text-foreground">
+                      {pw.worker?.daily_rate?.toLocaleString()} <span className="text-xs opacity-40">DZD</span>
                     </TableCell>
                     <TableCell className="text-right pe-6">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setDeleteTarget({ id: pw.id, name: pw.worker?.full_name || "" })}
-                        className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all rounded-full h-9 w-9"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all rounded-full h-9 w-9"
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -282,31 +282,31 @@ function WorkersPanel({ project, isAr }: { project: Project; isAr: boolean }) {
 
       {/* ── مودال الحذف ── */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(val) => !val && setDeleteTarget(null)}>
-        <AlertDialogContent className="sm:max-w-[420px] rounded-[32px] p-0 overflow-hidden shadow-2xl border-none" dir={isAr ? "rtl" : "ltr"}>
-          <div className="bg-red-50 p-8 flex flex-col items-center gap-4 text-center border-b">
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center animate-bounce shadow-inner border border-white">
-              <AlertTriangle className="text-red-600" size={32} />
+        <AlertDialogContent className="sm:max-w-md rounded-lg p-0 overflow-hidden shadow-sm border-none" dir={isAr ? "rtl" : "ltr"}>
+          <div className="bg-destructive/10 p-8 flex flex-col items-center gap-4 text-center border-b">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center animate-bounce shadow-inner border border-background">
+              <AlertTriangle className="text-destructive" size={32} />
             </div>
-            <AlertDialogTitle className="text-xl font-black">
+            <AlertDialogTitle className="text-xl font-bold">
               {isAr ? "هل تود فك الارتباط؟" : "Retirer cet ouvrier ?"}
             </AlertDialogTitle>
-            <p className="text-xs font-black text-red-600/50 uppercase bg-white/50 px-3 py-1 rounded-full border border-red-50">
+            <p className="text-xs font-bold text-destructive/50 uppercase bg-background/50 px-3 py-1 rounded-full border border-destructive/20">
               {deleteTarget?.name}
             </p>
           </div>
           <div className="p-8 pt-6 space-y-6">
-            <p className="text-xs font-bold leading-relaxed text-slate-600 text-center opacity-80">
+            <p className="text-xs font-bold leading-relaxed text-muted-foreground text-center opacity-80">
               {isAr
                 ? "سيتم سحب العامل من سجلات المشروع الحالية."
                 : "Retire l'ouvrier de ce projet uniquement."}
             </p>
             <AlertDialogFooter className="flex-row gap-3">
-              <AlertDialogCancel className="h-12 flex-1 rounded-2xl font-black border-slate-100">
+              <AlertDialogCancel className="h-12 flex-1 rounded-lg font-bold border-border">
                 {isAr ? "إلغاء" : "Annuler"}
               </AlertDialogCancel>
               <Button
                 variant="destructive"
-                className="h-12 flex-1 rounded-2xl font-black shadow-lg shadow-red-200"
+                className="h-12 flex-1 rounded-lg font-bold shadow-sm"
                 disabled={isDeleting}
                 onClick={handleConfirmDelete}
               >
@@ -328,15 +328,15 @@ function MiniStat({ icon, value, label, color }: {
   icon: React.ReactNode; value: string | number; label: string; color: string;
 }) {
   const styles: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    blue: "bg-primary/10 text-primary border-primary/20",
+    emerald: "bg-success/10 text-success border-success/20",
   };
   return (
-    <div className={`rounded-2xl border p-3 flex items-center gap-2.5 ${styles[color]}`}>
+    <div className={`rounded-lg border p-3 flex items-center gap-2.5 ${styles[color]}`}>
       <div className="opacity-60">{icon}</div>
       <div>
-        <p className="text-lg font-black tabular-nums leading-none">{value}</p>
-        <p className="text-[9px] font-bold uppercase opacity-50 mt-0.5">{label}</p>
+        <p className="text-lg font-bold tabular-nums leading-none">{value}</p>
+        <p className="text-xs font-bold uppercase opacity-50 mt-0.5">{label}</p>
       </div>
     </div>
   );
@@ -346,9 +346,9 @@ function DetailBox({ label, value, highlight = false }: {
   label: string; value: string | number | undefined; highlight?: boolean;
 }) {
   return (
-    <div className={`${highlight ? "bg-emerald-50/50" : "bg-slate-50/50 dark:bg-slate-900"} p-2 rounded-[18px] border dark:border-slate-800 text-center flex flex-col justify-center`}>
-      <span className={`text-[8px] font-black uppercase block mb-0.5 ${highlight ? "text-emerald-500" : "text-slate-400"}`}>{label}</span>
-      <p className={`text-[10px] font-black truncate px-0.5 ${highlight ? "text-emerald-700" : "text-slate-700"}`}>{value}</p>
+    <div className={`${highlight ? "bg-success/10" : "bg-muted/50 dark:bg-secondary"} p-2 rounded-lg border text-center flex flex-col justify-center`}>
+      <span className={`text-xs font-bold uppercase block mb-0.5 ${highlight ? "text-success" : "text-muted-foreground"}`}>{label}</span>
+      <p className={`text-xs font-bold truncate px-0.5 ${highlight ? "text-success" : "text-foreground"}`}>{value}</p>
     </div>
   );
 }

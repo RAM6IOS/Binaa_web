@@ -34,6 +34,54 @@ module.exports = {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground, var(--success)))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground, var(--warning)))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground, var(--info)))",
+        },
+        present: {
+          DEFAULT: "hsl(var(--present))",
+          foreground: "hsl(var(--present-foreground, var(--present)))",
+        },
+        shift: {
+          DEFAULT: "hsl(var(--shift))",
+          foreground: "hsl(var(--shift-foreground, var(--shift)))",
+        },
+        absent: {
+          DEFAULT: "hsl(var(--absent))",
+          foreground: "hsl(var(--absent-foreground, var(--absent)))",
+        },
+        "type-road": {
+          DEFAULT: "hsl(var(--type-road))",
+          foreground: "hsl(var(--type-road-foreground, var(--type-road)))",
+        },
+        "type-bridge": {
+          DEFAULT: "hsl(var(--type-bridge))",
+          foreground: "hsl(var(--type-bridge-foreground, var(--type-bridge)))",
+        },
+        "type-housing": {
+          DEFAULT: "hsl(var(--type-housing))",
+          foreground: "hsl(var(--type-housing-foreground, var(--type-housing)))",
+        },
+        "type-school": {
+          DEFAULT: "hsl(var(--type-school))",
+          foreground: "hsl(var(--type-school-foreground, var(--type-school)))",
+        },
+        "type-hospital": {
+          DEFAULT: "hsl(var(--type-hospital))",
+          foreground: "hsl(var(--type-hospital-foreground, var(--type-hospital)))",
+        },
+        "type-infrastructure": {
+          DEFAULT: "hsl(var(--type-infrastructure))",
+          foreground: "hsl(var(--type-infrastructure-foreground, var(--type-infrastructure)))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -41,6 +89,10 @@ module.exports = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+        },
+        inverse: {
+          DEFAULT: "hsl(var(--inverse))",
+          foreground: "hsl(var(--inverse-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

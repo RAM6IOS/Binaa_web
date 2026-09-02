@@ -31,13 +31,13 @@ export function SettingsSidebar({ activeSection, onSectionChange, locale }: Sett
             key={section.id}
             onClick={() => onSectionChange(section.id)}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+              "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
               isActive
-                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                ? "bg-primary/10 text-primary border border-primary/20"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <Icon className={cn("w-5 h-5", isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400")} />
+            <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} />
             {section.label}
           </button>
         );

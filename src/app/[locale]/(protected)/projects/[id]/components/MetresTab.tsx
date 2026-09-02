@@ -85,7 +85,7 @@ export function MetresTab({ project, isAr }: Props) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -93,18 +93,18 @@ export function MetresTab({ project, isAr }: Props) {
   if (items.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-2xl p-6">
+        <div className="bg-inverse text-inverse-foreground rounded-lg p-6">
           <h2 className="text-2xl font-bold">{isAr ? "الكميات المنجزة (Mètres)" : "Situation des Métrés"}</h2>
-          <p className="text-blue-100">{isAr ? "إدارة بنود العقد و跟踪 الكميات المنجزة" : "Suivi des quantités réalisées"}</p>
+          <p className="text-primary-foreground/70">{isAr ? "إدارة بنود العقد و跟踪 الكميات المنجزة" : "Suivi des quantités réalisées"}</p>
         </div>
 
         <Card>
           <CardContent className="py-16 text-center">
-            <Package className="mx-auto w-16 h-16 text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-slate-600 mb-2">
+            <Package className="mx-auto w-16 h-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-bold text-muted-foreground mb-2">
               {isAr ? "لا توجد بنود عقد بعد" : "Aucun article de contrat"}
             </h3>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {isAr
                 ? "أضف بنود العقد (BPU) لتتمكن من تتبع الكميات المنجزة"
                 : "Ajoutez les articles du bordereau (BPU) pour suivre les quantités réalisées"}
@@ -115,7 +115,7 @@ export function MetresTab({ project, isAr }: Props) {
                 projectId={project.id}
                 onSuccess={() => fetchData(true)}
                 trigger={
-                  <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600">
+                  <Button className="gap-2">
                     <Plus className="w-4 h-4" />
                     {isAr ? "إضافة بنود العقد" : "Ajouter les articles BPU"}
                   </Button>
@@ -145,13 +145,13 @@ export function MetresTab({ project, isAr }: Props) {
         trigger={<span className="hidden" />}
       />
       {/* ─── Hero ─── */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start gap-4">
+      <div className="bg-inverse text-inverse-foreground rounded-lg p-6 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-3">
             <Ruler className="w-7 h-7" />
             {isAr ? "الكميات المنجزة" : "Situation des Métrés"}
           </h2>
-          <p className="text-blue-100 mt-1">
+          <p className="text-primary-foreground/70 mt-1">
             {isAr ? "متابعة بنود العقد والكميات المنجزة" : "Suivi des articles contractuels et quantités réalisées"}
           </p>
         </div>
@@ -174,7 +174,7 @@ export function MetresTab({ project, isAr }: Props) {
             existingItems={items}
             trigger={
               <Button variant="secondary" className="gap-2">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                <FileSpreadsheet className="w-4 h-4 text-success" />
                 {isAr ? "استيراد" : "Importer"}
               </Button>
             }
@@ -189,11 +189,11 @@ export function MetresTab({ project, isAr }: Props) {
       </div>
 
       {/* ─── فلتر الفترة الزمنية ─── */}
-      <Card className="p-4 rounded-2xl border-slate-200 dark:border-slate-800 shadow-sm">
+      <Card className="p-4 rounded-lg border-border shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
           {/* عنوان الفترة */}
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 shrink-0">
-            <Calendar className="w-4 h-4 text-blue-600" />
+          <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+            <Calendar className="w-4 h-4 text-primary" />
             <span className="text-sm font-bold">{isAr ? "الفترة الزمنية" : "Période"}</span>
           </div>
 
@@ -207,7 +207,7 @@ export function MetresTab({ project, isAr }: Props) {
               aria-label={isAr ? "من تاريخ" : "Du"}
               className="h-11 md:h-10 w-full text-xs lg:w-40"
             />
-            <span className="hidden lg:inline text-slate-300 text-sm select-none">–</span>
+            <span className="hidden lg:inline text-muted-foreground text-sm select-none">–</span>
             <Input
               type="date"
               value={dateTo}
@@ -224,7 +224,7 @@ export function MetresTab({ project, isAr }: Props) {
               <Button
                 variant="outline"
                 onClick={clearFilter}
-                className="h-11 md:h-10 gap-1.5 text-xs text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:border-red-900 shrink-0"
+                className="h-11 md:h-10 gap-1.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 dark:hover:bg-destructive/30 dark:hover:border-destructive shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
                 {isAr ? "إعادة ضبط" : "Réinitialiser"}
@@ -243,7 +243,7 @@ export function MetresTab({ project, isAr }: Props) {
                 <CalendarClock className="w-3.5 h-3.5" />
                 {isAr ? "حسب الفترة" : "Selon la période"}
                 {(dateFrom || dateTo) && (
-                  <span className="font-mono text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                  <span className="font-mono text-xs font-medium text-primary">
                     {dateFrom || "…"} – {dateTo || "…"}
                   </span>
                 )}
@@ -251,62 +251,62 @@ export function MetresTab({ project, isAr }: Props) {
             </div>
           )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary">
                   <DollarSign className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "قيمة العقد" : "Valeur contrat"}</p>
-                  <p className="text-lg font-black text-slate-900 dark:text-white">
-                    {summary.total_contract_value.toLocaleString()} <span className="text-[10px] font-normal">DZD</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "قيمة العقد" : "Valeur contrat"}</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {summary.total_contract_value.toLocaleString()} <span className="text-xs font-normal">DZD</span>
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-xl text-green-600">
+                <div className="p-2 bg-success/10 rounded-lg text-success">
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "القيمة المنجزة" : "Montant réalisé"}</p>
-                  <p className="text-lg font-black text-green-600">
-                    {summary.total_achieved_value.toLocaleString()} <span className="text-[10px] font-normal">DZD</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "القيمة المنجزة" : "Montant réalisé"}</p>
+                  <p className="text-lg font-bold text-success">
+                    {summary.total_achieved_value.toLocaleString()} <span className="text-xs font-normal">DZD</span>
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-xl text-purple-600">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary">
                   <BarChart3 className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "نسبة الإنجاز" : "Taux réalisation"}</p>
-                  <p className="text-lg font-black text-purple-600">{summary.overall_progress}%</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "نسبة الإنجاز" : "Taux réalisation"}</p>
+                  <p className="text-lg font-bold text-primary">{summary.overall_progress}%</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
+                <div className="p-2 bg-warning/10 rounded-lg text-warning">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "بنود مكتملة" : "Articles terminés"}</p>
-                  <p className="text-lg font-black text-amber-600">
-                    {summary.completed_items} <span className="text-xs font-normal text-slate-400">/ {summary.total_items}</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "بنود مكتملة" : "Articles terminés"}</p>
+                  <p className="text-lg font-bold text-warning">
+                    {summary.completed_items} <span className="text-xs font-normal text-muted-foreground">/ {summary.total_items}</span>
                   </p>
                 </div>
               </div>
@@ -321,7 +321,7 @@ export function MetresTab({ project, isAr }: Props) {
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-bold">{isAr ? "نسبة الإنجاز العامة" : "Avancement global"}</span>
-            <span className="text-lg font-black text-blue-600">{summary?.overall_progress || 0}%</span>
+            <span className="text-lg font-bold text-primary">{summary?.overall_progress || 0}%</span>
           </div>
           <Progress value={summary?.overall_progress || 0} className="h-3" />
         </CardContent>
@@ -331,7 +331,7 @@ export function MetresTab({ project, isAr }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Ruler className="w-5 h-5 text-blue-600" />
+            <Ruler className="w-5 h-5 text-primary" />
             {isAr ? "بنود العقد والكميات المنجزة" : "Détail des articles et métrés"}
           </CardTitle>
         </CardHeader>
@@ -340,7 +340,7 @@ export function MetresTab({ project, isAr }: Props) {
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 dark:bg-slate-900/60">
+                <TableRow className="bg-muted">
                   <TableHead className="w-16 text-center font-bold text-xs">#</TableHead>
                   <TableHead className="font-bold text-xs">{isAr ? "رقم البند" : "N° Art"}</TableHead>
                   <TableHead className="font-bold text-xs">{isAr ? "وصف البند" : "Désignation"}</TableHead>
@@ -358,41 +358,41 @@ export function MetresTab({ project, isAr }: Props) {
                 {items.map((item, idx) => (
                   <TableRow
                     key={item.id}
-                    className={`cursor-pointer hover:bg-blue-50/60 dark:hover:bg-blue-900/20 transition-colors ${idx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-900/30"}`}
+                    className={`cursor-pointer hover:bg-primary/10 transition-colors ${idx % 2 === 0 ? "" : "bg-muted/50"}`}
                     onClick={() => setEditingItem(item)}
                   >
-                    <TableCell className="text-center text-xs font-bold text-slate-400">{idx + 1}</TableCell>
+                    <TableCell className="text-center text-xs font-bold text-muted-foreground">{idx + 1}</TableCell>
                     <TableCell className="font-mono font-bold text-xs">{item.item_number}</TableCell>
-                    <TableCell className="text-xs font-medium max-w-[200px] truncate">{item.designation}</TableCell>
+                    <TableCell className="text-xs font-medium max-w-48 truncate">{item.designation}</TableCell>
                     <TableCell className="text-center text-xs">{item.unit}</TableCell>
                     <TableCell className="text-center text-xs font-mono">{item.quantity.toLocaleString()}</TableCell>
-                    <TableCell className="text-center text-xs font-mono font-bold text-blue-600">{item.total_achieved.toLocaleString()}</TableCell>
+                    <TableCell className="text-center text-xs font-mono font-bold text-primary">{item.total_achieved.toLocaleString()}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center gap-2">
                         <Progress value={item.progress_percent} className="h-2 flex-1" />
-                        <span className={`text-[10px] font-bold ${
-                          item.progress_percent >= 100 ? 'text-green-600' :
-                          item.progress_percent >= 50 ? 'text-blue-600' :
-                          item.progress_percent > 0 ? 'text-amber-600' : 'text-slate-400'
+                        <span className={`text-xs font-bold ${
+                          item.progress_percent >= 100 ? 'text-success' :
+                          item.progress_percent >= 50 ? 'text-primary' :
+                          item.progress_percent > 0 ? 'text-warning' : 'text-muted-foreground'
                         }`}>
                           {item.progress_percent}%
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center text-xs font-mono">{item.unit_price.toLocaleString()}</TableCell>
-                    <TableCell className="text-center text-xs font-mono font-bold text-green-600">
-                      {item.achieved_amount.toLocaleString()} <span className="text-[8px]">DZD</span>
+                    <TableCell className="text-center text-xs font-mono font-bold text-success">
+                      {item.achieved_amount.toLocaleString()} <span className="text-xs">DZD</span>
                     </TableCell>
-                    <TableCell className="text-center text-xs font-mono text-red-500">
+                    <TableCell className="text-center text-xs font-mono text-destructive">
                       {item.remaining_quantity > 0 ? item.remaining_quantity.toLocaleString() : (
-                        <CheckCircle2 className="w-4 h-4 text-green-500 inline" />
+                        <CheckCircle2 className="w-4 h-4 text-success inline" />
                       )}
                     </TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-slate-300 hover:text-red-500"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
                         onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
                         disabled={deletingId === item.id}
                       >
@@ -414,21 +414,21 @@ export function MetresTab({ project, isAr }: Props) {
             {items.map((item, idx) => (
               <div
                 key={item.id}
-                className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3 cursor-pointer hover:bg-blue-50/60 dark:hover:bg-blue-900/20 transition-colors"
+                className="border rounded-lg p-4 bg-card shadow-sm space-y-3 cursor-pointer hover:bg-primary/10 transition-colors"
                 onClick={() => setEditingItem(item)}
               >
                 {/* Top: designation + delete */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.designation}</p>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                    <p className="text-sm font-bold text-foreground truncate">{item.designation}</p>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
                       {isAr ? "بند رقم" : "Art"} {item.item_number}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-slate-300 hover:text-red-500 shrink-0"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
                     onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
                     disabled={deletingId === item.id}
                   >
@@ -444,18 +444,18 @@ export function MetresTab({ project, isAr }: Props) {
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-black text-blue-600">{item.total_achieved.toLocaleString()}</span>
-                      <span className="text-[10px] text-slate-400 font-bold">{item.unit}</span>
+                      <span className="text-lg font-bold text-primary">{item.total_achieved.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground font-bold">{item.unit}</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">{isAr ? "المنجز" : "Réalisé"}</p>
+                    <p className="text-xs text-muted-foreground font-bold uppercase">{isAr ? "المنجز" : "Réalisé"}</p>
                   </div>
                   <div className="w-24">
                     <div className="flex items-center gap-1.5">
                       <Progress value={item.progress_percent} className="h-2 flex-1" />
-                      <span className={`text-[10px] font-bold ${
-                        item.progress_percent >= 100 ? 'text-green-600' :
-                        item.progress_percent >= 50 ? 'text-blue-600' :
-                        item.progress_percent > 0 ? 'text-amber-600' : 'text-slate-400'
+                      <span className={`text-xs font-bold ${
+                        item.progress_percent >= 100 ? 'text-success' :
+                        item.progress_percent >= 50 ? 'text-primary' :
+                        item.progress_percent > 0 ? 'text-warning' : 'text-muted-foreground'
                       }`}>
                         {item.progress_percent}%
                       </span>
@@ -465,19 +465,19 @@ export function MetresTab({ project, isAr }: Props) {
 
                 {/* Details row */}
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "العقدية" : "Contractuelle"}</p>
+                  <div className="bg-muted rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "العقدية" : "Contractuelle"}</p>
                     <p className="text-xs font-mono font-bold">{item.quantity.toLocaleString()}</p>
                   </div>
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المبلغ" : "Montant"}</p>
-                    <p className="text-xs font-mono font-bold text-green-600">{item.achieved_amount.toLocaleString()} <span className="text-[8px]">DZD</span></p>
+                  <div className="bg-success/10 rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المبلغ" : "Montant"}</p>
+                    <p className="text-xs font-mono font-bold text-success">{item.achieved_amount.toLocaleString()} <span className="text-xs">DZD</span></p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المتبقي" : "Reste"}</p>
-                    <p className="text-xs font-mono font-bold text-red-500">
+                  <div className="bg-muted rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المتبقي" : "Reste"}</p>
+                    <p className="text-xs font-mono font-bold text-destructive">
                       {item.remaining_quantity > 0 ? item.remaining_quantity.toLocaleString() : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500 inline" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-success inline" />
                       )}
                     </p>
                   </div>
@@ -487,26 +487,26 @@ export function MetresTab({ project, isAr }: Props) {
           </div>
 
           {/* ─── Table Footer Totals ─── */}
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="mt-4 p-4 bg-primary/10 rounded-lg border border-primary/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex flex-wrap gap-6">
               <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "إجمالي العقد" : "Total contrat"}</p>
-                <p className="text-lg font-black text-slate-900 dark:text-white">{summary?.total_contract_value.toLocaleString()} DZD</p>
+                <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "إجمالي العقد" : "Total contrat"}</p>
+                <p className="text-lg font-bold text-foreground">{summary?.total_contract_value.toLocaleString()} DZD</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "إجمالي المنجز" : "Total réalisé"}</p>
-                <p className="text-lg font-black text-green-600">{summary?.total_achieved_value.toLocaleString()} DZD</p>
+                <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "إجمالي المنجز" : "Total réalisé"}</p>
+                <p className="text-lg font-bold text-success">{summary?.total_achieved_value.toLocaleString()} DZD</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "المتبقي" : "Reste à réaliser"}</p>
-                <p className="text-lg font-black text-red-500">
+                <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المتبقي" : "Reste à réaliser"}</p>
+                <p className="text-lg font-bold text-destructive">
                   {((summary?.total_contract_value || 0) - (summary?.total_achieved_value || 0)).toLocaleString()} DZD
                 </p>
               </div>
             </div>
 
             <SituationPDFDownload items={items} summary={summary} project={project} isAr={isAr}>
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <Button className="gap-2">
                 <Download className="w-4 h-4" />
                 {isAr ? "تحميل Situation PDF" : "Télécharger Situation PDF"}
               </Button>

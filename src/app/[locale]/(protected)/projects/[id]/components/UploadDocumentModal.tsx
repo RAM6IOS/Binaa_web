@@ -153,13 +153,13 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ? trigger : (
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button className="gap-2">
             <Plus className="w-4 h-4" />
             {isAr ? 'رفع وثيقة / صورة ميدانية' : 'Uploader document / photo'}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className={`sm:max-w-[600px] max-h-[90vh] overflow-y-auto ${isAr ? 'rtl' : 'ltr'}`}>
+      <DialogContent className={`sm:max-w-xl max-h-[90vh] overflow-y-auto ${isAr ? 'rtl' : 'ltr'}`}>
         <DialogHeader>
           <DialogTitle>{isAr ? 'رفع وثيقة جديدة' : 'Uploader un nouveau document'}</DialogTitle>
         </DialogHeader>
@@ -167,8 +167,8 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
           
           {/* File Upload Zone */}
           <div 
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors
-              ${selectedFile ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900'}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors
+              ${selectedFile ? 'border-primary/30 bg-primary/10' : 'border-border hover:bg-muted/40'}
             `}
             onDragOver={e => e.preventDefault()}
             onDrop={handleDrop}
@@ -183,21 +183,21 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
             {previewUrl ? (
               <div className="flex flex-col items-center gap-3">
                 <img src={previewUrl} alt="Preview" className="max-h-40 rounded-md shadow-sm object-contain" />
-                <p className="text-sm font-medium text-blue-600">{selectedFile?.name}</p>
+                <p className="text-sm font-medium text-primary">{selectedFile?.name}</p>
               </div>
             ) : selectedFile ? (
               <div className="flex flex-col items-center gap-3">
-                <FileText className="w-12 h-12 text-blue-500" />
-                <p className="text-sm font-medium text-blue-600">{selectedFile.name}</p>
+                <FileText className="w-12 h-12 text-primary" />
+                <p className="text-sm font-medium text-primary">{selectedFile.name}</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3 cursor-pointer">
-                <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full">
-                  <UploadCloud className="w-8 h-8 text-slate-500" />
+                <div className="p-4 bg-muted/50 rounded-full">
+                  <UploadCloud className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{isAr ? 'اضغط لاختيار ملف أو قم بسحبه هنا' : 'Cliquez ou glissez un fichier ici'}</p>
-                  <p className="text-xs text-slate-500 mt-1">JPG, PNG, PDF, DOCX (Max 10MB)</p>
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, PDF, DOCX (Max 10MB)</p>
                 </div>
               </div>
             )}
@@ -289,7 +289,7 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
                   onChange={e => setFormData({ ...formData, gps_coordinates: e.target.value })}
                 />
                 <Button type="button" variant="outline" size="icon" onClick={captureGPS} title={isAr ? "التقاط الموقع الحالي" : "Capturer la position"}>
-                  <MapPin className="w-4 h-4 text-slate-500" />
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </div>
             </div>
@@ -299,7 +299,7 @@ export function UploadDocumentModal({ isAr, projectId, trigger, onSuccess }: Pro
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {isAr ? 'إلغاء' : 'Annuler'}
             </Button>
-            <Button type="submit" disabled={isUploading || !selectedFile} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isUploading || !selectedFile}>
               {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isAr ? 'رفع وحفظ' : 'Uploader et sauvegarder'}
             </Button>

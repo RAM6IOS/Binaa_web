@@ -101,7 +101,7 @@ export function LoginForm() {
           <div className="space-y-2">
             <Label htmlFor="email">{t('email')}</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="email"
                 type="email"
@@ -126,12 +126,12 @@ export function LoginForm() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">{t('password')}</Label>
-              <Link href="/auth/forgot-password" title={t('forgotPassword')} className="text-xs text-blue-600 hover:underline">
+              <Link href="/auth/forgot-password" title={t('forgotPassword')} className="text-xs text-primary hover:underline">
                 {t('forgotPassword')}
               </Link>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -149,7 +149,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 rtl:right-auto rtl:left-3"
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:right-auto rtl:left-3"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -157,7 +157,7 @@ export function LoginForm() {
           </div>
 
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base shadow-lg shadow-blue-200 dark:shadow-none" disabled={loading}>
+          <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {t('submit')}
           </Button>
@@ -167,26 +167,26 @@ export function LoginForm() {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-slate-200 dark:border-slate-800" />
+            <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white dark:bg-slate-950 px-2 text-slate-500">
+            <span className="bg-card px-2 text-muted-foreground">
               {tc('or')}
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
-          <Button variant="outline" type="button" className="w-full h-11 border-slate-200" onClick={handleGoogleLogin}>
+          <Button variant="outline" type="button" className="w-full h-11" onClick={handleGoogleLogin}>
             <Chrome className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
             {t('google')}
           </Button>
         </div>
 
 
-        <p className="text-center text-sm text-slate-600 dark:text-slate-400 pt-4">
+        <p className="text-center text-sm text-muted-foreground pt-4">
           {t('noAccount')}{" "}
-          <Link href="/auth/register" className="text-blue-600 hover:underline font-semibold">
+          <Link href="/auth/register" className="text-primary hover:underline font-semibold">
             {t('registerNow')}
           </Link>
         </p>

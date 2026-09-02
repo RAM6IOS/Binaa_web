@@ -1,4 +1,6 @@
+import { AlertTriangle, ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { TaskPriority } from "@/lib/types/projects";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   priority: TaskPriority;
@@ -6,18 +8,22 @@ interface Props {
 }
 
 export function TaskPriorityBadge({ priority, isAr }: Props) {
-  const config: Record<TaskPriority, { color: string; label: string }> = {
-    low: { color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", label: isAr ? 'منخفضة' : 'Basse' },
-    medium: { color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300", label: isAr ? 'متوسطة' : 'Moyenne' },
-    high: { color: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300", label: isAr ? 'عالية' : 'Haute' },
-    urgent: { color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300", label: isAr ? 'عاجلة' : 'Urgente' },
+  const config: Record<
+    TaskPriority,
+    { variant: "secondary" | "info" | "warning" | "destructive"; label: string; icon: React.ReactNode }
+  > = {
+    low: { variant: "secondary", label: isAr ? 'منخفضة' : 'Basse', icon: <ArrowDown className="h-3 w-3" /> },
+    medium: { variant: "info", label: isAr ? 'متوسطة' : 'Moyenne', icon: <Minus className="h-3 w-3" /> },
+    high: { variant: "warning", label: isAr ? 'عالية' : 'Haute', icon: <ArrowUp className="h-3 w-3" /> },
+    urgent: { variant: "destructive", label: isAr ? 'عاجلة' : 'Urgente', icon: <AlertTriangle className="h-3 w-3" /> },
   };
 
-  const badgeConfig = config[priority] || { color: "bg-slate-100 text-slate-700", label: priority };
+  const badgeConfig = config[priority] || { variant: "secondary" as const, label: priority, icon: null };
 
   return (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${badgeConfig.color}`}>
+    <Badge variant={badgeConfig.variant} className="gap-1">
+      {badgeConfig.icon}
       {badgeConfig.label}
-    </span>
+    </Badge>
   );
 }

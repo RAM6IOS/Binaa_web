@@ -95,13 +95,13 @@ export function CreateProjectDialog({ isAr, onSuccess, project, trigger, open: c
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ? trigger : (
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button className="gap-2">
             <Plus className="w-4 h-4" />
             {isAr ? 'إضافة مشروع جديد' : 'Nouveau Projet'}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className={`sm:max-w-[700px] max-h-[90vh] overflow-y-auto ${isAr ? 'rtl' : 'ltr'}`}>
+      <DialogContent className={`sm:max-w-3xl max-h-[90vh] overflow-y-auto ${isAr ? 'rtl' : 'ltr'}`}>
         <DialogHeader>
           <DialogTitle>
             {isEdit 
@@ -234,7 +234,7 @@ export function CreateProjectDialog({ isAr, onSuccess, project, trigger, open: c
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               {isAr ? 'إلغاء' : 'Annuler'}
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isAr ? 'حفظ المشروع' : 'Enregistrer'}
             </Button>

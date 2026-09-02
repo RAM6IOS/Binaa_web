@@ -21,7 +21,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-foreground/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -31,7 +31,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  "fixed z-50 gap-4 bg-background p-6 shadow-sm transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
   {
     variants: {
       side: {
@@ -66,10 +66,10 @@ const SheetContent = React.forwardRef<
     >
       {children}
       <SheetPrimitive.Close className={cn(
-        "absolute top-4 rounded-lg p-2 transition-all duration-200 shadow-md z-50",
-        "focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none",
+        "absolute top-4 rounded-lg p-2 transition-all duration-200 shadow-sm z-50",
+        "focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none",
         side === "right" ? "left-4" : "right-4",
-        "bg-slate-800 text-blue-400 hover:text-white border border-slate-700 hover:bg-blue-600 hover:border-blue-500 dark:bg-slate-900 dark:border-slate-800"
+        "bg-primary text-primary-foreground border border-primary hover:bg-primary/90 hover:border-primary"
       )}>
         <X className="h-5 w-5 stroke-[2.5]" />
         <span className="sr-only">Close</span>

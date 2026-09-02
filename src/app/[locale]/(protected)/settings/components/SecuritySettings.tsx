@@ -50,7 +50,7 @@ export function SecuritySettings({ locale }: { locale: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-destructive" />
       </div>
     );
   }
@@ -69,17 +69,17 @@ export function SecuritySettings({ locale }: { locale: string }) {
         {/* Change Password */}
         <section className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Key className="w-5 h-5 text-slate-400" />
+            <Key className="w-5 h-5 text-muted-foreground" />
             {isAr ? 'تغيير كلمة المرور' : 'Changer le mot de passe'}
           </h3>
-          <form onSubmit={handleChangePassword} className="grid md:grid-cols-3 gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
+          <form onSubmit={handleChangePassword} className="grid md:grid-cols-3 gap-4 bg-card p-6 rounded-lg border">
             <div className="space-y-2">
               <Label>{isAr ? 'كلمة المرور الحالية' : 'Mot de passe actuel'}</Label>
-              <Input type="password" placeholder="••••••••" className="bg-slate-50 dark:bg-slate-800" />
+              <Input type="password" placeholder="••••••••" className="bg-background" />
             </div>
             <div className="space-y-2">
               <Label>{isAr ? 'كلمة المرور الجديدة' : 'Nouveau mot de passe'}</Label>
-              <Input type="password" placeholder="••••••••" className="bg-slate-50 dark:bg-slate-800" />
+              <Input type="password" placeholder="••••••••" className="bg-background" />
             </div>
             <div className="space-y-2 flex flex-col justify-end">
               <Button type="submit" disabled={isChangingPass} className="w-full">
@@ -91,19 +91,19 @@ export function SecuritySettings({ locale }: { locale: string }) {
 
         {/* Two-Factor */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30">
+          <div className="flex items-center justify-between p-6 bg-primary/5 rounded-lg border border-primary/20">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded-full">
+              <div className="p-3 bg-primary/10 text-primary rounded-full">
                 <ShieldAlert className="w-6 h-6" />
               </div>
               <div>
                 <h4 className="font-semibold">{isAr ? 'المصادقة الثنائية (2FA)' : 'Authentification à deux facteurs'}</h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   {isAr ? 'تم تفعيلها عبر البريد الإلكتروني' : 'Activée via email'}
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="bg-white dark:bg-slate-800">
+            <Button variant="outline" size="sm">
               {isAr ? 'إدارة' : 'Gérer'}
             </Button>
           </div>
@@ -114,27 +114,27 @@ export function SecuritySettings({ locale }: { locale: string }) {
           <h3 className="text-lg font-semibold">{isAr ? 'الجلسات النشطة' : 'Sessions actives'}</h3>
           <div className="space-y-3">
             {sessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div key={session.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
                 <div className="flex items-center gap-4">
                   {session.device.includes('Mac') || session.device.includes('Chrome') ? (
-                    <Monitor className="w-5 h-5 text-slate-400" />
+                    <Monitor className="w-5 h-5 text-muted-foreground" />
                   ) : (
-                    <Smartphone className="w-5 h-5 text-slate-400" />
+                    <Smartphone className="w-5 h-5 text-muted-foreground" />
                   )}
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{session.device}</span>
                       {session.is_current && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] rounded-full uppercase font-bold tracking-wider">
+                        <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-full uppercase font-bold tracking-wider">
                           {isAr ? 'الحالية' : 'Actuelle'}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500">{session.location} • {isAr ? 'نشط مؤخراً' : 'Dernière activité'}: {new Date(session.last_active).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}</p>
+                    <p className="text-xs text-muted-foreground">{session.location} • {isAr ? 'نشط مؤخراً' : 'Dernière activité'}: {new Date(session.last_active).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}</p>
                   </div>
                 </div>
                 {!session.is_current && (
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600" aria-label={isAr ? "تسجيل الخروج" : "Déconnexion"}>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label={isAr ? "تسجيل الخروج" : "Déconnexion"}>
                     <LogOut className="w-4 h-4" />
                   </Button>
                 )}
@@ -146,25 +146,25 @@ export function SecuritySettings({ locale }: { locale: string }) {
         {/* Logout Section */}
         <section className="space-y-4">
           <h3 className="text-lg font-semibold">{isAr ? 'تسجيل الخروج' : 'Déconnexion'}</h3>
-          <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-6 bg-muted rounded-lg border flex items-center justify-between">
             <div>
               <p className="font-medium">{isAr ? 'إنهاء الجلسة الحالية' : 'Terminer la session actuelle'}</p>
-              <p className="text-sm text-slate-500">{isAr ? 'سيتم تسجيل خروجك من هذا المتصفح' : 'Vous serez déconnecté de ce navigateur'}</p>
+              <p className="text-sm text-muted-foreground">{isAr ? 'سيتم تسجيل خروجك من هذا المتصفح' : 'Vous serez déconnecté de ce navigateur'}</p>
             </div>
-            <LogoutButton variant="destructive" className="bg-red-600 hover:bg-red-700 text-white" />
+            <LogoutButton variant="destructive" />
           </div>
         </section>
 
         {/* Danger Zone */}
-        <section className="pt-6 border-t border-red-100 dark:border-red-900/20">
-          <div className="p-6 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30">
-            <h4 className="font-bold text-red-700 dark:text-red-400 mb-2">{isAr ? 'منطقة الخطر' : 'Zone de danger'}</h4>
-            <p className="text-sm text-red-600 dark:text-red-400/80 mb-4">
+        <section className="pt-6 border-t border-destructive/20">
+          <div className="p-6 bg-destructive/5 rounded-lg border border-destructive/20">
+            <h4 className="font-bold text-destructive mb-2">{isAr ? 'منطقة الخطر' : 'Zone de danger'}</h4>
+            <p className="text-sm text-destructive mb-4">
               {isAr ? 'بمجرد حذف حسابك، لن تتمكن من استعادته مرة أخرى. يرجى توخي الحذر.' : 'Une fois votre compte supprimé, vous ne pourrez plus revenir en arrière. Soyez prudent.'}
             </p>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
+                <Button variant="destructive">
                   <Trash2 className="w-4 h-4 mr-2 rtl:ml-2" />
                   {isAr ? 'حذف الحساب نهائياً' : 'Supprimer mon compte'}
                 </Button>

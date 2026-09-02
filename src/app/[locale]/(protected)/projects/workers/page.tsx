@@ -4,14 +4,14 @@ import { use, useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { DataState } from "@/components/ui/data-state";
 import {
-  Search, Loader2, User, Phone, MapPin,
-  MoreVertical, Edit, Trash2, HardHat, IdCard, Banknote,
-  SlidersHorizontal, PhoneCall, ChevronLeft,
+  Search, Phone, MapPin,
+  MoreVertical, Edit, Trash2, HardHat, Banknote,
+  SlidersHorizontal, PhoneCall,
 } from "lucide-react";
 import { workersService } from "@/lib/services/workers-service";
 import { Worker } from "@/lib/types/projects";
@@ -154,7 +154,20 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
   const activeFilterCount = [wilayaFilter, jobFilter, availabilityFilter].filter(f => f !== 'all').length;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
+    <PageContainer
+      dir={isAr ? 'rtl' : 'ltr'}
+      className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+      header={{
+        title: isAr ? 'إدارة الموارد البشرية' : 'Main d\'œuvre',
+        description: isAr ? 'تنظيم العمال، تتبع الحرف والوثائق' : 'Gestion du personnel et métiers',
+        actions: (
+          <>
+            <ImportWorkersDialog isAr={isAr} onSuccess={fetchWorkers} existingWorkers={workers} />
+            <AddWorkerDialog isAr={isAr} onSuccess={fetchWorkers} />
+          </>
+        ),
+      }}
+    >
 
       {/* ─── مودال الحذف ─── */}
       <DeleteConfirmationDialog
@@ -186,55 +199,41 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
 
       {/* ════════════════════════════════════════════ */}
-      {/* ── الهيدر ── */}
-      {/* ════════════════════════════════════════════ */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
-        <div className="text-start">
-          <h2 className="text-3xl font-black tracking-tight">{isAr ? 'إدارة الموارد البشرية' : 'Main d\'œuvre'}</h2>
-          <p className="text-slate-500 font-medium mt-1">{isAr ? 'تنظيم العمال، تتبع الحرف والوثائق' : 'Gestion du personnel et métiers'}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <ImportWorkersDialog isAr={isAr} onSuccess={fetchWorkers} existingWorkers={workers} />
-          <AddWorkerDialog isAr={isAr} onSuccess={fetchWorkers} />
-        </div>
-      </div>
-
-      {/* ════════════════════════════════════════════ */}
       {/* ── MOBILE ── */}
       {/* ════════════════════════════════════════════ */}
       <div className="md:hidden space-y-4">
         {/* شريط البحث + زر الفلاتر */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isAr ? 'بحث بالاسم...' : 'Recherche...'}
-              className="w-full ps-10 pe-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-shadow"
+              className="w-full ps-10 pe-4 py-2.5 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background transition-shadow"
             />
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shrink-0 relative">
+              <Button variant="outline" size="icon" className="h-11 w-11 rounded-lg shrink-0 relative">
                 <SlidersHorizontal className="w-4 h-4" />
                 {activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
                     {activeFilterCount}
                   </span>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl max-h-[70vh]" dir={isAr ? 'rtl' : 'ltr'}>
+            <SheetContent side="bottom" className="rounded-t-lg max-h-[70vh]" dir={isAr ? 'rtl' : 'ltr'}>
               <SheetHeader className="pb-4">
-                <SheetTitle className="font-black text-lg">{isAr ? 'الفلاتر' : 'Filtres'}</SheetTitle>
+                <SheetTitle className="text-lg font-semibold">{isAr ? 'الفلاتر' : 'Filtres'}</SheetTitle>
               </SheetHeader>
               <div className="space-y-4 pb-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase">{isAr ? 'الولاية' : 'Wilaya'}</label>
+                  <label className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'الولاية' : 'Wilaya'}</label>
                   <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder={isAr ? "كل الولايات" : "Toutes"} /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder={isAr ? "كل الولايات" : "Toutes"} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{isAr ? "كل الولايات" : "Toutes"}</SelectItem>
                       {uniqueWilayas.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
@@ -242,9 +241,9 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase">{isAr ? 'التخصص' : 'Métier'}</label>
+                  <label className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'التخصص' : 'Métier'}</label>
                   <Select value={jobFilter} onValueChange={setJobFilter}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder={isAr ? "كل المهن" : "Tous"} /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder={isAr ? "كل المهن" : "Tous"} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{isAr ? "كل المهن" : "Tous métiers"}</SelectItem>
                       {uniqueJobs.map(j => <SelectItem key={j} value={j}>{j}</SelectItem>)}
@@ -252,9 +251,9 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase">{isAr ? 'الحالة' : 'État'}</label>
+                  <label className="text-xs font-bold text-muted-foreground uppercase">{isAr ? 'الحالة' : 'État'}</label>
                   <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder={isAr ? "كل الحالات" : "Tous"} /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder={isAr ? "كل الحالات" : "Tous"} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{isAr ? "كل الحالات" : "Tous"}</SelectItem>
                       <SelectItem value="available">{isAr ? "متاح" : "Libre"}</SelectItem>
@@ -265,7 +264,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                 {activeFilterCount > 0 && (
                   <Button
                     variant="ghost"
-                    className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 font-bold text-sm"
+                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 font-bold text-sm"
                     onClick={() => { setWilayaFilter('all'); setJobFilter('all'); setAvailabilityFilter('all'); }}
                   >
                     {isAr ? 'مسح الفلاتر' : 'Réinitialiser'}
@@ -278,14 +277,14 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
         {/* عداد العمال */}
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-500">
+          <p className="text-sm font-bold text-muted-foreground">
             {isAr ? `${filteredWorkers.length} عامل` : `${filteredWorkers.length} ouvriers`}
           </p>
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs font-bold text-blue-600 h-8 px-2 gap-1"
+              className="text-xs font-bold text-primary h-8 px-2 gap-1"
               onClick={() => { setWilayaFilter('all'); setJobFilter('all'); setAvailabilityFilter('all'); }}
             >
               {activeFilterCount} {isAr ? 'فلتر نشط' : 'actif'}
@@ -295,36 +294,35 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
         {/* قائمة العمال */}
         {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-[88px] rounded-2xl" />)}
-          </div>
+          <DataState.Loading rows={3} rowClassName="h-24" />
         ) : filteredWorkers.length === 0 ? (
-          <div className="py-16 text-center text-slate-400">
-            <HardHat className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm font-bold">{isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}</p>
-          </div>
+          <DataState.Empty
+            icon={<HardHat className="h-12 w-12 text-muted-foreground" />}
+            title={isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}
+            description={isAr ? 'أضف عاملاً جديداً لبدء التتبع' : 'Ajoutez un ouvrier pour commencer le suivi'}
+          />
         ) : (
           <div className="space-y-2">
             {filteredWorkers.map((worker) => (
               <div
                 key={worker.id}
-                className="bg-white rounded-2xl border border-slate-100 p-3.5 shadow-sm active:bg-slate-50 transition-colors"
+                className="bg-card rounded-xl border border-border p-3.5 shadow-sm active:bg-muted transition-colors"
               >
                 {/* صف أعلى: Avatar + الاسم + الحالة + القائمة */}
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 ring-2 ring-white shadow-sm shrink-0">
+                  <Avatar className="h-12 w-12 ring-2 ring-border shadow-sm shrink-0">
                     <AvatarImage src={worker.photo_url || ''} />
-                    <AvatarFallback className="bg-blue-50 text-blue-600 text-xs font-bold">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                       {worker.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-[15px] text-slate-900 truncate">{worker.full_name}</p>
+                      <p className="font-bold text-base text-foreground truncate">{worker.full_name}</p>
                       <WorkerStatusBadge status={worker.availability} isAr={isAr} />
                     </div>
-                    <p className="text-[11px] text-slate-400 font-medium uppercase tracking-tight truncate">
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight truncate">
                       {worker.job_title}{worker.cin ? ` · ${worker.cin}` : ""}
                     </p>
                   </div>
@@ -333,27 +331,27 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                 </div>
 
                 {/* صف سفلي: الهاتف + الأجر */}
-                <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100">
+                <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-border">
                   {worker.phone && (
                     <a
                       href={`tel:${worker.phone}`}
-                      className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-3 py-2 font-bold text-xs gap-1.5 hover:bg-emerald-100 transition-colors min-h-[40px]"
+                      className="flex items-center gap-2 bg-success/10 border border-success/20 text-success rounded-xl px-3 py-2 font-bold text-xs hover:bg-success/20 transition-colors min-h-[40px]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <PhoneCall className="w-4 h-4 shrink-0" />
                       <span className="font-mono tracking-tight">{worker.phone}</span>
                     </a>
                   )}
-                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 min-h-[40px]">
-                    <Banknote className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="text-xs font-black text-slate-700 tabular-nums">
+                  <div className="flex items-center gap-1.5 bg-muted border border-border rounded-xl px-3 py-2 min-h-[40px]">
+                    <Banknote className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-xs font-bold text-foreground tabular-nums">
                       {worker.daily_rate?.toLocaleString()} <span className="text-[9px] font-bold opacity-40">DZD</span>
                     </span>
                   </div>
                   {worker.wilaya && (
-                    <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-xl px-2.5 py-2 min-h-[40px] ms-auto">
-                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                      <span className="text-[10px] font-bold text-slate-500">{worker.wilaya}</span>
+                    <div className="flex items-center gap-1 bg-muted border border-border rounded-xl px-2.5 py-2 min-h-[40px] ms-auto">
+                      <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                      <span className="text-[10px] font-bold text-muted-foreground">{worker.wilaya}</span>
                     </div>
                   )}
                 </div>
@@ -366,17 +364,17 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
       {/* ════════════════════════════════════════════ */}
       {/* ── DESKTOP ── (بدون تغيير) */}
       {/* ════════════════════════════════════════════ */}
-      <Card className="hidden md:block border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <CardHeader className="py-6 bg-slate-50/50 dark:bg-slate-900/50">
+      <Card className="hidden md:block border-border shadow-sm overflow-hidden">
+        <CardHeader className="py-6 bg-muted/50">
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isAr ? 'ابحث باسم العامل، بطاقة التعريف...' : 'Recherche par nom ou CIN...'}
-                className="w-full ps-10 pe-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 transition-shadow"
+                className="w-full ps-10 pe-4 py-2.5 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background transition-shadow"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -404,7 +402,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{isAr ? "كل الحالات" : "Tous"}</SelectItem>
-                  <SelectItem value="available" className="text-emerald-600 font-bold">{isAr ? "متاح" : "Libre"}</SelectItem>
+                  <SelectItem value="available" className="text-success font-bold">{isAr ? "متاح" : "Libre"}</SelectItem>
                   <SelectItem value="on_project">{isAr ? "في ورشة" : "En poste"}</SelectItem>
                 </SelectContent>
               </Select>
@@ -414,14 +412,12 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-6 space-y-4">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
-            </div>
+            <DataState.Loading className="p-6" rows={3} rowClassName="h-16" />
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-y">
-                  <TableRow className="text-[10px] uppercase font-black text-slate-500 tracking-widest">
+                <TableHeader className="bg-muted/50 border-y">
+                  <TableRow className="text-[10px] uppercase font-semibold text-muted-foreground tracking-widest">
                     <TableHead className="ps-8 py-4 h-14">{isAr ? 'الهوية / العامل' : 'Profile / Nom'}</TableHead>
                     <TableHead>{isAr ? 'المهنة والتخصص' : 'Métier'}</TableHead>
                     <TableHead>{isAr ? 'الأجر اليومي' : 'Journalier'}</TableHead>
@@ -432,25 +428,25 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                 </TableHeader>
                 <TableBody className="text-start">
                   {filteredWorkers.map((worker) => (
-                    <TableRow key={worker.id} className="group hover:bg-slate-50/50 transition-colors">
+                    <TableRow key={worker.id} className="group hover:bg-muted/50 transition-colors">
                       <TableCell className="ps-8 py-4">
                         <div className="flex items-center gap-4">
                           <Avatar className="h-10 w-10 border shadow-sm group-hover:scale-105 transition-transform">
                             <AvatarImage src={worker.photo_url || ''} />
-                            <AvatarFallback className="bg-slate-100 font-bold uppercase">{worker.full_name?.charAt(0)}</AvatarFallback>
+                            <AvatarFallback className="bg-muted font-bold uppercase">{worker.full_name?.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
-                            <p className="font-bold text-slate-900 truncate">{worker.full_name}</p>
+                            <p className="font-bold text-foreground truncate">{worker.full_name}</p>
                             <div className="flex items-center gap-1.5 opacity-60"><Phone size={10} /> <span className="text-[11px] font-medium font-mono tracking-tighter">{worker.phone}</span></div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell><div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /><span className="text-sm font-semibold">{worker.job_title}</span></div></TableCell>
-                      <TableCell className="font-black text-slate-900">
+                      <TableCell><div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /><span className="text-sm font-semibold">{worker.job_title}</span></div></TableCell>
+                      <TableCell className="font-bold text-foreground">
                         {worker.daily_rate?.toLocaleString()} <span className="text-[10px] font-bold opacity-40 ml-1">DZD</span>
                       </TableCell>
                       <TableCell><WorkerStatusBadge status={worker.availability} isAr={isAr} /></TableCell>
-                      <TableCell><code className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">{worker.cin}</code></TableCell>
+                      <TableCell><code className="text-xs font-mono font-bold bg-muted px-2 py-0.5 rounded text-muted-foreground">{worker.cin}</code></TableCell>
                       <TableCell className="text-right pe-8">
                         <ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} />
                       </TableCell>
@@ -462,7 +458,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -472,20 +468,20 @@ function ActionMenu({ worker, isAr, refresh, onDeleteClick, onEdit }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-white hover:shadow-md transition-all h-11 w-11" aria-label="Actions">
-          <MoreVertical className="w-5 h-5 text-slate-400" />
+        <Button variant="ghost" size="icon" className="rounded-lg hover:bg-muted hover:shadow-md transition-all h-11 w-11" aria-label="Actions">
+          <MoreVertical className="w-5 h-5 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[170px] p-2 rounded-2xl shadow-2xl">
+      <DropdownMenuContent align="end" className="w-[170px] p-2 rounded-lg">
         <DropdownMenuItem
           onClick={(e) => { e.stopPropagation(); onEdit(worker); }}
-          className="cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-xl"
+          className="cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md"
         >
-          <Edit className="w-3.5 h-3.5 text-blue-500" />
+          <Edit className="w-3.5 h-3.5 text-primary" />
           {isAr ? 'تعديل الملف' : 'Détails / Modifier'}
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="text-red-600 cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-xl hover:bg-red-50 focus:bg-red-50"
+          className="text-destructive cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
           onClick={onDeleteClick}
         >
           <Trash2 className="w-3.5 h-3.5" />

@@ -170,8 +170,8 @@ function VerifyOtpContent() {
       description={t('description')}
     >
       <div className="mb-6 text-center">
-        <p className="text-sm font-medium text-slate-500 mb-1">{t('email')}</p>
-        <p className="text-sm font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 py-1 px-3 rounded-md inline-block">
+        <p className="text-sm font-medium text-muted-foreground mb-1">{t('email')}</p>
+        <p className="text-sm font-bold text-foreground bg-muted py-1 px-3 rounded-md inline-block">
           {email}
         </p>
       </div>
@@ -188,13 +188,13 @@ function VerifyOtpContent() {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={(e) => handlePaste(index, e)}
-              className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-lg bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-lg bg-card border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
               autoFocus={index === 0}
             />
           ))}
         </div>
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading}>
+        <Button type="submit" className="w-full h-11" disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('submit')}
         </Button>
@@ -204,7 +204,7 @@ function VerifyOtpContent() {
             type="button"
             onClick={handleResend}
             disabled={countdown > 0 || resending}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 disabled:text-slate-400 flex items-center gap-2 transition-colors"
+            className="text-sm font-medium text-primary hover:text-primary/80 disabled:text-muted-foreground flex items-center gap-2 transition-colors"
           >
             {resending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className={`h-4 w-4 ${countdown === 0 ? "animate-none" : ""}`} />}
             {countdown > 0 
@@ -215,7 +215,7 @@ function VerifyOtpContent() {
 
           <Link 
             href="/auth/forgot-password" 
-            className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 inline-flex items-center gap-1 transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
           >
             {t('changeEmail')}
           </Link>

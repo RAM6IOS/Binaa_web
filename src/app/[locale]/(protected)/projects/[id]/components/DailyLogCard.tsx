@@ -85,7 +85,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
   const totalConsumptions = log.material_consumptions?.length || 0;
 
   return (
-    <Card className="overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all shadow-sm rounded-2xl group">
+    <Card className="overflow-hidden border hover:shadow-sm transition-all shadow-sm rounded-lg group">
 
       {/* ─── الديالوج الموحد لتأكيد الحذف ─── */}
       <DeleteConfirmationDialog
@@ -104,32 +104,32 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
           <div className="flex items-center gap-4 text-start">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/40 dark:to-slate-900 flex items-center justify-center flex-shrink-0 shadow-inner">
-              <Calendar className="w-7 h-7 text-orange-600" />
+            <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-warning/10 to-warning/5 dark:from-warning/20 dark:to-card flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-7 h-7 text-warning" />
             </div>
             <div>
-              <p className="font-bold text-xl tracking-tight text-slate-900 dark:text-white capitalize">{formattedDate}</p>
+              <p className="font-bold text-xl tracking-tight text-foreground capitalize">{formattedDate}</p>
               <div className="flex flex-wrap items-center gap-3 text-xs mt-1.5">
-                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full text-slate-600 dark:text-slate-400">
-                  <Thermometer className="w-3.5 h-3.5 text-red-500" />
+                <div className="flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-full text-muted-foreground">
+                  <Thermometer className="w-3.5 h-3.5 text-destructive" />
                   <span className="font-mono font-bold">{log.temperature}°C</span>
                   {log.temperature_min != null && (
                     <>
-                      <span className="text-slate-400 mx-0.5">/</span>
-                      <span className="font-mono font-bold text-blue-500">{log.temperature_min}°C</span>
+                      <span className="text-muted-foreground mx-0.5">/</span>
+                      <span className="font-mono font-bold text-primary">{log.temperature_min}°C</span>
                     </>
                   )}
                 </div>
-                <Badge variant="outline" className="rounded-full bg-white dark:bg-slate-950 font-bold uppercase tracking-wider text-[10px]">
+                <Badge variant="outline" className="rounded-full bg-card font-bold uppercase tracking-wider text-xs">
                   {log.weather_condition === "sunny" ? (isAr ? "مشمس" : "Sunny") : log.weather_condition}
                 </Badge>
                 {log.site_status && (
-                  <Badge variant="outline" className={`rounded-full font-bold uppercase tracking-wider text-[10px] ${
-                    log.site_status === 'active' ? 'bg-green-50 text-green-700 border-green-200' :
-                    log.site_status === 'in_progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                    log.site_status === 'delayed' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                    log.site_status === 'inactive' ? 'bg-red-50 text-red-700 border-red-200' :
-                    'bg-slate-50 text-slate-700 border-slate-200'
+                  <Badge variant="outline" className={`rounded-full font-bold uppercase tracking-wider text-xs ${
+                    log.site_status === 'active' ? 'bg-success/10 text-success border-success/20' :
+                    log.site_status === 'in_progress' ? 'bg-primary/10 text-primary border-primary/20' :
+                    log.site_status === 'delayed' ? 'bg-warning/10 text-warning border-warning/20' :
+                    log.site_status === 'inactive' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                    'bg-muted text-foreground border-border'
                   }`}>
                     <HardHat className="w-3 h-3 me-1" />
                     {log.site_status === 'active' ? (isAr ? "نشطة" : "Active") :
@@ -140,13 +140,13 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
                   </Badge>
                 )}
                 {log.location_details && (
-                  <div className="flex items-center gap-1 text-slate-500 bg-slate-50 dark:bg-slate-900 px-2.5 py-1 rounded-full border">
+                  <div className="flex items-center gap-1 text-muted-foreground bg-muted dark:bg-card px-2.5 py-1 rounded-full border">
                     <MapPin className="w-3 h-3" />
                     <span className="font-medium">{log.location_details}</span>
                   </div>
                 )}
                 {log.status === "validated" && (
-                  <Badge className="bg-blue-600 text-white border-0 gap-1 h-6">
+                  <Badge className="bg-primary text-primary-foreground border-0 gap-1 h-6">
                     <CheckCircle className="w-3 h-3" /> {isAr ? "معتمد" : "Validé"}
                   </Badge>
                 )}
@@ -160,7 +160,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-orange-50 text-slate-400 hover:text-orange-600 rounded-full h-9 w-9"
+                className="hover:bg-warning/10 text-muted-foreground hover:text-warning rounded-full h-9 w-9"
                 aria-label={isAr ? "تصدير PDF" : "Exporter PDF"}
               >
                 <FileDown className="w-4.5 h-4.5" />
@@ -173,7 +173,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
               log={log}
               onSuccess={onEdit}
               trigger={
-                <Button variant="ghost" size="icon" className="hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-full h-9 w-9" aria-label={isAr ? "تعديل" : "Modifier"}>
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-full h-9 w-9" aria-label={isAr ? "تعديل" : "Modifier"}>
                   <Pencil className="w-4.5 h-4.5" />
                 </Button>
               }
@@ -182,7 +182,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full h-9 w-9"
+              className="hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-full h-9 w-9"
               onClick={() => setDeleteModalOpen(true)}
               aria-label={isAr ? "حذف" : "Supprimer"}
             >
@@ -192,26 +192,26 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
         </div>
 
         {/* ملخص الإنجاز */}
-        <div className="relative mb-8 text-start group-hover:bg-slate-50/50 p-2 -mx-2 rounded-xl transition-colors">
-          <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+        <div className="relative mb-8 text-start group-hover:bg-muted p-2 -mx-2 rounded-lg transition-colors">
+          <p className="text-foreground leading-relaxed font-medium">
             {log.work_summary}
           </p>
         </div>
 
         {/* شبكة الإحصائيات (Stat Boxes) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <StatBox icon={<Users className="w-4.5 h-4.5" />} color="emerald" count={totalWorkers} label={isAr ? "عامل" : "Effectif"} />
-          <StatBox icon={<Truck className="w-4.5 h-4.5" />} color="blue" count={totalEquipment} label={isAr ? "معدة" : "Engins"} />
-          <StatBox icon={<Ruler className="w-4.5 h-4.5" />} color="purple" count={totalQuantities} label={isAr ? "بند منجز" : "Métrés"} />
-          <StatBox icon={<Package className="w-4.5 h-4.5" />} color="amber" count={totalConsumptions} label={isAr ? "مادة مستهلكة" : "Consommation"} />
+          <StatBox icon={<Users className="w-4.5 h-4.5" />} color="success" count={totalWorkers} label={isAr ? "عامل" : "Effectif"} />
+          <StatBox icon={<Truck className="w-4.5 h-4.5" />} color="primary" count={totalEquipment} label={isAr ? "معدة" : "Engins"} />
+          <StatBox icon={<Ruler className="w-4.5 h-4.5" />} color="info" count={totalQuantities} label={isAr ? "بند منجز" : "Métrés"} />
+          <StatBox icon={<Package className="w-4.5 h-4.5" />} color="warning" count={totalConsumptions} label={isAr ? "مادة مستهلكة" : "Consommation"} />
         </div>
 
         {/* Expand/Collapse Section */}
         <div className="flex flex-col items-center">
-          <div className="w-full h-px bg-slate-100 dark:bg-slate-800" />
+          <div className="w-full h-px bg-muted" />
           <Button
             variant="ghost"
-            className="text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-slate-900 -mt-5 bg-white dark:bg-slate-950 px-6 h-10 border rounded-full transition-all active:scale-95"
+            className="text-xs uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground -mt-5 bg-card dark:bg-card px-6 h-10 border rounded-full transition-all active:scale-95"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? (isAr ? "إخفاء التفاصيل" : "Cacher") : (isAr ? "عرض التفاصيل الكاملة" : "Détails")}
@@ -227,19 +227,19 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             {(log.problems_faced || log.notes) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-dashed pb-6">
                 {log.problems_faced && (
-                  <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30">
-                    <h4 className="text-xs font-black text-red-700 uppercase flex items-center gap-2 mb-2">
+                  <div className="bg-destructive/10 dark:bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+                    <h4 className="text-xs font-bold text-destructive uppercase flex items-center gap-2 mb-2">
                       <AlertTriangle className="w-4 h-4" /> {isAr ? "عقبات ميدانية" : "Incidents"}
                     </h4>
-                    <p className="text-sm text-red-900/80 dark:text-red-300 font-medium leading-relaxed">{log.problems_faced}</p>
+                    <p className="text-sm text-destructive dark:text-destructive font-medium leading-relaxed">{log.problems_faced}</p>
                   </div>
                 )}
                 {log.notes && (
-                  <div className="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border">
-                    <h4 className="text-xs font-black text-slate-500 uppercase flex items-center gap-2 mb-2">
+                  <div className="bg-muted dark:bg-muted p-4 rounded-lg border">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2 mb-2">
                       <StickyNote className="w-4 h-4" /> {isAr ? "ملاحظات وتوصيات" : "Notes"}
                     </h4>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">"{log.notes}"</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">"{log.notes}"</p>
                   </div>
                 )}
               </div>
@@ -248,16 +248,16 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             {/* 2. جدول الكميات المنجزة */}
             {totalQuantities > 0 && (
               <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-2 px-1">
+                <h4 className="text-xs font-bold text-info uppercase tracking-widest flex items-center gap-2 px-1">
                   <Ruler className="w-4 h-4" /> {isAr ? "الكميات والقياسات (Situation)" : "Situations techniques"}
                 </h4>
                 <div className="space-y-2.5">
                   {log.quantities?.map((q, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3.5 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-800 transition-hover hover:border-purple-300 shadow-sm">
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{q.description}</span>
-                      <div className="bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-purple-200">
-                        <span className="text-sm font-black text-purple-600">{q.achieved_quantity}</span>
-                        <span className="text-[10px] text-slate-400 ms-1 uppercase">{q.unit}</span>
+                    <div key={idx} className="flex justify-between items-center p-3.5 rounded-lg bg-info/5 dark:bg-info/10 border border-info/20 dark:border-info/20 transition-hover hover:border-info/40 shadow-sm">
+                      <span className="text-sm font-bold text-foreground">{q.description}</span>
+                      <div className="bg-card dark:bg-card px-3 py-1 rounded-lg border border-info/20">
+                        <span className="text-sm font-bold text-info">{q.achieved_quantity}</span>
+                        <span className="text-xs text-muted-foreground ms-1 uppercase">{q.unit}</span>
                       </div>
                     </div>
                   ))}
@@ -268,22 +268,22 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             {/* 3. العمال الحاضرون */}
             {totalWorkers > 0 && (
               <div className="space-y-4 pt-2">
-                <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-bold text-success uppercase tracking-widest flex items-center gap-2">
                   <Users className="w-4 h-4" /> {isAr ? "بوانتاج العمال" : "Effectifs présents"}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {log.workers_present?.map((w, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 rounded-2xl border bg-white dark:bg-slate-900 hover:shadow-md transition-shadow group/item">
+                    <div key={idx} className="flex justify-between items-center p-3 rounded-lg border bg-card dark:bg-card hover:shadow-sm transition-shadow group/item">
                       <div className="flex items-center gap-3 text-start min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 flex items-center justify-center font-black text-[10px] uppercase shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-success/10 dark:bg-success/20 text-success flex items-center justify-center font-bold text-xs uppercase shadow-sm">
                           {w.worker_name.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black text-slate-900 dark:text-white truncate uppercase tracking-tight">{w.worker_name}</p>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{w.job_title}</p>
+                          <p className="text-xs font-bold text-foreground truncate uppercase tracking-tight">{w.worker_name}</p>
+                          <p className="text-xs text-muted-foreground font-bold uppercase truncate">{w.job_title}</p>
                         </div>
                       </div>
-                      <div className="bg-slate-50 px-2 py-1 rounded text-[10px] font-black font-mono group-hover/item:bg-emerald-500 group-hover/item:text-white transition-colors">{w.hours_worked}H</div>
+                      <div className="bg-muted px-2 py-1 rounded text-xs font-bold font-mono group-hover/item:bg-success group-hover/item:text-success-foreground transition-colors">{w.hours_worked}H</div>
                     </div>
                   ))}
                 </div>
@@ -293,14 +293,14 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             {/* 4. المعدات والعتاد */}
             {totalEquipment > 0 && (
               <div className="space-y-4 pt-2">
-                <h4 className="text-[11px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-2">
                   <Truck className="w-4 h-4" /> {isAr ? "العتاد المستهلك" : "Utilisation engins"}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-start">
                   {log.equipment_used?.map((e, idx) => (
-                    <div key={idx} className="flex justify-between p-3.5 rounded-2xl border bg-slate-50 dark:bg-slate-900/60 font-bold text-xs group-hover:bg-white transition-colors">
-                      <span className="text-slate-600 truncate"># {e.equipment_name}</span>
-                      <span className="text-blue-600">{e.usage_hours} H <span className="text-[8px] opacity-60">USAGE</span></span>
+                    <div key={idx} className="flex justify-between p-3.5 rounded-lg border bg-muted dark:bg-muted font-bold text-xs group-hover:bg-card transition-colors">
+                      <span className="text-muted-foreground truncate"># {e.equipment_name}</span>
+                      <span className="text-primary">{e.usage_hours} H <span className="text-xs opacity-60">USAGE</span></span>
                     </div>
                   ))}
                 </div>
@@ -310,16 +310,16 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             {/* 5. استهلاك المواد من المخزون */}
             {totalConsumptions > 0 && (
               <div className="space-y-4 pt-2">
-                <h4 className="text-[11px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-bold text-warning uppercase tracking-widest flex items-center gap-2">
                   <Package className="w-4 h-4" /> {isAr ? "استهلاك المواد" : "Consommation de matériaux"}
                 </h4>
                 <div className="space-y-2.5">
                   {log.material_consumptions?.map((c, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-800 transition-hover hover:border-amber-300 shadow-sm">
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{c.material_name}</span>
-                      <div className="bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-amber-200">
-                        <span className="text-sm font-black text-amber-600">{c.consumed_quantity}</span>
-                        {c.notes && <span className="text-[10px] text-slate-400 ms-2 italic">({c.notes})</span>}
+                    <div key={idx} className="flex justify-between items-center p-3.5 rounded-lg bg-warning/5 dark:bg-warning/10 border border-warning/20 dark:border-warning/20 transition-hover hover:border-warning/40 shadow-sm">
+                      <span className="text-sm font-bold text-foreground">{c.material_name}</span>
+                      <div className="bg-card dark:bg-card px-3 py-1 rounded-lg border border-warning/20">
+                        <span className="text-sm font-bold text-warning">{c.consumed_quantity}</span>
+                        {c.notes && <span className="text-xs text-muted-foreground ms-2 italic">({c.notes})</span>}
                       </div>
                     </div>
                   ))}
@@ -328,17 +328,17 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             )}
 
             {/* 5. المرفقات والصور */}
-            <div className="pt-8 border-t dark:border-slate-800">
+            <div className="pt-8 border-t">
               <div className="flex items-center justify-between mb-4 px-2 text-start">
-                <h4 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
                   <ImageIcon className="w-4 h-4" /> {isAr ? "الألبوم الصوري والمستندات" : "Media & Attachments"}
                 </h4>
-                {log.overall_progress > 0 && <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black italic">{log.overall_progress}% الإنجاز</span>}
+                {log.overall_progress > 0 && <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-bold italic">{log.overall_progress}% الإنجاز</span>}
               </div>
               {isAttachmentsLoading ? (
                 <div className="flex flex-col items-center justify-center py-10 opacity-30">
-                  <Loader2 className="w-6 h-6 animate-spin text-orange-600 mb-2" />
-                  <p className="text-[10px] font-bold uppercase tracking-tighter">Sync Media...</p>
+                  <Loader2 className="w-6 h-6 animate-spin text-warning mb-2" />
+                  <p className="text-xs font-bold uppercase tracking-tighter">Sync Media...</p>
                 </div>
               ) : (
                 <AttachmentsList attachments={attachments} isAr={isAr} readOnly />
@@ -355,17 +355,17 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
 // مكون مساعدة محسّن (Semantic Stats)
 function StatBox({ icon, color, count, label }: { icon: any, color: string, count: number, label: string }) {
   const styles: any = {
-    emerald: "bg-emerald-50/60 dark:bg-emerald-950/20 text-emerald-600 border-emerald-100",
-    blue: "bg-blue-50/60 dark:bg-blue-950/20 text-blue-600 border-blue-100",
-    purple: "bg-purple-50/60 dark:bg-purple-950/20 text-purple-600 border-purple-100",
-    amber: "bg-amber-50/60 dark:bg-amber-950/20 text-amber-600 border-amber-100"
+    success: "bg-success/5 dark:bg-success/10 text-success border-success/20",
+    primary: "bg-primary/5 dark:bg-primary/10 text-primary border-primary/20",
+    info: "bg-info/5 dark:bg-info/10 text-info border-info/20",
+    warning: "bg-warning/5 dark:bg-warning/10 text-warning border-warning/20"
   };
 
   return (
-    <div className={`p-4 rounded-2xl flex flex-col items-center justify-center border-2 border-transparent transition-all hover:scale-105 active:scale-95 group ${styles[color]}`}>
-      <div className="mb-2 p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-50 transition-transform group-hover:rotate-12">{icon}</div>
-      <p className="font-black text-xl leading-none tabular-nums mb-1">{count}</p>
-      <p className="text-[10px] uppercase font-black opacity-50 tracking-wider text-center">{label}</p>
+    <div className={`p-4 rounded-lg flex flex-col items-center justify-center border-2 border-transparent transition-all hover:scale-105 active:scale-95 group ${styles[color]}`}>
+      <div className="mb-2 p-1.5 bg-card dark:bg-card rounded-lg shadow-sm border border-border transition-transform group-hover:rotate-12">{icon}</div>
+      <p className="font-bold text-xl leading-none tabular-nums mb-1">{count}</p>
+      <p className="text-xs uppercase font-bold opacity-50 tracking-wider text-center">{label}</p>
     </div>
   );
 }

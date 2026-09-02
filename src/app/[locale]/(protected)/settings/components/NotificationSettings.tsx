@@ -42,7 +42,7 @@ export function NotificationSettings({ locale }: { locale: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -66,14 +66,14 @@ export function NotificationSettings({ locale }: { locale: string }) {
             {isAr ? 'قنوات التواصل' : 'Canaux de communication'}
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
                   <Label className="text-base font-medium">{isAr ? 'إشعارات البريد الإلكتروني' : 'Notifications par Email'}</Label>
-                  <p className="text-sm text-slate-500">{isAr ? 'تلقي ملخصات وتقارير عبر البريد' : 'Recevoir des résumés et rapports par mail'}</p>
+                  <p className="text-sm text-muted-foreground">{isAr ? 'تلقي ملخصات وتقارير عبر البريد' : 'Recevoir des résumés et rapports par mail'}</p>
                 </div>
               </div>
               <Switch 
@@ -82,14 +82,14 @@ export function NotificationSettings({ locale }: { locale: string }) {
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg">
+                <div className="p-2 bg-success/10 text-success rounded-lg">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div>
                   <Label className="text-base font-medium">{isAr ? 'إشعارات واتساب' : 'Notifications WhatsApp'}</Label>
-                  <p className="text-sm text-slate-500">{isAr ? 'تنبيهات فورية للمهام العاجلة' : 'Alertes instantanées pour les tâches urgentes'}</p>
+                  <p className="text-sm text-muted-foreground">{isAr ? 'تنبيهات فورية للمهام العاجلة' : 'Alertes instantanées pour les tâches urgentes'}</p>
                 </div>
               </div>
               <Switch 
@@ -98,14 +98,14 @@ export function NotificationSettings({ locale }: { locale: string }) {
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 rounded-lg">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div>
                   <Label className="text-base font-medium">{isAr ? 'إشعارات داخل التطبيق' : 'Notifications In-App'}</Label>
-                  <p className="text-sm text-slate-500">{isAr ? 'تنبيهات عند استخدام المنصة' : 'Alertes lors de l\'utilisation de la plateforme'}</p>
+                  <p className="text-sm text-muted-foreground">{isAr ? 'تنبيهات عند استخدام المنصة' : 'Alertes lors de l\'utilisation de la plateforme'}</p>
                 </div>
               </div>
               <Switch 
@@ -169,11 +169,11 @@ export function NotificationSettings({ locale }: { locale: string }) {
           </div>
         </section>
       </CardContent>
-      <CardFooter className="px-0 pt-6 border-t border-slate-100 dark:border-slate-800">
+      <CardFooter className="px-0 pt-6 border-t border-border">
         <Button 
           onClick={handleSave} 
           disabled={isSaving}
-          className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
+          className="min-w-30"
         >
           {isSaving ? (
             <>

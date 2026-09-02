@@ -79,7 +79,7 @@ export function ResetPasswordForm() {
   };
 
   const StrengthItem = ({ met, text }: { met: boolean; text: string }) => (
-    <div className={`flex items-center gap-2 text-xs ${met ? "text-green-600" : "text-slate-400"}`}>
+    <div className={`flex items-center gap-2 text-xs ${met ? "text-success" : "text-muted-foreground"}`}>
       {met ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
       <span>{text}</span>
     </div>
@@ -94,7 +94,7 @@ export function ResetPasswordForm() {
         <div className="space-y-2">
           <Label htmlFor="password">{t('newPassword')}</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -115,13 +115,13 @@ export function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 rtl:right-auto rtl:left-3 focus:outline-none"
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:right-auto rtl:left-3 focus:outline-none"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mt-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
+          <div className="grid grid-cols-2 gap-2 mt-3 p-3 bg-muted/50 rounded-lg border border-border">
             <StrengthItem met={strength.length} text={t('strength.length')} />
             <StrengthItem met={strength.number} text={t('strength.number')} />
             <StrengthItem met={strength.special} text={t('strength.special')} />
@@ -132,7 +132,7 @@ export function ResetPasswordForm() {
         <div className="space-y-2">
           <Label htmlFor="confirm-password">{t('confirmPassword')}</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input
               id="confirm-password"
               type={showConfirmPassword ? "text" : "password"}
@@ -153,14 +153,14 @@ export function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 rtl:right-auto rtl:left-3 focus:outline-none"
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:right-auto rtl:left-3 focus:outline-none"
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11" disabled={loading}>
+        <Button type="submit" className="w-full h-11" disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('submit')}
         </Button>

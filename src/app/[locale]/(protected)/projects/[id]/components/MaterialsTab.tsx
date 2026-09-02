@@ -68,7 +68,7 @@ export function MaterialsTab({ project, isAr }: Props) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-success" />
       </div>
     );
   }
@@ -76,18 +76,18 @@ export function MaterialsTab({ project, isAr }: Props) {
   if (materials.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-2xl p-6">
+        <div className="bg-success text-success-foreground rounded-lg p-6">
           <h2 className="text-2xl font-bold">{isAr ? "المواد" : "Matériaux"}</h2>
-          <p className="text-emerald-100">{isAr ? "إدارة مخزون المواد للمشروع" : "Gestion de l'inventaire matériel"}</p>
+          <p className="text-success-foreground">{isAr ? "إدارة مخزون المواد للمشروع" : "Gestion de l'inventaire matériel"}</p>
         </div>
 
         <Card>
           <CardContent className="py-16 text-center">
-            <Package className="mx-auto w-16 h-16 text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-slate-600 mb-2">
+            <Package className="mx-auto w-16 h-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-bold text-muted-foreground mb-2">
               {isAr ? "لا توجد مواد بعد" : "Aucun matériel"}
             </h3>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               {isAr
                 ? "أضف مواد المشروع لتتمكن من تتبع المخزون والاستهلاك"
                 : "Ajoutez les matériaux du projet pour suivre l'inventaire"}
@@ -97,7 +97,7 @@ export function MaterialsTab({ project, isAr }: Props) {
               projectId={project.id}
               onSuccess={() => fetchData(true)}
               trigger={
-                <Button className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-600">
+                <Button className="gap-2">
                   <Plus className="w-4 h-4" />
                   {isAr ? "إضافة مادة" : "Ajouter matériel"}
                 </Button>
@@ -121,13 +121,13 @@ export function MaterialsTab({ project, isAr }: Props) {
       />
 
       {/* ─── Hero ─── */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start gap-4">
+      <div className="bg-success text-success-foreground rounded-lg p-6 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-3">
             <Package className="w-7 h-7" />
             {isAr ? "المواد" : "Matériaux"}
           </h2>
-          <p className="text-emerald-100 mt-1">
+          <p className="text-success-foreground mt-1">
             {isAr ? "إدارة مخزون المواد و跟踪 الاستهلاك" : "Suivi de l'inventaire et des consommations"}
           </p>
         </div>
@@ -147,48 +147,48 @@ export function MaterialsTab({ project, isAr }: Props) {
       {/* ─── Summary Cards ─── */}
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600">
+                <div className="p-2 bg-success/10 dark:bg-success/20 rounded-lg text-success">
                   <Boxes className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "إجمالي المواد" : "Total matériaux"}</p>
-                  <p className="text-lg font-black text-slate-900 dark:text-white">
-                    {summary.total_materials} <span className="text-[10px] font-normal text-slate-400">{isAr ? "مادة" : "articles"}</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "إجمالي المواد" : "Total matériaux"}</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {summary.total_materials} <span className="text-xs font-normal text-muted-foreground">{isAr ? "مادة" : "articles"}</span>
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600">
+                <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg text-primary">
                   <DollarSign className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "القيمة المتوفرة" : "Valeur disponible"}</p>
-                  <p className="text-lg font-black text-blue-600">
-                    {summary.total_remaining_value.toLocaleString()} <span className="text-[10px] font-normal">DZD</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "القيمة المتوفرة" : "Valeur disponible"}</p>
+                  <p className="text-lg font-bold text-primary">
+                    {summary.total_remaining_value.toLocaleString()} <span className="text-xs font-normal">DZD</span>
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-sm transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
+                <div className="p-2 bg-warning/10 dark:bg-warning/20 rounded-lg text-warning">
                   <TrendingDown className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "قيمة الاستهلاك" : "Valeur consommée"}</p>
-                  <p className="text-lg font-black text-amber-600">
-                    {summary.total_consumed_value.toLocaleString()} <span className="text-[10px] font-normal">DZD</span>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "قيمة الاستهلاك" : "Valeur consommée"}</p>
+                  <p className="text-lg font-bold text-warning">
+                    {summary.total_consumed_value.toLocaleString()} <span className="text-xs font-normal">DZD</span>
                   </p>
                 </div>
               </div>
@@ -201,7 +201,7 @@ export function MaterialsTab({ project, isAr }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-emerald-600" />
+            <Package className="w-5 h-5 text-success" />
             {isAr ? "قائمة المواد" : "Liste des matériaux"}
           </CardTitle>
         </CardHeader>
@@ -210,7 +210,7 @@ export function MaterialsTab({ project, isAr }: Props) {
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 dark:bg-slate-900/60">
+                <TableRow className="bg-muted">
                   <TableHead className="w-12 text-center font-bold text-xs">#</TableHead>
                   <TableHead className="font-bold text-xs">{isAr ? "اسم المادة" : "Nom"}</TableHead>
                   <TableHead className="text-center font-bold text-xs">{isAr ? "الوحدة" : "Unité"}</TableHead>
@@ -226,22 +226,22 @@ export function MaterialsTab({ project, isAr }: Props) {
                 {materials.map((m, idx) => (
                   <TableRow
                     key={m.id}
-                    className={`cursor-pointer hover:bg-emerald-50/60 dark:hover:bg-emerald-900/20 transition-colors ${idx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-900/30"}`}
+                    className={`cursor-pointer hover:bg-success/10 dark:hover:bg-success/10 transition-colors ${idx % 2 === 0 ? "" : "bg-muted/50"}`}
                     onClick={() => setEditingItem(m)}
                   >
-                    <TableCell className="text-center text-xs font-bold text-slate-400">{idx + 1}</TableCell>
+                    <TableCell className="text-center text-xs font-bold text-muted-foreground">{idx + 1}</TableCell>
                     <TableCell className="text-xs font-bold">{m.name}</TableCell>
                     <TableCell className="text-center text-xs">{m.unit}</TableCell>
                     <TableCell className="text-center text-xs font-mono">{m.initial_quantity.toLocaleString()}</TableCell>
-                    <TableCell className="text-center text-xs font-mono font-bold text-amber-600">{m.total_consumed.toLocaleString()}</TableCell>
-                    <TableCell className="text-center text-xs font-mono font-bold text-emerald-600">{m.remaining_quantity.toLocaleString()}</TableCell>
-                    <TableCell className="text-center text-xs font-mono">{m.unit_price.toLocaleString()} <span className="text-[8px]">DZD</span></TableCell>
-                    <TableCell className="text-xs text-slate-400 max-w-[120px] truncate">{m.notes || "—"}</TableCell>
+                    <TableCell className="text-center text-xs font-mono font-bold text-warning">{m.total_consumed.toLocaleString()}</TableCell>
+                    <TableCell className="text-center text-xs font-mono font-bold text-success">{m.remaining_quantity.toLocaleString()}</TableCell>
+                    <TableCell className="text-center text-xs font-mono">{m.unit_price.toLocaleString()} <span className="text-xs">DZD</span></TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-30 truncate">{m.notes || "—"}</TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-slate-300 hover:text-red-500"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
                         onClick={(e) => { e.stopPropagation(); handleDelete(m.id); }}
                         disabled={deletingId === m.id}
                       >
@@ -263,18 +263,18 @@ export function MaterialsTab({ project, isAr }: Props) {
             {materials.map((m) => (
               <div
                 key={m.id}
-                className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3 cursor-pointer hover:bg-emerald-50/60 dark:hover:bg-emerald-900/20 transition-colors"
+                className="border rounded-lg p-4 bg-card shadow-sm space-y-3 cursor-pointer hover:bg-success/10 dark:hover:bg-success/10 transition-colors"
                 onClick={() => setEditingItem(m)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{m.name}</p>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">{m.unit}</p>
+                    <p className="text-sm font-bold text-foreground truncate">{m.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">{m.unit}</p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-slate-300 hover:text-red-500 shrink-0"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
                     onClick={(e) => { e.stopPropagation(); handleDelete(m.id); }}
                     disabled={deletingId === m.id}
                   >
@@ -287,23 +287,23 @@ export function MaterialsTab({ project, isAr }: Props) {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "الأولية" : "Initiale"}</p>
+                  <div className="bg-muted rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "الأولية" : "Initiale"}</p>
                     <p className="text-xs font-mono font-bold">{m.initial_quantity.toLocaleString()}</p>
                   </div>
-                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المستهلكة" : "Consommée"}</p>
-                    <p className="text-xs font-mono font-bold text-amber-600">{m.total_consumed.toLocaleString()}</p>
+                  <div className="bg-warning/10 dark:bg-warning/10 rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المستهلكة" : "Consommée"}</p>
+                    <p className="text-xs font-mono font-bold text-warning">{m.total_consumed.toLocaleString()}</p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-1.5">
-                    <p className="text-[9px] text-slate-400 uppercase font-bold">{isAr ? "المتبقية" : "Reste"}</p>
-                    <p className="text-xs font-mono font-bold text-emerald-600">{m.remaining_quantity.toLocaleString()}</p>
+                  <div className="bg-success/10 dark:bg-success/10 rounded-lg p-1.5">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المتبقية" : "Reste"}</p>
+                    <p className="text-xs font-mono font-bold text-success">{m.remaining_quantity.toLocaleString()}</p>
                   </div>
                 </div>
 
                 {m.unit_price > 0 && (
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-400">{isAr ? "السعر" : "Prix"}</span>
+                    <span className="text-muted-foreground">{isAr ? "السعر" : "Prix"}</span>
                     <span className="font-mono font-bold">{m.unit_price.toLocaleString()} DZD</span>
                   </div>
                 )}
@@ -313,19 +313,19 @@ export function MaterialsTab({ project, isAr }: Props) {
 
           {/* ─── Table Footer Totals ─── */}
           {summary && (
-            <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="mt-4 p-4 bg-success/10 dark:bg-success/10 rounded-lg border border-success/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex flex-wrap gap-6">
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "إجمالي القيمة" : "Valeur totale"}</p>
-                  <p className="text-lg font-black text-slate-900 dark:text-white">{summary.total_initial_value.toLocaleString()} DZD</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "إجمالي القيمة" : "Valeur totale"}</p>
+                  <p className="text-lg font-bold text-foreground">{summary.total_initial_value.toLocaleString()} DZD</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "المستهلك" : "Consommé"}</p>
-                  <p className="text-lg font-black text-amber-600">{summary.total_consumed_value.toLocaleString()} DZD</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المستهلك" : "Consommé"}</p>
+                  <p className="text-lg font-bold text-warning">{summary.total_consumed_value.toLocaleString()} DZD</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">{isAr ? "المتبقي" : "Reste"}</p>
-                  <p className="text-lg font-black text-emerald-600">{summary.total_remaining_value.toLocaleString()} DZD</p>
+                  <p className="text-xs text-muted-foreground uppercase font-bold">{isAr ? "المتبقي" : "Reste"}</p>
+                  <p className="text-lg font-bold text-success">{summary.total_remaining_value.toLocaleString()} DZD</p>
                 </div>
               </div>
             </div>

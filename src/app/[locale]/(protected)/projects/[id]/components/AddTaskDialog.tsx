@@ -201,18 +201,18 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ? trigger : (
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md transition-all active:scale-95">
+          <Button className="gap-2">
             <Plus className="w-4 h-4" />
             {isAr ? 'إضافة مهمة جديدة' : 'Nouvelle Tâche'}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className={`sm:max-w-[650px] max-h-[95vh] overflow-y-auto p-0 gap-0 border-none shadow-2xl ${isAr ? 'rtl font-arabic' : 'ltr'}`}>
-        <div className="bg-blue-600 p-6 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+      <DialogContent className={`sm:max-w-xl max-h-[95vh] overflow-y-auto p-0 gap-0 ${isAr ? 'rtl font-arabic' : 'ltr'}`}>
+        <div className="bg-primary p-6 text-primary-foreground relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-foreground/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
+              <div className="p-2 bg-primary-foreground/20 rounded-lg">
                 <Plus className="w-6 h-6" />
               </div>
               {isEdit 
@@ -222,14 +222,14 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
           </DialogHeader>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-white dark:bg-slate-950">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div className="space-y-2 col-span-1 md:col-span-2">
               <Label htmlFor="title" className="text-sm font-semibold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-500" />
+                <AlertCircle className="w-4 h-4 text-primary" />
                 {isAr ? 'عنوان المهمة' : 'Titre de la tâche'}
-                <span className="text-red-500">*</span>
+                <span className="text-destructive">*</span>
               </Label>
               <Input 
                 id="title"
@@ -237,7 +237,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                 placeholder={isAr ? "أدخل عنوان المهمة..." : "Titre de la tâche..."}
                 value={formData.title || ''}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="h-11 focus-visible:ring-blue-500"
+                className="h-11 focus-visible:ring-ring"
               />
             </div>
 
@@ -251,7 +251,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                 placeholder={isAr ? "تفاصيل المهمة..." : "Détails de la tâche..."}
                 value={formData.description || ''}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                className="resize-none focus-visible:ring-blue-500"
+                className="resize-none focus-visible:ring-ring"
               />
             </div>
 
@@ -289,9 +289,9 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
 
             <div className="space-y-2">
               <Label className="text-sm font-semibold flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-orange-500" />
+                <Calendar className="w-4 h-4 text-warning" />
                 {isAr ? 'تاريخ البداية' : 'Date de début'}
-                <span className="text-red-500">*</span>
+                <span className="text-destructive">*</span>
               </Label>
               <Popover modal={true}>
                 <PopoverTrigger asChild>
@@ -317,9 +317,9 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
 
             <div className="space-y-2">
               <Label className="text-sm font-semibold flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-orange-500" />
+                <Calendar className="w-4 h-4 text-warning" />
                 {isAr ? 'تاريخ الاستحقاق' : 'Date d\'échéance'}
-                <span className="text-red-500">*</span>
+                <span className="text-destructive">*</span>
               </Label>
               <Popover modal={true}>
                 <PopoverTrigger asChild>
@@ -345,7 +345,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
 
             <div className="space-y-2">
               <Label htmlFor="estimated_hours" className="text-sm font-semibold flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
+                <Clock className="w-4 h-4 text-muted-foreground" />
                 {isAr ? 'الساعات المقدرة' : 'Heures estimées'}
               </Label>
               <Input 
@@ -355,13 +355,13 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                 placeholder="0.0"
                 value={formData.estimated_hours || ''}
                 onChange={e => setFormData({ ...formData, estimated_hours: Number(e.target.value) })}
-                className="h-11 focus-visible:ring-blue-500"
+                className="h-11 focus-visible:ring-ring"
               />
             </div>
 
             <div className="space-y-2 col-span-1 md:col-span-2">
               <Label htmlFor="assigned_to" className="text-sm font-semibold flex items-center gap-2">
-                <Users className="w-4 h-4 text-emerald-500" />
+                <Users className="w-4 h-4 text-success" />
                 {isAr ? 'تعيين إلى (عامل في المشروع)' : 'Assigné à (ouvrier du projet)'}
               </Label>
               <Select disabled={isWorkersLoading} value={formData.assigned_to} onValueChange={(v) => setFormData({ ...formData, assigned_to: v })}>
@@ -382,7 +382,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
                       <SelectItem key={w.id} value={w.id}>{w.full_name} ({w.job_title})</SelectItem>
                     ))
                   ) : !isWorkersLoading && (
-                    <div className="p-2 text-xs text-center text-slate-500 italic">
+                    <div className="p-2 text-xs text-center text-muted-foreground italic">
                       {isAr ? 'لا يوجد عمال مخصصون للمشروع بعد' : 'Aucun ouvrier assigné au projet'}
                     </div>
                   )}
@@ -395,7 +395,7 @@ export function AddTaskDialog({ isAr, projectId, onSuccess, task, trigger }: Pro
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 sm:flex-none">
               {isAr ? 'إلغاء' : 'Annuler'}
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 min-w-[120px]">
+            <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-none min-w-32">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isAr ? 'حفظ المهمة' : 'Enregistrer'}
             </Button>

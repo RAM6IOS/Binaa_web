@@ -131,9 +131,9 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
   if (needsMigration) {
     return (
       <div className="p-8 text-center">
-        <AlertTriangle className="mx-auto w-12 h-12 text-amber-500 mb-4" />
+        <AlertTriangle className="mx-auto w-12 h-12 text-warning mb-4" />
         <h3 className="font-bold text-lg mb-2">يلزم تحديث قاعدة البيانات</h3>
-        <p className="text-sm text-slate-600">يرجى تشغيل SQL Migration لجدول daily_logs</p>
+        <p className="text-sm text-muted-foreground">يرجى تشغيل SQL Migration لجدول daily_logs</p>
       </div>
     );
   }
@@ -141,35 +141,35 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
+      <div className="bg-gradient-to-r from-warning to-warning/60 text-warning-foreground rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <BookOpen className="w-6 h-6" />
             {isAr ? "التقارير اليومية" : "Rapports Journaliers"}
           </h2>
-          <p className="text-orange-100 mt-1">
+          <p className="text-warning-foreground/80 mt-1">
             {isAr ? "توثيق يومي لسير الأشغال، حالة الطقس، العمالة والمواد" : "Suivi quotidien du chantier, météo, effectifs et matériaux"}
           </p>
         </div>
-        <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+        <div className="flex items-center gap-4 bg-warning-foreground/10 backdrop-blur-md px-4 py-2 rounded-lg border border-warning-foreground/20">
           <div className="text-center">
-            <div className="text-2xl font-black">{filteredLogs.length}</div>
-            <div className="text-[10px] uppercase font-bold text-orange-100">{isAr ? "تقرير معروض" : "Affichés"}</div>
+            <div className="text-2xl font-bold">{filteredLogs.length}</div>
+            <div className="text-xs uppercase font-bold text-warning-foreground/80">{isAr ? "تقرير معروض" : "Affichés"}</div>
           </div>
-          <div className="h-8 w-px bg-white/20" />
+          <div className="h-8 w-px bg-warning-foreground/20" />
           <div className="text-center">
-            <div className="text-2xl font-black">{logs.length}</div>
-            <div className="text-[10px] uppercase font-bold text-orange-100">{isAr ? "الإجمالي" : "Total"}</div>
+            <div className="text-2xl font-bold">{logs.length}</div>
+            <div className="text-xs uppercase font-bold text-warning-foreground/80">{isAr ? "الإجمالي" : "Total"}</div>
           </div>
         </div>
       </div>
 
       {/* Toolbar & Filters */}
-      <Card className="p-4 rounded-2xl border-slate-200 dark:border-slate-800 shadow-sm">
+      <Card className="p-4 rounded-lg border shadow-sm">
         <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-4">
           {/* Search Box */}
-          <div className="relative w-full xl:flex-1 xl:min-w-[240px]">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <div className="relative w-full xl:flex-1 xl:min-w-60">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,7 +180,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
               <button
                 onClick={() => setSearchQuery("")}
                 aria-label={isAr ? "مسح البحث" : "Effacer la recherche"}
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -190,7 +190,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
           {/* Date Range + Weather Filters */}
           <div className="grid grid-cols-2 gap-3 xl:flex xl:items-center xl:gap-4">
             <div className="relative w-full xl:w-40">
-              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
                 type="date"
                 value={dateFrom}
@@ -202,7 +202,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
             </div>
 
             <div className="relative w-full xl:w-40">
-              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
                 type="date"
                 value={dateTo}
@@ -217,7 +217,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
             <div className="col-span-2 xl:col-span-1 w-full xl:w-44">
               <Select value={filterWeather} onValueChange={setFilterWeather}>
                 <SelectTrigger className="text-sm ps-9">
-                  <CloudSun className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <CloudSun className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <SelectValue placeholder={isAr ? "الطقس" : "Météo"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -238,7 +238,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="h-11 md:h-10 text-xs text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 gap-1 shrink-0"
+                className="h-11 md:h-10 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/10 gap-1 shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
                 {isAr ? "إلغاء الفلتر" : "Effacer"}
@@ -251,7 +251,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
               projectId={project.id}
               onSuccess={() => { fetchLogs(true); onRefresh?.(); }}
               trigger={
-                <Button className="h-11 md:h-10 gap-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shrink-0">
+                <Button className="h-11 md:h-10 gap-2 shrink-0">
                   <Plus className="w-4 h-4" />
                   {isAr ? "تقرير يومي جديد" : "Nouveau rapport"}
                 </Button>
@@ -262,9 +262,9 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
 
         {/* Active Filter Notice Banner */}
         {isFiltered && (
-          <div className="flex items-center justify-between bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs px-3 py-1.5 rounded-lg border border-orange-200 dark:border-orange-900">
+          <div className="flex items-center justify-between bg-warning/10 dark:bg-warning/10 text-warning dark:text-warning text-xs px-3 py-1.5 rounded-lg border border-warning/20">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
               <span>
                 {isAr
                   ? `تم تصفية التقارير: يظهر ${filteredLogs.length} تقارير من أصل ${logs.length}`
@@ -275,7 +275,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
             </div>
             <button
               onClick={clearFilters}
-              className="text-orange-600 dark:text-orange-400 font-bold hover:underline text-[11px]"
+              className="text-warning dark:text-warning font-bold hover:underline text-xs"
             >
               {isAr ? "إعادة الضبط" : "Réinitialiser"}
             </button>
@@ -286,15 +286,15 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
       {/* Logs List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-warning" />
         </div>
       ) : filteredLogs.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
-          <BookOpen className="mx-auto w-16 h-16 text-slate-300 mb-4" />
-          <h3 className="text-lg font-bold text-slate-600 dark:text-slate-300 mb-1">
+        <div className="text-center py-20 bg-card dark:bg-card rounded-lg border border-dashed border-border">
+          <BookOpen className="mx-auto w-16 h-16 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-bold text-foreground mb-1">
             {isAr ? "لا توجد تقارير مطابقة" : "Aucun rapport trouvé"}
           </h3>
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             {isFiltered
               ? (isAr ? "جرب تغيير نطاق التاريخ أو كلمات البحث" : "Essayez de modifier les dates ou la recherche")
               : (isAr ? "قم بإضافة أول تقرير يومي للمشروع" : "Ajoutez le premier rapport journalier")}

@@ -79,7 +79,7 @@ export function RegisterForm() {
         <div className="space-y-2">
           <Label htmlFor="full_name">{t('fullName')}</Label>
           <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input
               id="full_name"
               placeholder={t('fullName')}
@@ -100,7 +100,7 @@ export function RegisterForm() {
           <div className="space-y-2">
             <Label htmlFor="email">{t('email')}</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="email"
                 type="email"
@@ -122,7 +122,7 @@ export function RegisterForm() {
           <div className="space-y-2">
             <Label htmlFor="phone">{t('phone')}</Label>
             <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="phone"
                 type="tel"
@@ -139,7 +139,7 @@ export function RegisterForm() {
           <div className="space-y-2">
             <Label htmlFor="company_name">{t('companyName')}</Label>
             <div className="relative">
-              <Building className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="company_name"
                 placeholder={t('companyName')}
@@ -152,7 +152,7 @@ export function RegisterForm() {
           <div className="space-y-2">
             <Label htmlFor="job_title">{t('jobTitle')}</Label>
             <div className="relative">
-              <Briefcase className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+              <Briefcase className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="job_title"
                 placeholder={t('jobTitle')}
@@ -167,7 +167,7 @@ export function RegisterForm() {
         <div className="space-y-2">
           <Label htmlFor="password">{t('password')}</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input
               id="password"
               value={formData.password}
@@ -184,7 +184,7 @@ export function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 rtl:right-auto rtl:left-3"
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:right-auto rtl:left-3"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -195,14 +195,14 @@ export function RegisterForm() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-4" disabled={loading}>
+        <Button type="submit" className="w-full mt-4" disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('submit')}
         </Button>
 
-        <p className="text-center text-sm text-slate-600 dark:text-slate-400 pt-4">
+        <p className="text-center text-sm text-muted-foreground pt-4">
           {t('haveAccount')}{" "}
-          <Link href="/auth/login" className="text-blue-600 hover:underline font-semibold">
+          <Link href="/auth/login" className="text-primary hover:underline font-semibold">
             {t('loginNow')}
           </Link>
         </p>

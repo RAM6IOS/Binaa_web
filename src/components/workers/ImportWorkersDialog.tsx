@@ -238,53 +238,53 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) { setRows([]); setFileName(null); setSheetUrl(""); setImageFile(null); setImagePreview(null); } }}>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2 font-bold">
-          <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+          <FileSpreadsheet className="w-4 h-4 text-success" />
           {isAr ? 'استيراد العمال' : 'Importer des ouvriers'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[850px] max-h-[90vh] flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-black">
-            <FileSpreadsheet className="w-6 h-6 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <FileSpreadsheet className="w-6 h-6 text-success" />
             {isAr ? 'استيراد العمال (Excel / Google Sheets / AI)' : 'Importer des ouvriers'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 flex-1 overflow-y-auto py-2">
           <Tabs defaultValue="file" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 rounded-xl h-11">
+            <TabsList className="grid w-full grid-cols-3 rounded-lg h-11">
               <TabsTrigger value="file" className="gap-2 font-bold rounded-lg text-xs sm:text-sm">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <FileSpreadsheet className="w-4 h-4 text-success" />
                 {isAr ? 'ملف Excel' : 'Excel'}
               </TabsTrigger>
               <TabsTrigger value="sheet" className="gap-2 font-bold rounded-lg text-xs sm:text-sm">
-                <Globe className="w-4 h-4 text-blue-600" />
+                <Globe className="w-4 h-4 text-primary" />
                 {isAr ? 'Google Sheets' : 'Sheets'}
               </TabsTrigger>
               <TabsTrigger value="ai" className="gap-2 font-bold rounded-lg text-xs sm:text-sm">
-                <Sparkles className="w-4 h-4 text-purple-600" />
+                <Sparkles className="w-4 h-4 text-primary" />
                 {isAr ? 'صورة (AI)' : 'Image (AI)'}
               </TabsTrigger>
             </TabsList>
 
             {/* تبويب ملف Excel */}
             <TabsContent value="file" className="space-y-4 pt-4">
-              <div className="bg-slate-50 dark:bg-slate-900 border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-muted border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <p className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                  <p className="font-bold text-sm text-foreground">
                     {isAr ? 'تحميل قالب Excel النموذجي' : 'Télécharger le modèle Excel'}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {isAr ? 'استخدم هذا القالب لضمان تطابق الأعمدة.' : 'Utilisez ce modèle pour garantir la conformité.'}
                   </p>
                 </div>
                 <Button variant="secondary" onClick={handleDownloadTemplate} className="gap-2 shrink-0 font-bold">
-                  <Download className="w-4 h-4 text-blue-600" />
+                  <Download className="w-4 h-4 text-primary" />
                   {isAr ? 'تحميل القالب' : 'Télécharger'}
                 </Button>
               </div>
 
-              <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center hover:bg-slate-50/50 transition-colors cursor-pointer relative">
+              <div className="border-2 border-dashed border rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer relative">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -293,13 +293,13 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 <div className="flex flex-col items-center justify-center space-y-2">
-                  <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center">
                     <Upload className="w-6 h-6" />
                   </div>
-                  <p className="font-bold text-sm text-slate-700 dark:text-slate-300">
+                  <p className="font-bold text-sm text-foreground">
                     {fileName ? fileName : (isAr ? 'انقر لرفع ملف أو اسحبه هنا' : 'Cliquez ou glissez un fichier ici')}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-muted-foreground">
                     {isAr ? 'يدعم ملفات .xlsx, .xls, .csv' : 'Supporte .xlsx, .xls, .csv'}
                   </p>
                 </div>
@@ -308,9 +308,9 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
 
             {/* تبويب Google Sheets */}
             <TabsContent value="sheet" className="space-y-4 pt-4">
-              <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 rounded-2xl p-4 space-y-3">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-blue-900 dark:text-blue-200">
+                  <Label className="text-xs font-bold text-primary">
                     {isAr ? 'رابط Google Sheets (عام - Public)' : 'Lien Google Sheets (Public)'}
                   </Label>
                   <div className="flex gap-2">
@@ -318,15 +318,15 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
                       value={sheetUrl}
                       onChange={(e) => setSheetUrl(e.target.value)}
                       placeholder="https://docs.google.com/spreadsheets/d/..."
-                      className="bg-white dark:bg-slate-900"
+                      className="bg-card"
                     />
-                    <Button onClick={handleFetchGoogleSheet} disabled={isParsing} className="bg-blue-600 hover:bg-blue-700 font-bold shrink-0 gap-2">
+                    <Button onClick={handleFetchGoogleSheet} disabled={isParsing} className="font-bold shrink-0 gap-2">
                       {isParsing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
                       {isAr ? 'جلب البيانات' : 'Importer'}
                     </Button>
                   </div>
                 </div>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {isAr ? 'تأكد من مشاركة الملف كـ "Anyone with the link can view".' : 'Assurez-vous que le fichier est public.'}
                 </p>
               </div>
@@ -334,18 +334,18 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
 
             {/* تبويب الذكاء الاصطناعي (صورة جدول) */}
             <TabsContent value="ai" className="space-y-4 pt-4">
-              <div className="bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900 rounded-2xl p-4 space-y-4">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-4">
                 <div>
-                  <h4 className="font-black text-sm text-purple-900 dark:text-purple-200 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
+                  <h4 className="font-bold text-sm text-primary flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
                     {isAr ? 'استخراج البيانات من صورة الجدول بالذكاء الاصطناعي' : 'Extraction IA depuis une image'}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {isAr ? 'ارفع صورة لجدول العمال (صورة ورقية، لقطة شاشة، مستند) وسيقوم الذكاء الاصطناعي بقراءتها واستخراج البيانات تلقائياً.' : 'Téléchargez une image de table pour extraction automatique par IA.'}
                   </p>
                 </div>
 
-                <div className="border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-2xl p-6 text-center hover:bg-purple-50/50 transition-colors cursor-pointer relative">
+                <div className="border-2 border-dashed border rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer relative">
                   <input
                     ref={imageInputRef}
                     type="file"
@@ -354,10 +354,10 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                   <div className="flex flex-col items-center justify-center space-y-2">
-                    <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                       <Sparkles className="w-6 h-6" />
                     </div>
-                    <p className="font-bold text-sm text-slate-700 dark:text-slate-300">
+                    <p className="font-bold text-sm text-foreground">
                       {imageFile ? imageFile.name : (isAr ? 'انقر لرفع صورة الجدول' : 'Cliquez pour charger une image')}
                     </p>
                     {imagePreview && (
@@ -371,7 +371,7 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
                 <Button
                   onClick={handleExtractAI}
                   disabled={!imageFile || isParsing}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2 h-11 rounded-xl"
+                  className="w-full font-bold gap-2 h-11 rounded-lg"
                 >
                   {isParsing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {isAr ? 'استخراج البيانات بالذكاء الاصطناعي' : 'Extraire les données par IA'}
@@ -383,32 +383,32 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
           {/* معاينة النتائج */}
           {isParsing && (
             <div className="py-12 flex flex-col items-center justify-center space-y-3">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-              <p className="text-sm font-bold text-slate-600">{isAr ? 'جاري قراءة وتحليل البيانات بالذكاء الاصطناعي...' : 'Analyse des données par IA en cours...'}</p>
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm font-bold text-muted-foreground">{isAr ? 'جاري قراءة وتحليل البيانات بالذكاء الاصطناعي...' : 'Analyse des données par IA en cours...'}</p>
             </div>
           )}
 
           {rows.length > 0 && !isParsing && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-100 dark:bg-slate-800 rounded-xl p-3 text-center">
-                  <p className="text-xs text-slate-500 font-bold">{isAr ? 'إجمالي الصفوف' : 'Total'}</p>
-                  <p className="text-lg font-black text-slate-900 dark:text-slate-100">{rows.length}</p>
+                <div className="bg-muted rounded-lg p-3 text-center">
+                  <p className="text-xs text-muted-foreground font-bold">{isAr ? 'إجمالي الصفوف' : 'Total'}</p>
+                  <p className="text-lg font-bold text-foreground">{rows.length}</p>
                 </div>
-                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 rounded-xl p-3 text-center">
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">{isAr ? 'صحيحة جاهزة' : 'Valides'}</p>
-                  <p className="text-lg font-black text-emerald-700 dark:text-emerald-300">{validCount}</p>
+                <div className="bg-success/10 border border-success/20 rounded-lg p-3 text-center">
+                  <p className="text-xs text-success font-bold">{isAr ? 'صحيحة جاهزة' : 'Valides'}</p>
+                  <p className="text-lg font-bold text-success">{validCount}</p>
                 </div>
-                <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 rounded-xl p-3 text-center">
-                  <p className="text-xs text-red-600 dark:text-red-400 font-bold">{isAr ? 'تحتوي أخطاء' : 'Erreurs'}</p>
-                  <p className="text-lg font-black text-red-700 dark:text-red-300">{invalidCount}</p>
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-center">
+                  <p className="text-xs text-destructive font-bold">{isAr ? 'تحتوي أخطاء' : 'Erreurs'}</p>
+                  <p className="text-lg font-bold text-destructive">{invalidCount}</p>
                 </div>
               </div>
 
-              <div className="border rounded-xl overflow-hidden max-h-[300px] overflow-y-auto">
+              <div className="border rounded-lg overflow-hidden max-h-72 overflow-y-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50 dark:bg-slate-900 sticky top-0 z-10">
-                    <TableRow className="text-xs font-black">
+                  <TableHeader className="bg-muted sticky top-0 z-10">
+                    <TableRow className="text-xs font-bold">
                       <TableHead className="w-12">#</TableHead>
                       <TableHead>{isAr ? 'الاسم' : 'Nom'}</TableHead>
                       <TableHead>CIN</TableHead>
@@ -422,25 +422,25 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
                     {rows.map((row) => (
                       <TableRow
                         key={row.rowNumber}
-                        className={row.isValid ? 'bg-emerald-50/20' : 'bg-red-50/30'}
+                        className={row.isValid ? 'bg-success/10' : 'bg-destructive/10'}
                       >
                         <TableCell className="font-mono font-bold">{row.rowNumber}</TableCell>
                         <TableCell className="font-bold">{row.full_name || '-'}</TableCell>
                         <TableCell className="font-mono">{row.cin || '-'}</TableCell>
                         <TableCell className="font-mono">{row.phone || '-'}</TableCell>
                         <TableCell>{row.job_title || '-'}</TableCell>
-                        <TableCell className="font-black">{row.daily_rate ? `${row.daily_rate} DZD` : '-'}</TableCell>
+                        <TableCell className="font-bold">{row.daily_rate ? `${row.daily_rate} DZD` : '-'}</TableCell>
                         <TableCell>
                           {row.isValid ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                            <span className="inline-flex items-center gap-1 text-success font-bold">
                               <CheckCircle2 className="w-3.5 h-3.5" /> {isAr ? 'صحيح' : 'Valide'}
                             </span>
                           ) : (
-                            <div className="text-red-600 font-bold space-y-0.5">
+                            <div className="text-destructive font-bold space-y-0.5">
                               <span className="inline-flex items-center gap-1">
                                 <XCircle className="w-3.5 h-3.5" /> {isAr ? 'خطأ' : 'Erreur'}
                               </span>
-                              <p className="text-[10px] text-red-500 font-normal">{row.errors.join(', ')}</p>
+                              <p className="text-xs text-destructive font-normal">{row.errors.join(', ')}</p>
                             </div>
                           )}
                         </TableCell>
@@ -460,7 +460,7 @@ export function ImportWorkersDialog({ isAr, onSuccess, existingWorkers }: Import
           <Button
             onClick={handleImport}
             disabled={isImporting || validCount === 0}
-            className="bg-emerald-600 hover:bg-emerald-700 gap-2 font-bold px-6"
+            className="gap-2 font-bold px-6"
           >
             {isImporting && <Loader2 className="w-4 h-4 animate-spin" />}
             {isAr ? `استيراد (${validCount} عامل)` : `Importer (${validCount})`}

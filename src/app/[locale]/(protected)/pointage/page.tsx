@@ -226,9 +226,9 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   return (
     <div className="space-y-5 p-4 md:p-6" dir={isAr ? "rtl" : "ltr"}>
       {/* ── Read-only Banner ── */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-3">
-        <Info className="w-5 h-5 text-blue-600 shrink-0" />
-        <p className="text-sm font-semibold text-blue-800">
+      <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 flex items-center gap-3">
+        <Info className="w-5 h-5 text-primary shrink-0" />
+        <p className="text-sm font-semibold text-primary">
           {isAr
             ? "هذه الصفحة للعرض فقط. لتسجيل الحضور ادخل إلى المشروع"
             : "Cette page est en lecture seule. Pour pointer, accédez au projet."}
@@ -239,14 +239,14 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-2 bg-emerald-100 rounded-xl">
-              <CalendarDays className="w-5 h-5 text-emerald-600" />
+            <div className="p-2 bg-present/10 rounded-lg">
+              <CalendarDays className="w-5 h-5 text-present" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
               {isAr ? "سجل الحضور الأسبوعي" : "Registre de Présence"}
             </h1>
           </div>
-          <p className="text-slate-500 text-sm flex items-center gap-1.5">
+          <p className="text-muted-foreground text-sm flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5" />
             {isAr
               ? "عرض فقط — للتسجيل ادخل إلى المشروع"
@@ -256,30 +256,30 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
       </div>
 
       {/* ── Stats bar ── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div className="bg-card rounded-lg border border-border shadow-sm">
         <button
           type="button"
           className="w-full flex items-center justify-between p-3.5 md:cursor-default md:pointer-events-none"
           onClick={() => setStatsOpen((v) => !v)}
         >
-          <span className="text-xs font-bold text-slate-500 uppercase">
+          <span className="text-xs font-bold text-muted-foreground uppercase">
             {isAr ? "إحصاءات الأسبوع" : "Statistiques"}
           </span>
-          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 md:hidden ${statsOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 md:hidden ${statsOpen ? 'rotate-180' : ''}`} />
         </button>
         <div className={`grid grid-cols-2 md:grid-cols-4 gap-3 px-3.5 pb-3.5 overflow-hidden transition-all duration-200 ${statsOpen ? 'block' : 'hidden md:grid'}`}>
           {[
-            { label: isAr ? "ساعات الأسبوع" : "Heures", value: `${weekStats.totalHours}h`, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: isAr ? "حضور" : "Présences", value: weekStats.presentSlots, icon: UserCheck, color: "text-emerald-600", bg: "bg-emerald-50" },
-            { label: isAr ? "نشطون الآن" : "Actifs", value: weekStats.activeNow, icon: Timer, color: "text-amber-600", bg: "bg-amber-50" },
-            { label: isAr ? "عمال" : "Ouvriers", value: weekStats.workersCount, icon: Users, color: "text-violet-600", bg: "bg-violet-50" },
+            { label: isAr ? "ساعات الأسبوع" : "Heures", value: `${weekStats.totalHours}h`, icon: Clock, color: "text-primary", bg: "bg-primary/10" },
+            { label: isAr ? "حضور" : "Présences", value: weekStats.presentSlots, icon: UserCheck, color: "text-present", bg: "bg-present/10" },
+            { label: isAr ? "نشطون الآن" : "Actifs", value: weekStats.activeNow, icon: Timer, color: "text-shift", bg: "bg-shift/10" },
+            { label: isAr ? "عمال" : "Ouvriers", value: weekStats.workersCount, icon: Users, color: "text-primary", bg: "bg-primary/10" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-slate-50 rounded-xl border border-slate-100 p-3 flex items-center gap-2.5">
-              <div className={`p-2 rounded-xl ${stat.bg}`}>
+            <div key={stat.label} className="bg-muted rounded-lg border border-border p-3 flex items-center gap-2.5">
+              <div className={`p-2 rounded-lg ${stat.bg}`}>
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase">{stat.label}</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase">{stat.label}</p>
                 <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
               </div>
             </div>
@@ -288,16 +288,16 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
       </div>
 
       {/* ── Toolbar: week nav + filters ── */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+      <div className="bg-card rounded-lg border border-border p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setWeekStart((w) => subWeeks(w, 1))}>
               {isAr ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </Button>
-            <div className="text-center min-w-[140px] sm:min-w-[180px]">
-              <p className="font-bold text-slate-800 text-sm">{weekLabel}</p>
+            <div className="text-center min-w-36 sm:min-w-44">
+              <p className="font-bold text-foreground text-sm">{weekLabel}</p>
               {isCurrentWeek && (
-                <Badge variant="outline" className="text-[10px] mt-0.5 border-emerald-300 text-emerald-700">
+                <Badge variant="outline" className="text-xs mt-0.5 border-present/30 text-present">
                   {isAr ? "الأسبوع الحالي" : "En cours"}
                 </Badge>
               )}
@@ -306,14 +306,14 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
               {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </Button>
             {!isCurrentWeek && (
-              <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700 text-xs hidden sm:inline-flex"
+              <Button variant="ghost" size="sm" className="text-present hover:text-present/90 text-xs hidden sm:inline-flex"
                 onClick={() => setWeekStart(startOfWeek(today, { weekStartsOn: WEEK_STARTS_ON }))}>
                 {isAr ? "اليوم" : "Aujourd'hui"}
               </Button>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" onClick={fetchData} className="gap-1.5 text-slate-500 hidden sm:inline-flex">
+            <Button variant="ghost" size="sm" onClick={fetchData} className="gap-1.5 text-muted-foreground hidden sm:inline-flex">
               <RefreshCw className="w-3.5 h-3.5" />
               {isAr ? "تحديث" : "Actualiser"}
             </Button>
@@ -322,16 +322,16 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="h-9 w-9 sm:hidden relative">
                   <SlidersHorizontal className="w-4 h-4" />
-                  {projectFilter !== "all" && <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full" />}
+                  {projectFilter !== "all" && <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full" />}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="rounded-t-3xl" dir={isAr ? "rtl" : "ltr"}>
+              <SheetContent side="bottom" className="rounded-t-lg" dir={isAr ? "rtl" : "ltr"}>
                 <SheetHeader className="pb-4">
-                  <SheetTitle className="font-black text-lg">{isAr ? "فلتر المشروع" : "Filtre projet"}</SheetTitle>
+                  <SheetTitle className="font-bold text-lg">{isAr ? "فلتر المشروع" : "Filtre projet"}</SheetTitle>
                 </SheetHeader>
                 <div className="pb-6 space-y-3">
                   <Select value={projectFilter} onValueChange={setProjectFilter}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder={isAr ? "المشروع" : "Projet"} /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder={isAr ? "المشروع" : "Projet"} /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">{isAr ? "كل المشاريع" : "Tous les projets"}</SelectItem>
                       <SelectItem value="general">{isAr ? "وضع عام" : "Général"}</SelectItem>
@@ -340,13 +340,13 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
                   </Select>
                   <div className="flex flex-wrap gap-4 pt-2">
                     {[
-                      { color: "bg-emerald-400", label: isAr ? "حاضر" : "Présent" },
-                      { color: "bg-yellow-400", label: isAr ? "وردية" : "Shift" },
-                      { color: "bg-slate-300", label: isAr ? "غائب" : "Absent" },
+                      { color: "bg-present", label: isAr ? "حاضر" : "Présent" },
+                      { color: "bg-shift", label: isAr ? "وردية" : "Shift" },
+                      { color: "bg-absent", label: isAr ? "غائب" : "Absent" },
                     ].map((item) => (
                       <div key={item.label} className="flex items-center gap-1.5">
                         <span className={`w-3 h-3 rounded-sm ${item.color}`} />
-                        <span className="text-[11px] text-slate-500">{item.label}</span>
+                        <span className="text-xs text-muted-foreground">{item.label}</span>
                       </div>
                     ))}
                   </div>
@@ -359,7 +359,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
         {/* Desktop: inline filters */}
         <div className="hidden sm:flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder={isAr ? "بحث عن عامل..." : "Rechercher un ouvrier..."}
               value={searchQuery}
@@ -368,7 +368,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
             />
           </div>
           <Select value={projectFilter} onValueChange={setProjectFilter}>
-            <SelectTrigger className="h-9 w-full sm:w-[220px]">
+            <SelectTrigger className="h-9 w-full sm:w-56">
               <SelectValue placeholder={isAr ? "المشروع" : "Projet"} />
             </SelectTrigger>
             <SelectContent>
@@ -378,22 +378,22 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
             </SelectContent>
           </Select>
         </div>
-        <div className="hidden sm:flex flex-wrap gap-4 pt-1 border-t border-slate-100">
+        <div className="hidden sm:flex flex-wrap gap-4 pt-1 border-t border-border">
           {[
-            { color: "bg-emerald-400", label: isAr ? "حاضر (مكتمل)" : "Présent" },
-            { color: "bg-yellow-400", label: isAr ? "وردية (جارية)" : "Shift (en cours)" },
-            { color: "bg-slate-300", label: isAr ? "غائب" : "Absent" },
+            { color: "bg-present", label: isAr ? "حاضر (مكتمل)" : "Présent" },
+            { color: "bg-shift", label: isAr ? "وردية (جارية)" : "Shift (en cours)" },
+            { color: "bg-absent", label: isAr ? "غائب" : "Absent" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <span className={`w-3 h-3 rounded-sm ${item.color}`} />
-              <span className="text-[11px] text-slate-500">{item.label}</span>
+              <span className="text-xs text-muted-foreground">{item.label}</span>
             </div>
           ))}
         </div>
 
         {/* Mobile: search always visible */}
         <div className="relative sm:hidden">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder={isAr ? "بحث عن عامل..." : "Rechercher un ouvrier..."}
             value={searchQuery}

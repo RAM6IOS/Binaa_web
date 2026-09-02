@@ -35,13 +35,13 @@ function formatFileSize(bytes: number): string {
 
 function getFileIcon(fileType: string) {
   const type = fileType.toLowerCase();
-  if (type.startsWith("image/")) return <FileImage className="w-8 h-8 text-purple-500" />;
-  if (type.includes("pdf")) return <FileText className="w-8 h-8 text-red-500" />;
+  if (type.startsWith("image/")) return <FileImage className="w-8 h-8 text-info" />;
+  if (type.includes("pdf")) return <FileText className="w-8 h-8 text-destructive" />;
   if (type.includes("sheet") || type.includes("excel") || type.includes("csv"))
-    return <FileSpreadsheet className="w-8 h-8 text-green-500" />;
+    return <FileSpreadsheet className="w-8 h-8 text-success" />;
   if (type.includes("zip") || type.includes("rar"))
-    return <FileArchive className="w-8 h-8 text-amber-500" />;
-  return <File className="w-8 h-8 text-slate-500" />;
+    return <FileArchive className="w-8 h-8 text-warning" />;
+  return <File className="w-8 h-8 text-muted-foreground" />;
 }
 
 export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }: AttachmentsListProps) {
@@ -50,7 +50,7 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
 
   if (!attachments || attachments.length === 0) {
     return (
-      <p className="text-sm text-slate-400 italic py-6 text-center">
+      <p className="text-sm text-muted-foreground italic py-6 text-center">
         {isAr ? "لا توجد مرفقات مضافة بعد." : "Aucune pièce jointe ajoutée."}
       </p>
     );
@@ -84,10 +84,10 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
           return (
             <div
               key={file.id}
-              className="group relative flex flex-col border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 hover:shadow-md transition-all duration-300"
+              className="group relative flex flex-col border border-border rounded-lg overflow-hidden bg-card hover:shadow-sm transition-all duration-300"
             >
               {/* Preview */}
-              <div className="aspect-video bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+              <div className="aspect-video bg-muted/50 flex items-center justify-center relative overflow-hidden">
                 {isImage ? (
                   <img
                     src={file.file_url}
@@ -97,19 +97,19 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center p-6">
                     {getFileIcon(file.file_type)}
-                    <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-widest">
+                    <p className="text-xs text-muted-foreground mt-2 uppercase tracking-widest">
                       {file.file_type.split('/')[1] || 'FILE'}
                     </p>
                   </div>
                 )}
 
                 {/* Overlay Actions */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                <div className="absolute inset-0 bg-muted/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
                   {isImage && (
                     <Button
                       size="icon"
                       variant="secondary"
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-background/90 hover:bg-background"
                       onClick={() => setLightboxSrc(file.file_url)}
                       aria-label="Preview"
                     >
@@ -119,7 +119,7 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="bg-white/90 hover:bg-white"
+                    className="bg-background/90 hover:bg-background"
                     asChild
                   >
                     <a href={file.file_url} target="_blank" rel="noopener noreferrer" aria-label="Open externally">
@@ -131,10 +131,10 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
 
               {/* File Info */}
               <div className="p-3">
-                <p className="text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-2 mb-1">
+                <p className="text-xs font-medium text-foreground line-clamp-2 mb-1">
                   {file.file_name}
                 </p>
-                <div className="flex justify-between items-center text-[10px] text-slate-400">
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
                   <span>{formatFileSize(file.file_size)}</span>
                   <span>{new Date(file.uploaded_at).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}</span>
                 </div>
@@ -145,7 +145,7 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
                 <button
                   onClick={() => handleDelete(file.id)}
                   disabled={deletingId === file.id}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
+                  className="absolute top-2 right-2 p-1.5 bg-destructive hover:bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
                 >
                   {deletingId === file.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                 </button>
@@ -157,15 +157,15 @@ export function AttachmentsList({ attachments, isAr, onDelete, readOnly = true }
 
       {/* Lightbox */}
       {lightboxSrc && (
-        <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxSrc(null)}>
+        <div className="fixed inset-0 z-[10000] bg-muted/90 flex items-center justify-center p-4" onClick={() => setLightboxSrc(null)}>
           <img
             src={lightboxSrc}
             alt="Preview"
-            className="max-h-[90vh] max-w-full rounded-2xl shadow-2xl"
+            className="max-h-[90vh] max-w-full rounded-lg shadow-sm"
             onClick={e => e.stopPropagation()}
           />
           <button
-            className="absolute top-6 right-6 text-white text-3xl hover:text-red-400"
+            className="absolute top-6 right-6 text-muted-foreground text-3xl hover:text-destructive"
             onClick={() => setLightboxSrc(null)}
           >
             ✕

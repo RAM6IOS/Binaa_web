@@ -60,12 +60,12 @@ export function CreateSituationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] rounded-3xl" dir={isAr ? "rtl" : "ltr"}>
+      <DialogContent className="sm:max-w-lg rounded-lg" dir={isAr ? "rtl" : "ltr"}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-black">
+          <DialogTitle className="text-xl font-bold">
             {isAr ? "إنشاء وضعية أشغال جديدة" : "Nouvelle Situation des Travaux"}
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500">
+          <DialogDescription className="text-xs text-muted-foreground">
             {isAr
               ? "إصدار وضعية جديدة وفق النموذج الرسمي الجزائري مع جلب الكميات المنجزة تلقائياً."
               : "Générer une nouvelle situation conforme au modèle algérien officiel."}
@@ -78,10 +78,10 @@ export function CreateSituationDialog({
               {isAr ? "نوع الوضعية" : "Type de situation"}
             </Label>
             <Select value={situationType} onValueChange={(val: any) => setSituationType(val)}>
-              <SelectTrigger className="rounded-xl h-11 text-xs">
+              <SelectTrigger className="rounded-md h-11 text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-md">
                 <SelectItem value="monthly">{isAr ? "وضعية شهرية (Mensuelle)" : "Mensuelle"}</SelectItem>
                 <SelectItem value="interim">{isAr ? "وضعية مرحلية (Interimaire)" : "Intérimaire"}</SelectItem>
                 <SelectItem value="final">{isAr ? "وضعية ختامية (Finale)" : "Finale"}</SelectItem>
@@ -98,7 +98,7 @@ export function CreateSituationDialog({
               required
               value={arreteeAu}
               onChange={(e) => setArreteeAu(e.target.value)}
-              className="rounded-xl h-11 text-xs font-medium"
+              className="rounded-md h-11 text-xs font-medium"
             />
           </div>
 
@@ -111,7 +111,7 @@ export function CreateSituationDialog({
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="rounded-xl h-11 text-xs font-medium"
+                className="rounded-md h-11 text-xs font-medium"
               />
             </div>
             <div className="space-y-2">
@@ -122,7 +122,7 @@ export function CreateSituationDialog({
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="rounded-xl h-11 text-xs font-medium"
+                className="rounded-md h-11 text-xs font-medium"
               />
             </div>
           </div>
@@ -132,14 +132,14 @@ export function CreateSituationDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl h-11 text-xs font-bold"
+              className="rounded-md h-11 text-xs font-bold"
             >
               {isAr ? "إلغاء" : "Annuler"}
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="rounded-xl h-11 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              className="rounded-md h-11 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
             >
               {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isAr ? "إنشاء الوضعية" : "Créer la situation"}

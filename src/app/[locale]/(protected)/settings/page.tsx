@@ -31,14 +31,14 @@ export default function SettingsPage({ params }: { params: Promise<{ locale: str
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-start">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {isAr ? 'الإعدادات' : 'Paramètres'}
           </h1>
-          <p className="text-slate-500">
+          <p className="text-muted-foreground">
             {isAr ? 'تخصيص وإدارة حسابك ومنصتك' : 'Personnalisez et gérez votre compte et votre plateforme'}
           </p>
         </div>
-        <LogoutButton variant="destructive" className="bg-red-600 hover:bg-red-700 text-white" />
+        <LogoutButton variant="destructive" />
       </div>
 
       {/* Desktop Layout */}
@@ -50,14 +50,14 @@ export default function SettingsPage({ params }: { params: Promise<{ locale: str
             locale={locale} 
           />
         </div>
-        <div className="col-span-9 bg-white dark:bg-slate-950 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="col-span-9 bg-card p-8 rounded-lg shadow-sm border">
           {renderSection()}
         </div>
       </div>
 
       {/* Mobile Layout (No Tabs as extra sections are hidden) */}
       <div className="md:hidden">
-        <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="bg-card p-6 rounded-lg shadow-sm border">
           {renderSection()}
         </div>
       </div>

@@ -46,7 +46,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
 
   return (
     <div className="grid md:grid-cols-2 gap-3 md:gap-4 animate-in fade-in duration-300 md:duration-500" dir={isAr ? 'rtl' : 'ltr'}>
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-sm transition-shadow">
         <CardHeader>
           <CardTitle>{isAr ? 'تفاصيل المشروع' : 'Détails du projet'}</CardTitle>
           <CardDescription>{isAr ? 'معلومات عامة' : 'Informations générales'}</CardDescription>
@@ -54,26 +54,26 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
              <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">{isAr ? 'العميل / المالك' : 'Client'}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{isAr ? 'العميل / المالك' : 'Client'}</p>
               <p className="text-sm font-medium">{project.client_name || '-'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">{isAr ? 'رقم العقد' : 'N° Contrat'}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{isAr ? 'رقم العقد' : 'N° Contrat'}</p>
               <p className="text-sm font-medium font-mono">{project.contract_number || '-'}</p>
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">{isAr ? 'وصف المشروع' : 'Description'}</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300">{project.description || '-'}</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{isAr ? 'وصف المشروع' : 'Description'}</p>
+            <p className="text-sm text-foreground">{project.description || '-'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">{isAr ? 'ملاحظات' : 'Notes'}</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300">{project.notes || '-'}</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{isAr ? 'ملاحظات' : 'Notes'}</p>
+            <p className="text-sm text-foreground">{project.notes || '-'}</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-sm transition-shadow">
         <CardHeader>
           <CardTitle>{isAr ? 'الحالة والتقدم' : 'Statut et Progrès'}</CardTitle>
           <CardDescription>{isAr ? 'تحديث الحالة والنسب' : 'Mise à jour du statut et pourcentage'}</CardDescription>
@@ -100,7 +100,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
                   <SelectItem value="cancelled">{isAr ? "ملغى" : "Annulé"}</SelectItem>
                 </SelectContent>
               </Select>
-              {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-blue-500 self-center" />}
+              {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-primary self-center" />}
             </div>
           </div>
 
@@ -115,7 +115,7 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
                   value={editProgress}
                   onChange={(e) => setEditProgress(Number(e.target.value))}
                 />
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600" onClick={() => handleUpdate('progress', editProgress)} aria-label="Confirm">
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleUpdate('progress', editProgress)} aria-label="Confirm">
                    <Check className="w-4 h-4" />
                 </Button>
               </div>
@@ -125,32 +125,32 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-sm transition-shadow">
         <CardHeader>
           <CardTitle>{isAr ? 'الميزانية والتكاليف' : 'Budget et Coûts'}</CardTitle>
           <CardDescription>{isAr ? 'ملخص الاستهلاك المالي' : 'Résumé de la consommation financière'}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-             <p className="text-sm text-slate-500">{isAr ? 'الميزانية المخصصة' : 'Budget alloué'}</p>
-             <div className="text-3xl font-bold text-slate-900 dark:text-white">
-               {project.budget.toLocaleString()} <span className="text-sm text-slate-500 font-normal">DZD</span>
+             <p className="text-sm text-muted-foreground">{isAr ? 'الميزانية المخصصة' : 'Budget alloué'}</p>
+             <div className="text-3xl font-bold text-foreground">
+               {project.budget.toLocaleString()} <span className="text-sm text-muted-foreground font-normal">DZD</span>
              </div>
           </div>
           
           <div className="space-y-3 pt-4 border-t">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-red-600 dark:text-red-400">{isAr ? 'التكلفة الفعلية (المستهلك)' : 'Coût réel (Consommé)'}</label>
+              <label className="text-sm font-medium text-destructive">{isAr ? 'التكلفة الفعلية (المستهلك)' : 'Coût réel (Consommé)'}</label>
               <div className="flex items-center gap-2">
                 <Input 
                   type="number" 
-                  className="flex-1 font-semibold text-red-600 dark:text-red-400 h-10 md:h-auto"
+                  className="flex-1 font-semibold text-destructive h-10 md:h-auto"
                   value={editActualCost}
                   onChange={(e) => setEditActualCost(Number(e.target.value))}
                 />
                 <Button 
                   variant="outline" 
-                  className="text-blue-600 h-10 px-3 md:px-4 shrink-0" 
+                  className="text-primary h-10 px-3 md:px-4 shrink-0" 
                   onClick={() => handleUpdate('actual_cost', editActualCost)}
                 >
                   <Check className="w-4 h-4 md:hidden" />
@@ -160,13 +160,13 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
             </div>
             
             <div className="space-y-1">
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{isAr ? 'نسبة الاستهلاك' : 'Taux de consommation'}</span>
                 <span>{project.budget > 0 ? Math.round((project.actual_cost / project.budget) * 100) : 0}%</span>
               </div>
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-red-400 dark:bg-red-500 transition-all duration-500" 
+                  className="h-full bg-destructive transition-all duration-500" 
                   style={{ width: `${project.budget > 0 ? Math.min(100, (project.actual_cost / project.budget) * 100) : 0}%` }} 
                 />
               </div>
@@ -176,15 +176,15 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
       </Card>
       
       {/* ── الموقع: مخفي على الموبايل (غير فعّال)، ظاهر على سطح المكتب ── */}
-      <Card className="hover:shadow-md transition-shadow hidden md:block">
+      <Card className="hover:shadow-sm transition-shadow hidden md:block">
         <CardHeader>
           <CardTitle>{isAr ? 'الموقع' : 'Emplacement'}</CardTitle>
           <CardDescription>{project.wilaya}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-300 dark:border-slate-700 relative overflow-hidden">
+          <div className="h-48 bg-muted rounded-lg flex items-center justify-center border border-border relative overflow-hidden">
              <div className="absolute inset-0 opacity-20 bg-[url('https://maps.wikimedia.org/osm-intl/12/2114/1569.png')] bg-cover bg-center mix-blend-luminosity"></div>
-             <p className="text-slate-500 z-10 font-medium bg-white/80 dark:bg-black/80 px-4 py-2 rounded-md shadow-sm text-center">
+             <p className="text-muted-foreground z-10 font-medium bg-background/80 px-4 py-2 rounded-md shadow-sm text-center">
                 [ {isAr ? 'خريطة GPS' : 'Carte GPS'} ]<br/>
                 <span className="text-xs font-mono">{project.location_coordinates || 'No Coordinates'}</span>
              </p>
@@ -193,16 +193,16 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
       </Card>
 
       {/* ── الموقع: بطاقة مبسّطة على الموبايل ── */}
-      <Card className="hover:shadow-md transition-shadow md:hidden">
+      <Card className="hover:shadow-sm transition-shadow md:hidden">
         <CardContent className="pt-5">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-red-50 dark:bg-red-950 rounded-xl">
-              <MapPin className="w-5 h-5 text-red-500" />
+            <div className="p-2.5 bg-destructive/10 rounded-lg">
+              <MapPin className="w-5 h-5 text-destructive" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{project.wilaya}</p>
+              <p className="text-sm font-bold text-foreground">{project.wilaya}</p>
               {project.location_coordinates && (
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{project.location_coordinates}</p>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">{project.location_coordinates}</p>
               )}
             </div>
           </div>

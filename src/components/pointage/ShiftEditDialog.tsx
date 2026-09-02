@@ -184,17 +184,17 @@ export function ShiftEditDialog({
           </DialogTitle>
           <DialogDescription asChild>
             <div className="space-y-0.5 pt-1">
-              <p className="font-semibold text-slate-800">{context.worker.full_name}</p>
+              <p className="font-semibold text-foreground">{context.worker.full_name}</p>
               <p className="text-xs">{context.worker.job_title}</p>
-              <p className="text-xs text-slate-500">{dateLabel}</p>
+              <p className="text-xs text-muted-foreground">{dateLabel}</p>
             </div>
           </DialogDescription>
         </DialogHeader>
 
         {isFuture && (
-          <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            <p className="text-xs font-semibold text-amber-800">
+          <div className="px-3 py-2 bg-warning/10 border border-warning/30 rounded-lg flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
+            <p className="text-xs font-semibold text-warning">
               {isAr
                 ? "لا يمكن تسجيل أو تعديل الحضور لتاريخ مستقبلي"
                 : "Enregistrement impossible pour une date future"}
@@ -207,7 +207,7 @@ export function ShiftEditDialog({
           <div className="flex gap-2">
             {(isEmpty || isActive) && (
               <Button
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 gap-2"
+                className="flex-1 bg-present hover:bg-present/90 text-present-foreground gap-2"
                 onClick={handleClockIn}
                 disabled={isSubmitting || isActive}
               >
@@ -217,7 +217,7 @@ export function ShiftEditDialog({
             )}
             {isActive && (
               <Button
-                className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-yellow-950 gap-2"
+                className="flex-1 bg-shift hover:bg-shift/90 text-shift-foreground gap-2"
                 onClick={handleClockOut}
                 disabled={isSubmitting}
               >
@@ -228,7 +228,7 @@ export function ShiftEditDialog({
           </div>
         )}
 
-        <div className="space-y-4 py-1 border-t border-slate-100 pt-4">
+        <div className="space-y-4 py-1 border-t border-border pt-4">
           <div className="space-y-1.5">
             <Label>{isAr ? "الحالة" : "Statut"}</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as AttendanceStatus)}>
@@ -292,7 +292,7 @@ export function ShiftEditDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {isAr ? "إلغاء" : "Annuler"}
           </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 gap-2" onClick={handleSave} disabled={isSubmitting || isFuture}>
+          <Button className="bg-present hover:bg-present/90 text-present-foreground gap-2" onClick={handleSave} disabled={isSubmitting || isFuture}>
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isAr ? "حفظ" : "Enregistrer"}
           </Button>

@@ -26,24 +26,24 @@ export function Navbar({ locale }: NavbarProps) {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="bg-primary p-2 rounded-lg">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-blue-900">Binaa</span>
+            <span className="text-2xl font-bold tracking-tight text-primary">Binaa</span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 href={link.href} 
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-primary transition-colors"
               >
                 {link.name}
               </Link>
@@ -59,7 +59,7 @@ export function Navbar({ locale }: NavbarProps) {
                 {isAr ? "تسجيل الدخول" : "Connexion"}
               </Link>
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200" asChild>
+            <Button className="shadow-sm" asChild>
               <Link href="/auth/register">
                 {isAr ? "ابدأ مجاناً" : "Essayer gratuitement"}
               </Link>
@@ -70,7 +70,7 @@ export function Navbar({ locale }: NavbarProps) {
           <div className="flex md:hidden items-center gap-2">
             <LanguageSwitcher />
             <button
-              className="p-3 text-slate-600 rounded-md hover:bg-slate-100 transition-colors"
+              className="p-3 text-muted-foreground rounded-md hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
             >
@@ -81,13 +81,13 @@ export function Navbar({ locale }: NavbarProps) {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden bg-white border-b border-slate-100 overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div className={`md:hidden bg-background border-b border-border overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
             <div className="p-4 space-y-4">
               {navLinks.map((link) => (
                 <Link 
                   key={link.name} 
                   href={link.href} 
-                  className="block py-3 px-2 text-slate-600 text-base font-medium rounded-md hover:bg-slate-50 transition-colors"
+                  className="block py-3 px-2 text-muted-foreground text-base font-medium rounded-md hover:bg-muted transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.name}
@@ -99,7 +99,7 @@ export function Navbar({ locale }: NavbarProps) {
                     {isAr ? "تسجيل الدخول" : "Connexion"}
                   </Link>
                 </Button>
-                <Button size="lg" className="w-full bg-blue-600 text-white text-base h-12" asChild>
+                <Button size="lg" className="w-full text-base h-12" asChild>
                   <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
                     {isAr ? "ابدأ مجاناً" : "Essayer gratuitement"}
                   </Link>

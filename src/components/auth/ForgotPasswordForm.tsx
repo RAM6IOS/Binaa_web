@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
         <div className="space-y-2">
           <Label htmlFor="email">{t('email')}</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400 rtl:left-auto rtl:right-3" />
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input 
               id="email"
               type="email" 
@@ -68,16 +68,16 @@ export function ForgotPasswordForm() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('submit')}
         </Button>
         
         <div className="text-center pt-2">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             <Link 
               href="/auth/login" 
-              className="text-blue-600 hover:underline font-medium transition-colors"
+              className="text-primary hover:underline font-medium transition-colors"
             >
               {t('backToLogin')}
             </Link>

@@ -102,7 +102,7 @@ export function SituationDetailScreen({
   if (isLoading || !situation) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -110,30 +110,30 @@ export function SituationDetailScreen({
   const isDraft = situation.status === "draft";
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto pb-12" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-6 max-w-7xl mx-auto pb-12" dir={isAr ? "rtl" : "ltr"}>
       {/* ─── الهيدر وأزرار التحكم ─── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-950 p-6 rounded-3xl border shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card dark:bg-card p-6 rounded-lg border shadow-sm">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="gap-2 -ml-2 text-slate-500 font-bold"
+            className="gap-2 -ml-2 text-muted-foreground font-bold"
           >
             {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             {isAr ? "العودة للوضعيات" : "Retour"}
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black">
+              <h1 className="text-xl md:text-2xl font-bold">
                 {isAr ? `وضعية أشغال رقم N° ${situation.situation_number}` : `Situation N° ${situation.situation_number}`}
               </h1>
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                situation.status === "validated" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                situation.status === "validated" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
               }`}>
                 {situation.status === "validated" ? (isAr ? "معتمدة (Validée)" : "Validée") : (isAr ? "مسودة (Draft)" : "Brouillon")}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {isAr ? "تاريخ إيقاف الحساب:" : "Arrêtée au:"} {situation.arretee_au} | {situation.project_name}
             </p>
           </div>
@@ -141,7 +141,7 @@ export function SituationDetailScreen({
 
         <div className="flex flex-wrap items-center gap-2">
           <SituationOfficialPDFDownload situation={situation} isAr={isAr}>
-            <Button variant="outline" className="rounded-2xl gap-2 font-bold text-xs h-11 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100">
+            <Button variant="outline" className="rounded-lg gap-2 font-bold text-xs h-11 border-primary/20 text-primary bg-primary/10 hover:bg-primary/15">
               <Printer className="w-4 h-4" />
               {isAr ? "تحميل PDF الرسمي" : "Télécharger PDF officiel"}
             </Button>
@@ -153,7 +153,7 @@ export function SituationDetailScreen({
                 variant="outline"
                 onClick={handleRecalculate}
                 disabled={isRecalculating}
-                className="rounded-2xl gap-2 font-bold text-xs h-11"
+                className="rounded-lg gap-2 font-bold text-xs h-11"
               >
                 {isRecalculating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4" />}
                 {isAr ? "إعادة الحساب" : "Recalculer"}
@@ -162,7 +162,7 @@ export function SituationDetailScreen({
               <Button
                 onClick={handleValidate}
                 disabled={isSaving}
-                className="rounded-2xl gap-2 font-bold text-xs h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="rounded-lg gap-2 font-bold text-xs h-11 bg-success text-success-foreground hover:bg-success/90"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 {isAr ? "اعتماد وإقفال" : "Valider"}
@@ -177,7 +177,7 @@ export function SituationDetailScreen({
         <Button
           variant={activeTab === "items" ? "default" : "ghost"}
           onClick={() => setActiveTab("items")}
-          className="rounded-xl text-xs font-bold gap-2"
+          className="rounded-md text-xs font-bold gap-2"
         >
           <FileSpreadsheet className="w-4 h-4" />
           {isAr ? "بنود الوضعية والكميات" : "Articles & Quantités"}
@@ -185,7 +185,7 @@ export function SituationDetailScreen({
         <Button
           variant={activeTab === "financials" ? "default" : "ghost"}
           onClick={() => setActiveTab("financials")}
-          className="rounded-xl text-xs font-bold gap-2"
+          className="rounded-md text-xs font-bold gap-2"
         >
           <Calculator className="w-4 h-4" />
           {isAr ? "الحساب المالي وملخص الصفحة 1" : "Synthèse financière (Page 1)"}
@@ -193,7 +193,7 @@ export function SituationDetailScreen({
         <Button
           variant={activeTab === "snapshot" ? "default" : "ghost"}
           onClick={() => setActiveTab("snapshot")}
-          className="rounded-xl text-xs font-bold gap-2"
+          className="rounded-md text-xs font-bold gap-2"
         >
           <Building className="w-4 h-4" />
           {isAr ? "بيانات المقاول والصفقة (Snapshot)" : "En-tête & Co-contractant"}
@@ -203,23 +203,23 @@ export function SituationDetailScreen({
       {/* ─── تاب 1: بنود الوضعية ─── */}
       {activeTab === "items" && (
         <div className="space-y-4">
-          <Card className="rounded-3xl overflow-hidden border shadow-sm">
-            <CardHeader className="bg-slate-50 dark:bg-slate-900 pb-4">
-              <CardTitle className="text-base font-black">
+          <Card className="rounded-lg overflow-hidden border shadow-sm">
+            <CardHeader className="bg-muted pb-4">
+              <CardTitle className="text-base font-bold">
                 {isAr ? "جدول تفصيل البنود (ملحق الوضعية)" : "Détail des articles et avancement"}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 overflow-x-auto">
               <table className="w-full text-right border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b">
+                  <tr className="bg-muted text-foreground font-bold border-b">
                     <th className="p-3">#</th>
                     <th className="p-3">{isAr ? "رقم البند" : "Art"}</th>
                     <th className="p-3 w-1/3">{isAr ? "تعيين الأشغال" : "Désignation"}</th>
                     <th className="p-3">{isAr ? "الوحدة" : "Unité"}</th>
                     <th className="p-3">{isAr ? "الكمية العقدية" : "Qté Contrat"}</th>
                     <th className="p-3">{isAr ? "السابقة" : "Qté Préc."}</th>
-                    <th className="p-3 bg-blue-50 dark:bg-blue-950/40 text-blue-700">{isAr ? "الفترة الحالية" : "Qté Période"}</th>
+                    <th className="p-3 bg-primary/10 text-primary">{isAr ? "الفترة الحالية" : "Qté Période"}</th>
                     <th className="p-3">{isAr ? "التراكمية" : "Qté Cumul"}</th>
                     <th className="p-3">{isAr ? "النسبة %" : "Avanc. %"}</th>
                     <th className="p-3">{isAr ? "السعر الفردي" : "Prix Unit."}</th>
@@ -228,36 +228,36 @@ export function SituationDetailScreen({
                 </thead>
                 <tbody className="divide-y">
                   {situation.items.map((item, idx) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50">
-                      <td className="p-3 text-slate-400">{idx + 1}</td>
+                    <tr key={item.id} className="hover:bg-muted">
+                      <td className="p-3 text-muted-foreground">{idx + 1}</td>
                       <td className="p-3 font-bold">{item.item_code}</td>
-                      <td className="p-3 font-medium text-slate-800 dark:text-slate-200">{item.description}</td>
-                      <td className="p-3 text-slate-500">{item.unit}</td>
+                      <td className="p-3 font-medium text-foreground">{item.description}</td>
+                      <td className="p-3 text-muted-foreground">{item.unit}</td>
                       <td className="p-3 font-bold">{item.contracted_qty.toLocaleString()}</td>
-                      <td className="p-3 text-slate-600">{item.previous_qty.toLocaleString()}</td>
-                      <td className="p-3 bg-blue-50/30">
+                      <td className="p-3 text-muted-foreground">{item.previous_qty.toLocaleString()}</td>
+                      <td className="p-3 bg-primary/5">
                         {isDraft ? (
                           <Input
                             type="number"
                             step="any"
                             value={item.period_qty}
                             onChange={(e) => handleItemQtyChange(item.id, e.target.value)}
-                            className="h-8 w-24 text-xs font-bold rounded-lg border-blue-300 bg-white"
+                            className="h-8 w-24 text-xs font-bold rounded-md border-primary/30 bg-card"
                           />
                         ) : (
-                          <span className="font-bold text-blue-600">{item.period_qty.toLocaleString()}</span>
+                          <span className="font-bold text-primary">{item.period_qty.toLocaleString()}</span>
                         )}
                       </td>
                       <td className="p-3 font-bold">{item.cumulative_qty.toLocaleString()}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                          item.progress_percent >= 100 ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700"
+                        <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                          item.progress_percent >= 100 ? "bg-success/10 text-success" : "bg-muted text-foreground"
                         }`}>
                           {item.progress_percent}%
                         </span>
                       </td>
                       <td className="p-3 font-medium">{item.unit_price.toLocaleString()}</td>
-                      <td className="p-3 font-bold text-emerald-600">{(item.cumulative_amount || 0).toLocaleString()} DZD</td>
+                      <td className="p-3 font-bold text-success">{(item.cumulative_amount || 0).toLocaleString()} DZD</td>
                     </tr>
                   ))}
                 </tbody>
@@ -271,190 +271,190 @@ export function SituationDetailScreen({
       {activeTab === "financials" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* الإجماليات الأولى والثانية */}
-          <Card className="rounded-3xl border shadow-sm">
-            <CardHeader className="bg-slate-50 dark:bg-slate-900">
-              <CardTitle className="text-base font-black">
+          <Card className="rounded-lg border shadow-sm">
+            <CardHeader className="bg-muted">
+              <CardTitle className="text-base font-bold">
                 {isAr ? "الملخص المالي (TOTAL 1 & TOTAL 2)" : "Synthèse financière (Total 1 & 2)"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 pt-4 text-xs">
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">1. Travaux cumulés</span>
-                <span className="font-black text-slate-900">{situation.travaux_cumules.toLocaleString()} DZD</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">1. Travaux cumulés</span>
+                <span className="font-bold text-foreground">{situation.travaux_cumules.toLocaleString()} DZD</span>
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">2. Avances forfaitaires</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">2. Avances forfaitaires</span>
                 {isDraft ? (
                   <Input
                     type="number"
                     value={situation.avances_forfaitaires}
                     onChange={(e) => handleFinancialChange("avances_forfaitaires", parseFloat(e.target.value) || 0)}
-                    className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                    className="h-8 w-32 text-xs rounded-md text-right font-bold"
                   />
                 ) : (
                   <span className="font-bold">{situation.avances_forfaitaires.toLocaleString()} DZD</span>
                 )}
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">3. Avances approvisionnement</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">3. Avances approvisionnement</span>
                 {isDraft ? (
                   <Input
                     type="number"
                     value={situation.avances_approvisionnement}
                     onChange={(e) => handleFinancialChange("avances_approvisionnement", parseFloat(e.target.value) || 0)}
-                    className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                    className="h-8 w-32 text-xs rounded-md text-right font-bold"
                   />
                 ) : (
                   <span className="font-bold">{situation.avances_approvisionnement.toLocaleString()} DZD</span>
                 )}
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">4. Travaux en avenant</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">4. Travaux en avenant</span>
                 {isDraft ? (
                   <Input
                     type="number"
                     value={situation.travaux_avenant}
                     onChange={(e) => handleFinancialChange("travaux_avenant", parseFloat(e.target.value) || 0)}
-                    className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                    className="h-8 w-32 text-xs rounded-md text-right font-bold"
                   />
                 ) : (
                   <span className="font-bold">{situation.travaux_avenant.toLocaleString()} DZD</span>
                 )}
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">5. Autres montants</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">5. Autres montants</span>
                 {isDraft ? (
                   <Input
                     type="number"
                     value={situation.autres_montant}
                     onChange={(e) => handleFinancialChange("autres_montant", parseFloat(e.target.value) || 0)}
-                    className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                    className="h-8 w-32 text-xs rounded-md text-right font-bold"
                   />
                 ) : (
                   <span className="font-bold">{situation.autres_montant.toLocaleString()} DZD</span>
                 )}
               </div>
 
-              <div className="p-3 bg-blue-50 rounded-2xl border border-blue-200 flex justify-between items-center">
-                <span className="font-black text-blue-900">TOTAL 1 (1+2+3+4+5)</span>
-                <span className="text-sm font-black text-blue-700">{situation.total_1.toLocaleString()} DZD</span>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20 flex justify-between items-center">
+                <span className="font-bold text-primary">TOTAL 1 (1+2+3+4+5)</span>
+                <span className="text-sm font-bold text-primary">{situation.total_1.toLocaleString()} DZD</span>
               </div>
 
               <div className="pt-3 border-t space-y-3">
-                <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                  <span className="font-bold text-slate-600">6. Travaux précédemment certifiés</span>
+                <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                  <span className="font-bold text-muted-foreground">6. Travaux précédemment certifiés</span>
                   <span className="font-bold">{situation.travaux_precedemment_certifies.toLocaleString()} DZD</span>
                 </div>
 
-                <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                  <span className="font-bold text-slate-600">7. Avances forfaitaires reçues</span>
+                <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                  <span className="font-bold text-muted-foreground">7. Avances forfaitaires reçues</span>
                   {isDraft ? (
                     <Input
                       type="number"
                       value={situation.avances_forfaitaires_recues}
                       onChange={(e) => handleFinancialChange("avances_forfaitaires_recues", parseFloat(e.target.value) || 0)}
-                      className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                      className="h-8 w-32 text-xs rounded-md text-right font-bold"
                     />
                   ) : (
                     <span className="font-bold">{situation.avances_forfaitaires_recues.toLocaleString()} DZD</span>
                   )}
                 </div>
 
-                <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                  <span className="font-bold text-slate-600">8. Avances appro reçues</span>
+                <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                  <span className="font-bold text-muted-foreground">8. Avances appro reçues</span>
                   {isDraft ? (
                     <Input
                       type="number"
                       value={situation.avances_appro_recues}
                       onChange={(e) => handleFinancialChange("avances_appro_recues", parseFloat(e.target.value) || 0)}
-                      className="h-8 w-32 text-xs rounded-lg text-right font-bold"
+                      className="h-8 w-32 text-xs rounded-md text-right font-bold"
                     />
                   ) : (
                     <span className="font-bold">{situation.avances_appro_recues.toLocaleString()} DZD</span>
                   )}
                 </div>
 
-                <div className="p-3 bg-slate-100 rounded-2xl border flex justify-between items-center">
-                  <span className="font-black text-slate-900">TOTAL 2 (6+7+8)</span>
-                  <span className="text-sm font-black text-slate-800">{situation.total_2.toLocaleString()} DZD</span>
+                <div className="p-3 bg-muted rounded-lg border flex justify-between items-center">
+                  <span className="font-bold text-foreground">TOTAL 2 (6+7+8)</span>
+                  <span className="text-sm font-bold text-foreground">{situation.total_2.toLocaleString()} DZD</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* الضرائب، ضمان الأداء، وصافي الدفع */}
-          <Card className="rounded-3xl border shadow-sm">
-            <CardHeader className="bg-slate-50 dark:bg-slate-900">
-              <CardTitle className="text-base font-black">
+          <Card className="rounded-lg border shadow-sm">
+            <CardHeader className="bg-muted">
+              <CardTitle className="text-base font-bold">
                 {isAr ? "الضرائب وصافي الدفع (9 إلى 14)" : "TVA, Retenue & Net à payer"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4 text-xs">
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
-                <span className="font-black text-emerald-900">9. MONTANT BRUT (TOTAL 1 - TOTAL 2)</span>
-                <span className="text-sm font-black text-emerald-700">{situation.montant_brut.toLocaleString()} DZD</span>
+              <div className="p-3 bg-success/10 rounded-lg border border-success/20 flex justify-between items-center">
+                <span className="font-bold text-success">9. MONTANT BRUT (TOTAL 1 - TOTAL 2)</span>
+                <span className="text-sm font-bold text-success">{situation.montant_brut.toLocaleString()} DZD</span>
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">10. MONTANT H.T.</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">10. MONTANT H.T.</span>
                 <span className="font-bold">{situation.montant_ht.toLocaleString()} DZD</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-2.5 bg-slate-50 rounded-xl items-center">
+              <div className="grid grid-cols-2 gap-3 p-2.5 bg-muted rounded-md items-center">
                 <div>
-                  <span className="font-bold text-slate-600">11. T.V.A. (%)</span>
+                  <span className="font-bold text-muted-foreground">11. T.V.A. (%)</span>
                   {isDraft ? (
                     <Input
                       type="number"
                       value={situation.tva_rate}
                       onChange={(e) => handleFinancialChange("tva_rate", parseFloat(e.target.value) || 0)}
-                      className="h-8 text-xs rounded-lg mt-1 font-bold"
+                      className="h-8 text-xs rounded-md mt-1 font-bold"
                     />
                   ) : (
                     <span className="block font-bold mt-1">{situation.tva_rate}%</span>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-slate-500">Montant TVA</span>
-                  <p className="font-black text-slate-900 mt-1">{situation.tva_amount.toLocaleString()} DZD</p>
+                  <span className="font-bold text-muted-foreground">Montant TVA</span>
+                  <p className="font-bold text-foreground mt-1">{situation.tva_amount.toLocaleString()} DZD</p>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-600">12. MONTANT T.T.C.</span>
-                <span className="font-black text-slate-900">{situation.montant_ttc.toLocaleString()} DZD</span>
+              <div className="flex justify-between items-center p-2.5 bg-muted rounded-md">
+                <span className="font-bold text-muted-foreground">12. MONTANT T.T.C.</span>
+                <span className="font-bold text-foreground">{situation.montant_ttc.toLocaleString()} DZD</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-2.5 bg-slate-50 rounded-xl items-center">
+              <div className="grid grid-cols-2 gap-3 p-2.5 bg-muted rounded-md items-center">
                 <div>
-                  <span className="font-bold text-slate-600">13. Retenue de garantie (%)</span>
+                  <span className="font-bold text-muted-foreground">13. Retenue de garantie (%)</span>
                   {isDraft ? (
                     <Input
                       type="number"
                       value={situation.retenue_garantie_rate}
                       onChange={(e) => handleFinancialChange("retenue_garantie_rate", parseFloat(e.target.value) || 0)}
-                      className="h-8 text-xs rounded-lg mt-1 font-bold"
+                      className="h-8 text-xs rounded-md mt-1 font-bold"
                     />
                   ) : (
                     <span className="block font-bold mt-1">{situation.retenue_garantie_rate}%</span>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-slate-500">Montant Retenue</span>
-                  <p className="font-black text-red-600 mt-1">-{situation.retenue_garantie_amount.toLocaleString()} DZD</p>
+                  <span className="font-bold text-muted-foreground">Montant Retenue</span>
+                  <p className="font-bold text-destructive mt-1">-{situation.retenue_garantie_amount.toLocaleString()} DZD</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2">
+              <div className="p-4 bg-inverse text-inverse-foreground rounded-lg space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-300 font-bold">14. NET À PAYER</span>
-                  <span className="text-lg font-black text-emerald-400">{situation.net_a_payer.toLocaleString()} DZD</span>
+                  <span className="text-xs text-inverse-foreground/80 font-bold">14. NET À PAYER</span>
+                  <span className="text-lg font-bold text-success-foreground">{situation.net_a_payer.toLocaleString()} DZD</span>
                 </div>
-                <p className="text-[11px] text-slate-400 italic pt-2 border-t border-slate-800">
+                <p className="text-xs text-inverse-foreground/70 italic pt-2 border-t border-inverse-foreground/20">
                   {situation.net_a_payer_text}
                 </p>
               </div>
@@ -462,7 +462,7 @@ export function SituationDetailScreen({
               {isDraft && (
                 <Button
                   onClick={handleRecalculate}
-                  className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 gap-2 text-xs"
+                  className="w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-10 gap-2 text-xs"
                 >
                   <Calculator className="w-4 h-4" />
                   {isAr ? "تحديث الحسابات الفورية" : "Mettre à jour les calculs"}
@@ -475,9 +475,9 @@ export function SituationDetailScreen({
 
       {/* ─── تاب 3: بيانات المقاول والصفقة (Snapshot) ─── */}
       {activeTab === "snapshot" && (
-        <Card className="rounded-3xl border shadow-sm">
-          <CardHeader className="bg-slate-50 dark:bg-slate-900">
-            <CardTitle className="text-base font-black">
+        <Card className="rounded-lg border shadow-sm">
+          <CardHeader className="bg-muted">
+            <CardTitle className="text-base font-bold">
               {isAr ? "معلومات الهوية والصفقة (اللقطة الرسمية)" : "Informations du co-contractant & du marché"}
             </CardTitle>
           </CardHeader>
@@ -489,7 +489,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.client_name || ""}
                   onChange={(e) => setSituation({ ...situation, client_name: e.target.value })}
-                  className="rounded-xl h-10 text-xs font-semibold"
+                  className="rounded-md h-10 text-xs font-semibold"
                   placeholder={isAr ? "مثال: مديرية التجهيزات العمومية" : "Ex: Direction des Équipements Publics"}
                 />
               </div>
@@ -499,7 +499,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.marche_number || ""}
                   onChange={(e) => setSituation({ ...situation, marche_number: e.target.value })}
-                  className="rounded-xl h-10 text-xs font-semibold"
+                  className="rounded-md h-10 text-xs font-semibold"
                   placeholder={isAr ? "مثال: N° 45/2024" : "Ex: N° 45/2024"}
                 />
               </div>
@@ -509,7 +509,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.lot_number || ""}
                   onChange={(e) => setSituation({ ...situation, lot_number: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
               <div className="space-y-1 md:col-span-3">
@@ -518,7 +518,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.lot_label || ""}
                   onChange={(e) => setSituation({ ...situation, lot_label: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                   placeholder={isAr ? "مثال: أشغال إنجاز الأساسات والهيكل" : "Ex: Gros œuvre"}
                 />
               </div>
@@ -529,7 +529,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_name || ""}
                   onChange={(e) => setSituation({ ...situation, company_name: e.target.value })}
-                  className="rounded-xl h-10 text-xs font-semibold"
+                  className="rounded-md h-10 text-xs font-semibold"
                 />
               </div>
               <div className="space-y-1 md:col-span-2">
@@ -538,7 +538,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_address || ""}
                   onChange={(e) => setSituation({ ...situation, company_address: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
 
@@ -548,7 +548,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_rc || ""}
                   onChange={(e) => setSituation({ ...situation, company_rc: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
               <div className="space-y-1">
@@ -558,7 +558,7 @@ export function SituationDetailScreen({
                   type="date"
                   value={situation.company_rc_date || ""}
                   onChange={(e) => setSituation({ ...situation, company_rc_date: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
               <div className="space-y-1">
@@ -567,7 +567,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_nif || ""}
                   onChange={(e) => setSituation({ ...situation, company_nif: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
 
@@ -577,7 +577,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_nis || ""}
                   onChange={(e) => setSituation({ ...situation, company_nis: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
               <div className="space-y-1">
@@ -586,7 +586,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_article || ""}
                   onChange={(e) => setSituation({ ...situation, company_article: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                 />
               </div>
               <div className="space-y-1">
@@ -595,7 +595,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_capital || ""}
                   onChange={(e) => setSituation({ ...situation, company_capital: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                   placeholder="Ex: 10 000 000 DA"
                 />
               </div>
@@ -606,7 +606,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_rib || ""}
                   onChange={(e) => setSituation({ ...situation, company_rib: e.target.value })}
-                  className="rounded-xl h-10 text-xs font-mono"
+                  className="rounded-md h-10 text-xs font-mono"
                 />
               </div>
               <div className="space-y-1">
@@ -615,7 +615,7 @@ export function SituationDetailScreen({
                   disabled={!isDraft}
                   value={situation.company_bank || ""}
                   onChange={(e) => setSituation({ ...situation, company_bank: e.target.value })}
-                  className="rounded-xl h-10 text-xs"
+                  className="rounded-md h-10 text-xs"
                   placeholder="Ex: BEA Agence 104"
                 />
               </div>
@@ -647,7 +647,7 @@ export function SituationDetailScreen({
                       toast.error(err.message);
                     }
                   }}
-                  className="rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white gap-2 h-10"
+                  className="rounded-md font-bold text-xs bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-10"
                 >
                   <Save className="w-4 h-4" />
                   {isAr ? "حفظ التعديلات" : "Enregistrer"}

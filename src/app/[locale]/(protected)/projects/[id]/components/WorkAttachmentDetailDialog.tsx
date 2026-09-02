@@ -115,19 +115,19 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <DialogTitle className="text-xl font-bold flex items-center gap-3">
-                <FileText className="w-6 h-6 text-blue-600" />
+                <FileText className="w-6 h-6 text-primary" />
                 {isAr
                   ? `محضر قيس الأشغال رقم ${attachment?.attachment_number || ""}`
                   : `Attachement de Travaux N° ${attachment?.attachment_number || ""}`}
               </DialogTitle>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {isAr ? "الفترة:" : "Période :"} {attachment?.period_start} → {attachment?.period_end}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Badge
                 variant={attachment?.status === "validated" ? "default" : "secondary"}
-                className={attachment?.status === "validated" ? "bg-green-600" : "bg-amber-500 text-white"}
+                className={attachment?.status === "validated" ? "bg-success" : "bg-warning text-warning-foreground"}
               >
                 {attachment?.status === "validated"
                   ? (isAr ? "معتمد" : "Validé")
@@ -147,12 +147,12 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : attachment ? (
           <div className="space-y-6 py-4">
             {attachment.status === "validated" && (
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 rounded-xl flex items-center gap-2 text-green-700 dark:text-green-300 text-xs">
+              <div className="bg-success/10 border border-success/30 p-3 rounded-lg flex items-center gap-2 text-success text-xs">
                 <Lock className="w-4 h-4 shrink-0" />
                 <span>
                   {isAr
@@ -162,10 +162,10 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
               </div>
             )}
 
-            <div className="border rounded-xl overflow-hidden">
+            <div className="border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50 dark:bg-slate-900">
+                  <TableRow className="bg-muted/50">
                     <TableHead className="w-12 text-center text-xs font-bold">#</TableHead>
                     <TableHead className="text-xs font-bold">{isAr ? "البند" : "Art"}</TableHead>
                     <TableHead className="text-xs font-bold">{isAr ? "الوصف" : "Désignation"}</TableHead>
@@ -183,26 +183,26 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
 
                     return (
                       <TableRow key={item.id}>
-                        <TableCell className="text-center text-xs font-bold text-slate-400">{idx + 1}</TableCell>
+                        <TableCell className="text-center text-xs font-bold text-muted-foreground">{idx + 1}</TableCell>
                         <TableCell className="font-mono font-bold text-xs">{item.item_code}</TableCell>
-                        <TableCell className="text-xs font-medium max-w-[200px] truncate">{item.description}</TableCell>
+                        <TableCell className="text-xs font-medium max-w-48 truncate">{item.description}</TableCell>
                         <TableCell className="text-center text-xs">{item.unit}</TableCell>
                         <TableCell className="text-center text-xs font-mono">{item.contracted_qty.toLocaleString()}</TableCell>
-                        <TableCell className="text-center text-xs font-mono text-slate-500">{item.previous_qty.toLocaleString()}</TableCell>
+                        <TableCell className="text-center text-xs font-mono text-muted-foreground">{item.previous_qty.toLocaleString()}</TableCell>
                         <TableCell className="text-center">
                           {attachment.status === "draft" ? (
                             <Input
                               type="number"
                               step="any"
-                              className="h-8 text-center text-xs font-mono font-bold text-blue-600"
+                              className="h-8 text-center text-xs font-mono font-bold text-primary"
                               value={periodVal}
                               onChange={(e) => handleQtyChange(item.id, e.target.value)}
                             />
                           ) : (
-                            <span className="text-xs font-mono font-bold text-blue-600">{item.period_qty.toLocaleString()}</span>
+                            <span className="text-xs font-mono font-bold text-primary">{item.period_qty.toLocaleString()}</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-center text-xs font-mono font-bold text-green-600">
+                        <TableCell className="text-center text-xs font-mono font-bold text-success">
                           {cumulVal.toLocaleString()}
                         </TableCell>
                       </TableRow>
@@ -213,9 +213,9 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
             </div>
 
             {attachment.notes && (
-              <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-xs space-y-1">
-                <p className="font-bold text-slate-700 dark:text-slate-300">{isAr ? "ملاحظات:" : "Notes :"}</p>
-                <p className="text-slate-500">{attachment.notes}</p>
+              <div className="bg-muted/50 p-3 rounded-lg text-xs space-y-1">
+                <p className="font-bold text-foreground">{isAr ? "ملاحظات:" : "Notes :"}</p>
+                <p className="text-muted-foreground">{attachment.notes}</p>
               </div>
             )}
           </div>
@@ -232,7 +232,7 @@ export function WorkAttachmentDetailDialog({ attachmentId, project, isAr, open, 
                 <Save className="w-4 h-4" />
                 {isAr ? "حفظ التعديلات" : "Enregistrer"}
               </Button>
-              <Button onClick={handleValidate} disabled={isSaving || isValidating} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
+              <Button onClick={handleValidate} disabled={isSaving || isValidating} className="gap-2">
                 {isValidating && <Loader2 className="w-4 h-4 animate-spin" />}
                 <CheckCircle2 className="w-4 h-4" />
                 {isAr ? "اعتماد المحضر" : "Valider"}

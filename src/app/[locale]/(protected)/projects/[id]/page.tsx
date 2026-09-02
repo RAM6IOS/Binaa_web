@@ -35,17 +35,17 @@ type ProjectWithJoins = Project & {
 };
 
 const SECTIONS = [
-  { id: 'overview',    icon: Eye,          labelAr: 'نظرة عامة',      labelFr: 'Vue d\'ensemble', color: 'bg-blue-50 dark:bg-blue-950',    iconColor: 'text-blue-600' },
-  { id: 'daily-logs',  icon: ClipboardList, labelAr: 'السجل اليومي',   labelFr: 'Journal de bord', color: 'bg-amber-50 dark:bg-amber-950',  iconColor: 'text-amber-600' },
-  { id: 'metres',      icon: Ruler,        labelAr: 'الكميات',        labelFr: 'Métrés',          color: 'bg-emerald-50 dark:bg-emerald-950', iconColor: 'text-emerald-600' },
-  { id: 'work-attachments', icon: FileText, labelAr: 'محاضر القيس', labelFr: 'Attachements', color: 'bg-teal-50 dark:bg-teal-950', iconColor: 'text-teal-600' },
-  { id: 'situations',  icon: Landmark,     labelAr: 'الوضعيات',       labelFr: 'Situations',      color: 'bg-emerald-50 dark:bg-emerald-950', iconColor: 'text-emerald-600' },
-  { id: 'materials',   icon: Package,      labelAr: 'المواد',         labelFr: 'Matériaux',       color: 'bg-amber-50 dark:bg-amber-950',   iconColor: 'text-amber-600' },
-  { id: 'workforce',   icon: Users,        labelAr: 'اليد العاملة',   labelFr: 'Main-d\'œuvre',   color: 'bg-violet-50 dark:bg-violet-950', iconColor: 'text-violet-600' },
-  { id: 'resources',   icon: Truck,        labelAr: 'المعدات',        labelFr: 'Équipements',     color: 'bg-orange-50 dark:bg-orange-950', iconColor: 'text-orange-600' },
-  { id: 'tasks',       icon: CheckSquare,  labelAr: 'المهام',         labelFr: 'Tâches',          color: 'bg-rose-50 dark:bg-rose-950',    iconColor: 'text-rose-600' },
-  { id: 'documents',   icon: FileText,     labelAr: 'الوثائق',        labelFr: 'Documents',       color: 'bg-cyan-50 dark:bg-cyan-950',    iconColor: 'text-cyan-600' },
-  { id: 'gantt',       icon: BarChart3,    labelAr: 'التخطيط',        labelFr: 'Gantt',           color: 'bg-indigo-50 dark:bg-indigo-950', iconColor: 'text-indigo-600' },
+  { id: 'overview',    icon: Eye,          labelAr: 'نظرة عامة',      labelFr: 'Vue d\'ensemble', color: 'bg-primary/10',    iconColor: 'text-primary' },
+  { id: 'daily-logs',  icon: ClipboardList, labelAr: 'السجل اليومي',   labelFr: 'Journal de bord', color: 'bg-warning/10',  iconColor: 'text-warning' },
+  { id: 'metres',      icon: Ruler,        labelAr: 'الكميات',        labelFr: 'Métrés',          color: 'bg-success/10', iconColor: 'text-success' },
+  { id: 'work-attachments', icon: FileText, labelAr: 'محاضر القيس', labelFr: 'Attachements', color: 'bg-info/10', iconColor: 'text-info' },
+  { id: 'situations',  icon: Landmark,     labelAr: 'الوضعيات',       labelFr: 'Situations',      color: 'bg-success/10', iconColor: 'text-success' },
+  { id: 'materials',   icon: Package,      labelAr: 'المواد',         labelFr: 'Matériaux',       color: 'bg-warning/10',   iconColor: 'text-warning' },
+  { id: 'workforce',   icon: Users,        labelAr: 'اليد العاملة',   labelFr: 'Main-d\'œuvre',   color: 'bg-info/10', iconColor: 'text-info' },
+  { id: 'resources',   icon: Truck,        labelAr: 'المعدات',        labelFr: 'Équipements',     color: 'bg-warning/10', iconColor: 'text-warning' },
+  { id: 'tasks',       icon: CheckSquare,  labelAr: 'المهام',         labelFr: 'Tâches',          color: 'bg-destructive/10',    iconColor: 'text-destructive' },
+  { id: 'documents',   icon: FileText,     labelAr: 'الوثائق',        labelFr: 'Documents',       color: 'bg-info/10',    iconColor: 'text-info' },
+  { id: 'gantt',       icon: BarChart3,    labelAr: 'التخطيط',        labelFr: 'Gantt',           color: 'bg-info/10', iconColor: 'text-info' },
 ] as const;
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ locale: string, id: string }> }) {
@@ -111,22 +111,22 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
   const activeSection = SECTIONS.find(s => s.id === mobileSection);
 
   return (
-    <div className="space-y-3 md:space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-300 md:duration-500 pb-6 md:pb-12" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="space-y-3 md:space-y-6 max-w-screen-2xl mx-auto animate-in fade-in duration-300 md:duration-500 pb-6 md:pb-12" dir={isAr ? 'rtl' : 'ltr'}>
 
       {/* ─── زر الرجوع ─── */}
       <Button
         variant="ghost"
         onClick={() => router.push('/projects')}
-        className="gap-2 -ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold"
+        className="gap-2 -ml-2 text-muted-foreground hover:text-foreground text-xs font-bold"
       >
         {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
         {isAr ? 'العودة إلى المشاريع' : 'Retour aux projets'}
       </Button>
 
       {/* ─── هيدر المشروع ─── */}
-      <header className="bg-white dark:bg-slate-950 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <header className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
         {project.cover_image && (
-          <div className="relative w-full h-48 md:h-72 lg:h-80 bg-slate-100">
+          <div className="relative w-full h-48 md:h-72 lg:h-80 bg-muted">
             <Image
               src={getOptimizedImage(project.cover_image)}
               alt={project.name}
@@ -135,7 +135,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
               className="object-cover transition-opacity duration-300"
               sizes="(max-width: 768px) 100vw, 1400px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent md:hidden" />
           </div>
         )}
 
@@ -143,23 +143,23 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <div className="flex flex-col md:flex-row justify-between items-start gap-3 md:gap-4">
             <div className="space-y-2 w-full">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
                   {project.name}
                 </h1>
                 <ProjectStatusBadge status={project.status} isAr={isAr} />
               </div>
 
-              <div className="flex flex-wrap gap-4 text-sm font-bold text-slate-500 uppercase tracking-tighter tabular-nums">
-                <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border">
-                  <MapPin className="w-3.5 h-3.5 text-red-500" /> {project.wilaya}
+              <div className="flex flex-wrap gap-4 text-sm font-bold text-muted-foreground uppercase tracking-tighter tabular-nums">
+                <span className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-lg border">
+                  <MapPin className="w-3.5 h-3.5 text-destructive" /> {project.wilaya}
                 </span>
-                <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border">
-                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                <span className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-lg border">
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
                   {new Date(project.start_date).toLocaleDateString(isAr ? 'ar-DZ' : 'fr-FR')}
                 </span>
-                <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100">
+                <span className="flex items-center gap-1.5 bg-warning/10 text-warning px-3 py-1.5 rounded-lg border border-warning/20">
                   <Landmark className="w-3.5 h-3.5" />
-                  {(project.budget || 0).toLocaleString()} <span className="text-[10px]">DZD</span>
+                  {(project.budget || 0).toLocaleString()} <span className="text-xs">DZD</span>
                 </span>
               </div>
             </div>
@@ -168,8 +168,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <div className="mt-4 md:mt-8 space-y-2">
             <div className="flex justify-between items-end">
               <div className="text-start">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{isAr ? "نسبة التقدم الميداني" : "Avancement Réel"}</p>
-                <p className="text-xl font-black text-blue-600">{project.progress}%</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{isAr ? "نسبة التقدم الميداني" : "Avancement Réel"}</p>
+                <p className="text-xl font-bold text-primary">{project.progress}%</p>
               </div>
             </div>
             <ProgressBar progress={project.progress} status={project.status} className="h-2.5 rounded-full" />
@@ -190,12 +190,12 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
                 <button
                   key={section.id}
                   onClick={() => setMobileSection(section.id)}
-                  className={`${section.color} rounded-2xl p-5 flex flex-col items-center gap-3 text-center active:scale-95 transition-all duration-200 border border-transparent active:border-slate-300 dark:active:border-slate-600 min-h-[110px]`}
+                  className={`${section.color} rounded-lg p-5 flex flex-col items-center gap-3 text-center active:scale-95 transition-all duration-200 border border-transparent active:border-border min-h-28`}
                 >
-                  <div className={`p-2.5 rounded-xl bg-white/70 dark:bg-black/30 ${section.iconColor}`}>
+                  <div className={`p-2.5 rounded-lg bg-card/70 ${section.iconColor}`}>
                     <Icon className="w-6 h-6" strokeWidth={2.2} />
                   </div>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">
+                  <span className="text-xs font-bold text-foreground leading-tight">
                     {isAr ? section.labelAr : section.labelFr}
                   </span>
                 </button>
@@ -208,10 +208,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
             <div className="flex items-center justify-between">
               {activeSection && (
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl ${activeSection.color} ${activeSection.iconColor}`}>
+                  <div className={`p-2 rounded-lg ${activeSection.color} ${activeSection.iconColor}`}>
                     <activeSection.icon className="w-5 h-5" strokeWidth={2.2} />
                   </div>
-                  <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                  <h2 className="text-lg font-bold text-foreground">
                     {isAr ? activeSection.labelAr : activeSection.labelFr}
                   </h2>
                 </div>
@@ -220,7 +220,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
                 variant="outline"
                 size="sm"
                 onClick={() => setMobileSection(null)}
-                className="gap-2 text-xs font-bold rounded-xl"
+                className="gap-2 text-xs font-bold rounded-lg"
               >
                 {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
                 {isAr ? 'العودة للأقسام' : 'Retour aux sections'}
@@ -235,7 +235,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
       {/* ── سطح المكتب: التبويبات الأفقية ── */}
       {/* ──────────────────────────────────────────────────────── */}
       <Tabs defaultValue="overview" className="w-full hidden md:block">
-        <div className="sticky top-0 z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md -mx-4 px-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="sticky top-0 z-40 bg-muted/80 backdrop-blur-md -mx-4 px-4 border-b border-border">
           <div
             ref={tabsScrollRef}
             onScroll={handleTabsScroll}
@@ -246,7 +246,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
                 <TabsTrigger
                   key={section.id}
                   value={section.id}
-                  className="relative h-14 min-w-0 shrink-0 rounded-none border-b-[3px] border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-xs uppercase tracking-widest whitespace-nowrap transition-all px-2 text-slate-500 data-[state=active]:text-blue-600 dark:text-slate-400 dark:data-[state=active]:text-blue-400"
+                  className="relative h-14 min-w-0 shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-bold text-xs uppercase tracking-widest whitespace-nowrap transition-all px-2 text-muted-foreground data-[state=active]:text-primary"
                 >
                   {isAr ? section.labelAr : section.labelFr}
                 </TabsTrigger>
@@ -262,7 +262,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="metres"><MetresTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="work-attachments"><WorkAttachmentsTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="situations"><SituationsTab project={project} isAr={isAr} /></TabsContent>
-          <TabsContent value="gantt" className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
+          <TabsContent value="gantt" className="min-h-[60vh]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
           <TabsContent value="workforce"><WorkforceTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><EquipmentTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="materials"><MaterialsTab project={project} isAr={isAr} /></TabsContent>
@@ -292,7 +292,7 @@ function SectionContent({ sectionId, project, isAr, onRefresh }: {
     case 'workforce':   return <WorkforceTab project={project} isAr={isAr} />;
     case 'resources':   return <EquipmentTab project={project} isAr={isAr} />;
     case 'documents':   return <DocumentsTab project={project} isAr={isAr} />;
-    case 'gantt':       return <div className="min-h-[500px]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></div>;
+    case 'gantt':       return <div className="min-h-[60vh]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></div>;
     default:            return null;
   }
 }
@@ -301,10 +301,10 @@ function SectionContent({ sectionId, project, isAr, onRefresh }: {
 
 function ProjectDetailSkeleton({ isAr }: { isAr: boolean }) {
   return (
-    <div className="space-y-3 md:space-y-6 max-w-[1400px] mx-auto p-4" dir={isAr ? 'rtl' : 'ltr'}>
-      <Skeleton className="h-48 md:h-80 w-full rounded-2xl md:rounded-3xl" />
+    <div className="space-y-3 md:space-y-6 max-w-screen-2xl mx-auto p-4" dir={isAr ? 'rtl' : 'ltr'}>
+      <Skeleton className="h-48 md:h-80 w-full rounded-lg" />
       <div className="space-y-3">
-        <Skeleton className="h-10 w-1/3 rounded-xl" />
+        <Skeleton className="h-10 w-1/3 rounded-lg" />
         <div className="flex gap-3">
           <Skeleton className="h-8 w-24 rounded-lg" /><Skeleton className="h-8 w-24 rounded-lg" />
         </div>
@@ -313,7 +313,7 @@ function ProjectDetailSkeleton({ isAr }: { isAr: boolean }) {
       {/* محاكاة الشبكة على الموبايل */}
       <div className="md:hidden grid grid-cols-2 gap-3">
         {[...Array(9)].map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-2xl" />
+          <Skeleton key={i} className="h-28 rounded-lg" />
         ))}
       </div>
     </div>
@@ -325,10 +325,10 @@ function ProjectDetailSkeleton({ isAr }: { isAr: boolean }) {
 function ErrorState({ error, isAr, retry }: any) {
   return (
     <div className="flex flex-col h-[70vh] items-center justify-center text-center p-6">
-      <div className="p-5 bg-red-50 rounded-3xl mb-4 text-red-500"><AlertCircle size={40} /></div>
-      <h2 className="text-xl font-black mb-2">{isAr ? "عذراً، وقع خطأ في التحميل" : "Erreur de chargement"}</h2>
-      <p className="text-sm text-slate-500 mb-6 max-w-xs">{error}</p>
-      <Button onClick={retry} className="rounded-2xl gap-2 font-bold bg-blue-600 px-8 h-12 hover:bg-blue-700">
+      <div className="p-5 bg-destructive/10 rounded-lg mb-4 text-destructive"><AlertCircle size={40} /></div>
+      <h2 className="text-xl font-bold mb-2">{isAr ? "عذراً، وقع خطأ في التحميل" : "Erreur de chargement"}</h2>
+      <p className="text-sm text-muted-foreground mb-6 max-w-xs">{error}</p>
+      <Button onClick={retry} className="rounded-lg gap-2 font-bold px-8 h-12">
         <RefreshCcw size={16} /> {isAr ? "إعادة المحاولة" : "Réessayer"}
       </Button>
     </div>

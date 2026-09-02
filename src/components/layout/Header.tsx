@@ -36,8 +36,8 @@ export function Header({
   };
 
   return (
-    <header className="h-16 border-b bg-white dark:bg-slate-900 flex items-center justify-between px-6 sticky top-0 z-30">
-      <div className="flex font-semibold text-lg text-slate-800 dark:text-slate-100 items-center gap-4">
+    <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-30">
+      <div className="flex font-semibold text-lg text-foreground items-center gap-4">
         {/* Mobile Sidebar Trigger */}
         <div className="md:hidden">
           <Sheet>
@@ -80,11 +80,11 @@ export function Header({
         <NotificationDropdown locale={locale} />
 
         <Avatar
-          className="w-10 h-10 border-2 border-blue-200 dark:border-blue-800"
+          className="w-10 h-10 border-2 border-primary/20"
           title={fullName || userEmail}
         >
           <AvatarImage src={avatarUrl || undefined} className="object-cover" />
-          <AvatarFallback className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold">
+          <AvatarFallback className="bg-primary/10 text-primary font-bold">
             {fullName
               ? fullName.charAt(0).toUpperCase()
               : userEmail

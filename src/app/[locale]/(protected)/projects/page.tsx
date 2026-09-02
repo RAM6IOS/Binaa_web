@@ -22,6 +22,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { DataState } from "@/components/ui/data-state";
 import {
   Search,
   MoreVertical,
@@ -76,7 +78,7 @@ const PAGE_SIZE = 10;
 // ────────────────────────────────────────────
 const MobileCardSkeleton = memo(function MobileCardSkeleton() {
   return (
-    <div className="mx-3 my-2 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/40 bg-white dark:bg-slate-900 space-y-3">
+    <div className="mx-3 my-2 p-4 rounded-lg border border-border bg-card space-y-3">
       <div className="flex justify-between items-start">
         <div className="space-y-2 flex-1">
           <Skeleton className="h-5 w-3/4 rounded-lg" />
@@ -92,7 +94,7 @@ const MobileCardSkeleton = memo(function MobileCardSkeleton() {
         <Skeleton className="h-4 w-24 rounded" />
         <Skeleton className="h-4 w-20 rounded" />
       </div>
-      <div className="space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <div className="space-y-1.5 pt-3 border-t border-border">
         <div className="flex justify-between">
           <Skeleton className="h-3 w-14 rounded" />
           <Skeleton className="h-3 w-8 rounded" />
@@ -121,7 +123,7 @@ const TableRowSkeleton = memo(function TableRowSkeleton() {
       <TableCell>
         <Skeleton className="h-6 w-24 rounded-full" />
       </TableCell>
-      <TableCell className="w-[180px]">
+      <TableCell className="w-44">
         <div className="flex items-center gap-3">
           <Skeleton className="h-2 flex-1 rounded-full" />
           <Skeleton className="h-4 w-8 rounded" />
@@ -147,7 +149,7 @@ const ProjectCoverImage = memo(function ProjectCoverImage({
   priority?: boolean;
 }) {
   return (
-    <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+    <div className="relative w-10 h-10 rounded-md overflow-hidden shrink-0 bg-muted border border-border">
       <Image
         src={src}
         alt={alt}
@@ -187,26 +189,26 @@ const StatsBar = memo(function StatsBar({
     {
       label: isAr ? "إجمالي" : "Total",
       value: stats.total,
-      icon: <LayoutGrid size={14} className="text-blue-500" />,
-      color: "text-blue-600 dark:text-blue-400",
+      icon: <LayoutGrid size={14} className="text-primary" />,
+      color: "text-primary",
     },
     {
       label: isAr ? "جارية" : "En cours",
       value: stats.inProgress,
-      icon: <TrendingUp size={14} className="text-emerald-500" />,
-      color: "text-emerald-600 dark:text-emerald-400",
+      icon: <TrendingUp size={14} className="text-success" />,
+      color: "text-success",
     },
     {
       label: isAr ? "متأخرة" : "Retard",
       value: stats.delayed,
-      icon: <Calendar size={14} className="text-orange-500" />,
-      color: "text-orange-600 dark:text-orange-400",
+      icon: <Calendar size={14} className="text-warning" />,
+      color: "text-warning",
     },
     {
       label: isAr ? "متوسط الإنجاز" : "Moy. progrès",
       value: `${stats.avgProgress}%`,
-      icon: <TrendingUp size={14} className="text-purple-500" />,
-      color: "text-purple-600 dark:text-purple-400",
+      icon: <TrendingUp size={14} className="text-info" />,
+      color: "text-info",
     },
   ];
 
@@ -215,16 +217,16 @@ const StatsBar = memo(function StatsBar({
       {items.map((item) => (
         <div
           key={item.label}
-          className="flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-3.5 sm:px-4 py-3 shadow-sm"
+          className="flex items-center gap-2.5 sm:gap-3 bg-card border border-border rounded-lg px-3.5 sm:px-4 py-3 shadow-sm"
         >
-          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 shrink-0">
+          <div className="p-2 rounded-md bg-muted shrink-0">
             {item.icon}
           </div>
           <div className="text-start min-w-0">
-            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
+            <p className="text-xs sm:text-xs font-bold text-muted-foreground uppercase tracking-widest truncate">
               {item.label}
             </p>
-            <p className={`text-base sm:text-lg font-black leading-none mt-0.5 ${item.color}`}>
+            <p className={`text-base sm:text-lg font-bold leading-none mt-0.5 ${item.color}`}>
               {item.value}
             </p>
           </div>
@@ -255,7 +257,7 @@ const MobileProjectCard = memo(function MobileProjectCard({
   return (
     <Link
       href={`/projects/${p.id}`}
-      className="block mx-3 my-2 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/40 bg-white dark:bg-slate-900 shadow-sm active:shadow-none active:scale-[0.98] active:bg-slate-50 dark:active:bg-slate-800/60 transition-all duration-150"
+      className="block mx-3 my-2 p-4 rounded-lg border border-border bg-card shadow-sm active:shadow-none active:scale-95 active:bg-muted transition-all duration-150"
     >
       {/* Row 1: name + action menu */}
       <div className="flex items-start gap-3 justify-between">
@@ -268,13 +270,13 @@ const MobileProjectCard = memo(function MobileProjectCard({
             />
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="font-black text-[15px] text-slate-900 dark:text-slate-50 leading-tight truncate">
+            <h3 className="font-bold text-sm text-foreground leading-tight truncate">
               {p.name}
             </h3>
             <div className="flex items-center gap-2 mt-1">
               <Badge
                 variant="secondary"
-                className="text-[9px] uppercase font-bold tabular-nums h-4"
+                className="text-xs uppercase font-bold tabular-nums h-4"
               >
                 #{p.contract_number || "N/A"}
               </Badge>
@@ -293,55 +295,29 @@ const MobileProjectCard = memo(function MobileProjectCard({
 
       {/* Row 2: status + type badges — unified size */}
       <div className="flex items-center gap-2 mt-3">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 ring-1 ring-blue-200/50 dark:ring-blue-800/50">
-          {isAr
-            ? p.status === "planning" ? "قيد التخطيط"
-            : p.status === "in_progress" ? "قيد الإنجاز"
-            : p.status === "completed" ? "مكتمل"
-            : p.status === "delayed" ? "متأخر"
-            : "ملغى"
-            : p.status === "planning" ? "Planification"
-            : p.status === "in_progress" ? "En cours"
-            : p.status === "completed" ? "Terminé"
-            : p.status === "delayed" ? "En retard"
-            : "Annulé"}
-        </span>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700/50">
-          {isAr
-            ? p.project_type === "road" ? "طرق"
-            : p.project_type === "bridge" ? "جسور"
-            : p.project_type === "housing" ? "سكن"
-            : p.project_type === "school" ? "مدرسة"
-            : p.project_type === "hospital" ? "مستشفى"
-            : "بنية تحتية"
-            : p.project_type === "road" ? "Route"
-            : p.project_type === "bridge" ? "Pont"
-            : p.project_type === "housing" ? "Logement"
-            : p.project_type === "school" ? "École"
-            : p.project_type === "hospital" ? "Hôpital"
-            : "Infrastructure"}
-        </span>
+        <ProjectStatusBadge status={p.status} isAr={isAr} />
+        <ProjectTypeBadge type={p.project_type} isAr={isAr} />
       </div>
 
       {/* Row 3: wilaya + budget */}
       <div className="flex items-center justify-between gap-3 mt-3">
-        <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 min-w-0">
-          <MapPin size={13} className="text-red-500 shrink-0" />
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
+          <MapPin size={13} className="text-destructive shrink-0" />
           <span className="font-semibold truncate">{p.wilaya}</span>
         </div>
-        <div className="shrink-0 font-black text-slate-900 dark:text-slate-100 tabular-nums text-[11px] whitespace-nowrap">
+        <div className="shrink-0 font-bold text-foreground tabular-nums text-xs whitespace-nowrap">
           {(p.budget ?? 0).toLocaleString("ar-DZ")}{" "}
-          <span className="text-[9px] opacity-60 font-bold tracking-tight">دج</span>
+          <span className="text-xs opacity-60 font-bold tracking-tight">دج</span>
         </div>
       </div>
 
       {/* Row 4: prominent progress bar */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <div className="mt-3 pt-3 border-t border-border">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {isAr ? "الإنجاز" : "Avancement"}
           </span>
-          <span className="text-xs font-black tabular-nums text-slate-700 dark:text-slate-300">
+          <span className="text-xs font-bold tabular-nums text-foreground">
             {p.progress ?? 0}%
           </span>
         </div>
@@ -355,7 +331,7 @@ const MobileProjectCard = memo(function MobileProjectCard({
 
       {/* Tappable indicator — arrow + subtle text */}
       <div className="flex items-center justify-end gap-1 mt-2.5 opacity-40">
-        <span className="text-[9px] font-bold uppercase tracking-widest">
+        <span className="text-xs font-bold uppercase tracking-widest">
           {isAr ? "فتح" : "Ouvrir"}
         </span>
         <ChevronLeft
@@ -388,7 +364,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
   const router = useRouter();
   return (
     <TableRow
-      className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors duration-100 cursor-pointer"
+      className="group hover:bg-muted/50 transition-colors duration-100 cursor-pointer"
       onClick={() => router.push(`/projects/${p.id}`)}
     >
       <TableCell className="ps-8 py-4 font-bold">
@@ -403,12 +379,12 @@ const DesktopTableRow = memo(function DesktopTableRow({
           <div className="min-w-0">
             <Link
               href={`/projects/${p.id}`}
-              className="text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 block transition-colors font-bold text-sm leading-tight truncate max-w-[200px]"
+              className="text-foreground hover:text-primary block transition-colors font-bold text-sm leading-tight truncate max-w-48"
               onClick={(e) => e.stopPropagation()}
             >
               {p.name}
             </Link>
-            <code className="text-[9px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded opacity-60 font-mono tracking-tight mt-1 inline-block">
+            <code className="text-xs bg-muted px-1.5 py-0.5 rounded opacity-60 font-mono tracking-tight mt-1 inline-block">
               #{p.contract_number || p.id.slice(0, 8)}
             </code>
           </div>
@@ -416,14 +392,14 @@ const DesktopTableRow = memo(function DesktopTableRow({
       </TableCell>
       <TableCell>
         <div className="space-y-1">
-          <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
-            <MapPin size={10} className="text-red-500 shrink-0" />
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin size={10} className="text-destructive shrink-0" />
             <span className="truncate">{p.wilaya}</span>
           </div>
           <ProjectTypeBadge type={p.project_type} isAr={isAr} />
         </div>
       </TableCell>
-      <TableCell className="text-[10.5px] font-mono text-slate-500 dark:text-slate-400">
+      <TableCell className="text-xs font-mono text-muted-foreground">
         <div className="space-y-0.5 uppercase tracking-tighter font-bold">
           <p>Déb: {p.start_date}</p>
           <p>Fin: {p.expected_end_date}</p>
@@ -432,7 +408,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
       <TableCell>
         <ProjectStatusBadge status={p.status} isAr={isAr} />
       </TableCell>
-      <TableCell className="w-[180px]">
+      <TableCell className="w-44">
         <div className="flex items-center gap-3">
           <ProgressBar
             progress={p.progress ?? 0}
@@ -440,7 +416,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
             className="flex-1 h-1.5 shadow-inner"
             showText={false}
           />
-          <span className="font-black text-xs w-8 text-center tabular-nums">
+          <span className="font-bold text-xs w-8 text-center tabular-nums">
             {p.progress ?? 0}%
           </span>
         </div>
@@ -483,8 +459,8 @@ const Pagination = memo(function Pagination({
     }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-800">
-      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-border">
+      <p className="text-xs text-muted-foreground font-medium">
         {isAr
           ? `عرض ${start}–${end} من ${totalCount} مشروع`
           : `Affichage ${start}–${end} sur ${totalCount} projets`}
@@ -493,7 +469,7 @@ const Pagination = memo(function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-xl"
+          className="h-8 w-8 rounded-md"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
           aria-label={isAr ? "الصفحة السابقة" : "Page précédente"}
@@ -502,7 +478,7 @@ const Pagination = memo(function Pagination({
         </Button>
         {pages.map((item, idx) =>
           item === "..." ? (
-            <span key={`ellipsis-${idx}`} className="text-xs text-slate-400 px-1">
+            <span key={`ellipsis-${idx}`} className="text-xs text-muted-foreground px-1">
               …
             </span>
           ) : (
@@ -510,7 +486,7 @@ const Pagination = memo(function Pagination({
               key={item}
               variant={currentPage === item ? "default" : "outline"}
               size="icon"
-              className="h-8 w-8 rounded-xl text-xs font-bold"
+              className="h-8 w-8 rounded-md text-xs font-bold"
               onClick={() => onPageChange(item as number)}
               aria-current={currentPage === item ? "page" : undefined}
             >
@@ -521,7 +497,7 @@ const Pagination = memo(function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-xl"
+          className="h-8 w-8 rounded-md"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
           aria-label={isAr ? "الصفحة التالية" : "Page suivante"}
@@ -681,9 +657,16 @@ export default function ProjectsListPage({
   }, []);
 
   return (
-    <div
-      className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12"
+    <PageContainer
       dir={isAr ? "rtl" : "ltr"}
+      className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+      header={{
+        title: isAr ? "محفظة المشاريع" : "Portfolio Projets",
+        description: isAr
+          ? "متابعة الورشات، الميزانيات، وحالات الإنجاز الميدانية"
+          : "Suivi des chantiers et avancement réel",
+        actions: <CreateProjectDialog isAr={isAr} onSuccess={fetchProjects} />,
+      }}
     >
       <DeleteConfirmationDialog
         isOpen={isDeleteModalOpen}
@@ -708,29 +691,15 @@ export default function ProjectsListPage({
         trigger={<span className="hidden" />}
       />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-        <div className="text-start">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50">
-            {isAr ? "محفظة المشاريع" : "Portfolio Projets"}
-          </h1>
-          <p className="text-slate-500 font-medium text-sm mt-1">
-            {isAr
-              ? "متابعة الورشات، الميزانيات، وحالات الإنجاز الميدانية"
-              : "Suivi des chantiers et avancement réel"}
-          </p>
-        </div>
-        <CreateProjectDialog isAr={isAr} onSuccess={fetchProjects} />
-      </div>
-
       {!isLoading && projects.length > 0 && (
         <StatsBar projects={projects} isAr={isAr} />
       )}
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden rounded-2xl">
-        <CardHeader className="py-4 px-5 sm:px-6 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+      <Card className="border-border shadow-sm overflow-hidden rounded-lg">
+        <CardHeader className="py-4 px-5 sm:px-6 bg-muted/50 border-b border-border">
           <div className="flex flex-col gap-3">
             <div className="relative w-full">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <input
                 id="projects-search"
                 type="search"
@@ -743,12 +712,12 @@ export default function ProjectsListPage({
                     : "Nom du projet ou N° de marché..."
                 }
                 aria-label={isAr ? "بحث في المشاريع" : "Rechercher un projet"}
-                className="w-full ps-10 pe-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 transition-shadow placeholder:text-slate-400"
+                className="w-full ps-10 pe-10 py-3 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background transition-shadow placeholder:text-muted-foreground"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-0.5 rounded"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded"
                   aria-label={isAr ? "مسح البحث" : "Effacer la recherche"}
                 >
                   <X size={15} />
@@ -777,7 +746,7 @@ export default function ProjectsListPage({
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="h-10 text-xs font-bold text-slate-500 hover:text-red-500 gap-1.5 rounded-xl"
+                    className="h-10 text-xs font-bold text-muted-foreground hover:text-destructive gap-1.5 rounded-md"
                   >
                     <X size={13} />
                     {isAr ? "مسح" : "Effacer"}
@@ -786,7 +755,7 @@ export default function ProjectsListPage({
                 {filteredProjects.length > 0 && (
                   <Badge
                     variant="secondary"
-                    className="ms-auto text-[10px] font-black h-6 rounded-full"
+                    className="ms-auto text-xs font-bold h-6 rounded-full"
                   >
                     {filteredProjects.length}
                   </Badge>
@@ -795,7 +764,7 @@ export default function ProjectsListPage({
 
               {/* Desktop: inline filter selects */}
               <div className="hidden md:flex flex-wrap items-center gap-2 w-full">
-                <Filter size={13} className="text-slate-400 shrink-0" />
+                <Filter size={13} className="text-muted-foreground shrink-0" />
                 <FilterSelect
                   value={statusFilter}
                   onChange={setStatusFilter}
@@ -820,7 +789,7 @@ export default function ProjectsListPage({
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="h-9 text-xs font-bold text-slate-500 hover:text-red-500 gap-1.5 rounded-xl"
+                    className="h-9 text-xs font-bold text-muted-foreground hover:text-destructive gap-1.5 rounded-md"
                   >
                     <X size={12} />
                     {isAr ? "مسح الكل" : "Effacer"}
@@ -829,7 +798,7 @@ export default function ProjectsListPage({
                 {filteredProjects.length > 0 && (
                   <Badge
                     variant="secondary"
-                    className="ms-auto text-[10px] font-black h-6 rounded-full"
+                    className="ms-auto text-xs font-bold h-6 rounded-full"
                   >
                     {filteredProjects.length}
                   </Badge>
@@ -849,7 +818,7 @@ export default function ProjectsListPage({
               </div>
               <div className="hidden md:block overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/50 dark:bg-slate-900 border-y">
+                  <TableHeader className="bg-muted/50 border-y">
                     <TableRow>
                       {[
                         isAr ? "المشروع / العقد" : "Projet / Marché",
@@ -861,7 +830,7 @@ export default function ProjectsListPage({
                       ].map((h) => (
                         <TableHead
                           key={h}
-                          className="ps-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500"
+                          className="ps-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground"
                         >
                           {h}
                         </TableHead>
@@ -881,7 +850,15 @@ export default function ProjectsListPage({
               {/* 📱 Mobile */}
               <div className="md:hidden">
                 {paginatedProjects.length === 0 ? (
-                  <EmptyState isAr={isAr} hasFilters={hasActiveFilters} />
+                  <DataState.Empty
+                    icon={<Construction className="h-12 w-12 text-muted-foreground" />}
+                    title={hasActiveFilters
+                      ? isAr ? "لا توجد نتائج للبحث الحالي" : "Aucun résultat trouvé"
+                      : isAr ? "لا توجد مشاريع مسجلة حالياً" : "Aucun chantier disponible"}
+                    description={hasActiveFilters
+                      ? isAr ? "حاول تغيير معايير البحث" : "Essayez de modifier vos filtres"
+                      : undefined}
+                  />
                 ) : (
                   paginatedProjects.map((p, idx) => (
                     <MobileProjectCard
@@ -900,8 +877,8 @@ export default function ProjectsListPage({
               {/* 🖥️ Desktop */}
               <div className="hidden md:block overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/50 dark:bg-slate-900 border-y">
-                    <TableRow className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <TableHeader className="bg-muted/50 border-y">
+                    <TableRow className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       <TableHead className="ps-8 py-4">
                         {isAr ? "المشروع / العقد" : "Projet / Marché"}
                       </TableHead>
@@ -918,7 +895,15 @@ export default function ProjectsListPage({
                     {paginatedProjects.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6}>
-                          <EmptyState isAr={isAr} hasFilters={hasActiveFilters} />
+                          <DataState.Empty
+                            icon={<Construction className="h-12 w-12 text-muted-foreground" />}
+                            title={hasActiveFilters
+                              ? isAr ? "لا توجد نتائج للبحث الحالي" : "Aucun résultat trouvé"
+                              : isAr ? "لا توجد مشاريع مسجلة حالياً" : "Aucun chantier disponible"}
+                            description={hasActiveFilters
+                              ? isAr ? "حاول تغيير معايير البحث" : "Essayez de modifier vos filtres"
+                              : undefined}
+                          />
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -950,7 +935,7 @@ export default function ProjectsListPage({
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -981,13 +966,13 @@ function FilterSelect({
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
-        className="w-[120px] sm:w-[130px] rounded-xl h-9 font-bold text-[11px] uppercase tracking-tight shadow-sm border-slate-200 dark:border-slate-700"
+        className="w-28 sm:w-32 rounded-md h-9 font-bold text-xs uppercase tracking-tight shadow-sm border-border"
         aria-label={placeholder}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="rounded-xl p-1">
-        <SelectItem value="all" className="text-[11px] font-black uppercase">
+      <SelectContent className="rounded-md p-1">
+        <SelectItem value="all" className="text-xs font-bold uppercase">
           {isAr ? "الكل" : "Tous"}
         </SelectItem>
         {type === "wilaya" &&
@@ -1056,12 +1041,12 @@ function MobileFilterSheet({
         <Button
           variant="outline"
           size="sm"
-          className="relative h-10 rounded-xl font-bold text-xs gap-2 border-slate-200 dark:border-slate-700 shadow-sm"
+          className="relative h-10 rounded-md font-bold text-xs gap-2 border-border shadow-sm"
         >
           <Filter size={14} />
           {isAr ? "فلترة" : "Filtrer"}
           {filterCount > 0 && (
-            <span className="absolute -top-1.5 -end-1.5 h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px] font-black">
+            <span className="absolute -top-1.5 -end-1.5 h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
               {filterCount}
             </span>
           )}
@@ -1072,23 +1057,23 @@ function MobileFilterSheet({
         className="rounded-t-3xl max-h-[85vh] overflow-y-auto"
       >
         <SheetHeader className="pb-2 ps-0">
-          <SheetTitle className="text-lg font-black">
+          <SheetTitle className="text-lg font-bold">
             {isAr ? "خيارات الفلترة" : "Filtres"}
           </SheetTitle>
         </SheetHeader>
 
         <div className="space-y-5 py-4">
           <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {isAr ? "الحالة" : "Statut"}
             </label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+              <SelectTrigger className="h-12 rounded-md font-bold text-sm">
                 <SelectValue
                   placeholder={isAr ? "الكل" : "Tous"}
                 />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-md">
                 <SelectItem value="all" className="text-sm font-bold py-3">
                   {isAr ? "الكل" : "Tous"}
                 </SelectItem>
@@ -1112,16 +1097,16 @@ function MobileFilterSheet({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {isAr ? "الولاية" : "Wilaya"}
             </label>
             <Select value={wilayaFilter} onValueChange={setWilayaFilter}>
-              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+              <SelectTrigger className="h-12 rounded-md font-bold text-sm">
                 <SelectValue
                   placeholder={isAr ? "الكل" : "Toutes"}
                 />
               </SelectTrigger>
-              <SelectContent className="rounded-xl max-h-60">
+              <SelectContent className="rounded-md max-h-60">
                 <SelectItem value="all" className="text-sm font-bold py-3">
                   {isAr ? "الكل" : "Toutes"}
                 </SelectItem>
@@ -1135,16 +1120,16 @@ function MobileFilterSheet({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {isAr ? "النوع" : "Type"}
             </label>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-12 rounded-xl font-bold text-sm">
+              <SelectTrigger className="h-12 rounded-md font-bold text-sm">
                 <SelectValue
                   placeholder={isAr ? "الكل" : "Tous"}
                 />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-md">
                 <SelectItem value="all" className="text-sm font-bold py-3">
                   {isAr ? "الكل" : "Tous"}
                 </SelectItem>
@@ -1177,7 +1162,7 @@ function MobileFilterSheet({
                 clearFilters();
                 setOpen(false);
               }}
-              className="w-full h-12 rounded-xl font-bold text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 gap-2"
+              className="w-full h-12 rounded-md font-bold text-sm text-destructive hover:bg-destructive/10 gap-2"
             >
               <X size={16} />
               {isAr ? "مسح جميع الفلاتر" : "Effacer tous les filtres"}
@@ -1208,36 +1193,36 @@ const ActionMenu = memo(function ActionMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all h-12 w-12 shrink-0"
+          className="rounded-full hover:bg-muted hover:shadow-sm transition-all h-12 w-12 shrink-0"
           aria-label={isAr ? "خيارات المشروع" : "Options du projet"}
           onClick={(e) => e.stopPropagation()}
         >
-          <MoreVertical size={16} className="text-slate-400" />
+          <MoreVertical size={16} className="text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[180px] p-2 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800"
+        className="w-44 p-2 rounded-lg shadow-sm border border-border"
       >
         <DropdownMenuItem asChild>
           <Link
             href={`/projects/${p.id}`}
-            className="cursor-pointer font-bold text-[11px] uppercase gap-2 py-3 rounded-xl"
+            className="cursor-pointer font-bold text-xs uppercase gap-2 py-3 rounded-md"
           >
-            <LayoutGrid size={14} className="text-blue-500" />
+            <LayoutGrid size={14} className="text-primary" />
             {isAr ? "فتح الورشة" : "Consulter"}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => { e.stopPropagation(); onEdit(p); }}
-          className="cursor-pointer font-bold text-[11px] uppercase gap-2 py-3 rounded-xl"
+          className="cursor-pointer font-bold text-xs uppercase gap-2 py-3 rounded-md"
         >
-          <Edit size={14} className="text-amber-500" />
+          <Edit size={14} className="text-warning" />
           {isAr ? "تعديل" : "Modifier"}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={askDelete}
-          className="text-red-600 font-bold text-[11px] uppercase gap-2 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-950 focus:bg-red-50 dark:focus:bg-red-950"
+          className="text-destructive font-bold text-xs uppercase gap-2 py-3 rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
         >
           <Trash2 size={14} />
           {isAr ? "حذف" : "Supprimer"}
@@ -1246,40 +1231,3 @@ const ActionMenu = memo(function ActionMenu({
     </DropdownMenu>
   );
 });
-
-function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1 text-start">
-      <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-        {label}
-      </span>
-      <div className="min-h-5 flex items-center">{value}</div>
-    </div>
-  );
-}
-
-function EmptyState({
-  isAr,
-  hasFilters,
-}: {
-  isAr: boolean;
-  hasFilters: boolean;
-}) {
-  return (
-    <div className="py-20 sm:py-28 text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-4">
-        <Construction className="w-8 h-8 text-slate-400" />
-      </div>
-      <p className="font-black text-xs uppercase tracking-[0.2em] text-slate-400">
-        {hasFilters
-          ? isAr ? "لا توجد نتائج للبحث الحالي" : "Aucun résultat trouvé"
-          : isAr ? "لا توجد مشاريع مسجلة حالياً" : "Aucun chantier disponible"}
-      </p>
-      {hasFilters && (
-        <p className="text-[11px] text-slate-400 mt-1.5">
-          {isAr ? "حاول تغيير معايير البحث" : "Essayez de modifier vos filtres"}
-        </p>
-      )}
-    </div>
-  );
-}

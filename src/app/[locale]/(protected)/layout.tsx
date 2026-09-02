@@ -32,7 +32,7 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors">
+    <div className="min-h-screen bg-background flex transition-colors">
       <div className="hidden md:block w-64 flex-shrink-0">
         <Sidebar locale={locale} />
       </div>

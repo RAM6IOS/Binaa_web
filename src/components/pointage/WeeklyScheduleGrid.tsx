@@ -34,8 +34,8 @@ export function WeeklyScheduleGrid({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-500">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+        <Loader2 className="w-8 h-8 animate-spin text-present" />
         <p className="text-sm font-medium">
           {isAr ? "جاري تحميل الجدول الأسبوعي..." : "Chargement du planning..."}
         </p>
@@ -46,14 +46,14 @@ export function WeeklyScheduleGrid({
   if (rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4 text-center px-6">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-          <Users className="w-8 h-8 text-slate-400" />
+        <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+          <Users className="w-8 h-8 text-muted-foreground" />
         </div>
         <div>
-          <p className="font-semibold text-slate-700">
+          <p className="font-semibold text-foreground">
             {isAr ? "لا يوجد عمال لعرضهم" : "Aucun ouvrier à afficher"}
           </p>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {isAr ? "أضف عمالاً أو غيّر فلتر المشروع" : "Ajoutez des ouvriers ou modifiez le filtre"}
           </p>
         </div>
@@ -64,16 +64,16 @@ export function WeeklyScheduleGrid({
   return (
     <>
       {/* Desktop Grid */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
         {/* Header row */}
         <div
           className={cn(
-            "grid sticky top-0 z-20 bg-slate-50 border-b border-slate-200",
+            "grid sticky top-0 z-20 bg-muted/50 border-b border-border",
             colTemplate
           )}
         >
-          <div className="sticky start-0 z-30 bg-slate-50 border-e border-slate-200 px-3 py-3 flex items-end">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="sticky start-0 z-30 bg-muted/50 border-e border-border px-3 py-3 flex items-end">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {isAr ? "العمال" : "Ouvriers"}
             </span>
           </div>
@@ -85,31 +85,31 @@ export function WeeklyScheduleGrid({
               <div
                 key={date}
                 className={cn(
-                  "px-1 py-2 text-center border-e border-slate-100",
-                  isToday && "bg-emerald-50"
+                  "px-1 py-2 text-center border-e border-border",
+                  isToday && "bg-present/10"
                 )}
               >
-                <p className="text-[10px] font-medium text-slate-500 uppercase">
+                <p className="text-xs font-medium text-muted-foreground uppercase">
                   {format(d, "EEE", { locale })}
                 </p>
                 <p
                   className={cn(
                     "text-sm font-bold mt-0.5",
-                    isToday ? "text-emerald-700" : "text-slate-800"
+                    isToday ? "text-present" : "text-foreground"
                   )}
                 >
                   {format(d, "d", { locale })}
                 </p>
-                <p className="text-[9px] text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {format(d, "MMM", { locale })}
                 </p>
               </div>
             );
           })}
 
-          <div className="sticky end-0 z-30 px-2 py-2 text-center bg-emerald-50 border-s border-emerald-100 flex flex-col items-center justify-end gap-0.5">
-            <Clock className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-[10px] font-bold text-emerald-700 uppercase">
+          <div className="sticky end-0 z-30 px-2 py-2 text-center bg-present/10 border-s border-present/30 flex flex-col items-center justify-end gap-0.5">
+            <Clock className="w-3.5 h-3.5 text-present" />
+            <span className="text-xs font-bold text-present uppercase">
               {isAr ? "الإجمالي" : "Total"}
             </span>
           </div>
@@ -136,23 +136,23 @@ export function WeeklyScheduleGrid({
         {rows.map((row) => {
           const { worker, shifts, weekTotalHours, presentDays } = row;
           return (
-            <div key={row.worker.id} className="border rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+            <div key={row.worker.id} className="border rounded-lg p-4 bg-card shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                  <div className="w-10 h-10 rounded-full bg-present/10 flex items-center justify-center text-present font-bold text-xs">
                     {worker.full_name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">{worker.full_name}</p>
-                    <p className="text-[10px] text-slate-400">{worker.job_title}</p>
+                    <p className="text-sm font-bold text-foreground">{worker.full_name}</p>
+                    <p className="text-xs text-muted-foreground">{worker.job_title}</p>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-emerald-600" />
-                    <span className="text-base font-bold text-emerald-700">{weekTotalHours.toFixed(1)}</span>
+                    <Clock className="w-3 h-3 text-present" />
+                    <span className="text-base font-bold text-present">{weekTotalHours.toFixed(1)}</span>
                   </div>
-                  <p className="text-[9px] text-slate-400">{presentDays} {isAr ? "أيام" : "j"}</p>
+                  <p className="text-xs text-muted-foreground">{presentDays} {isAr ? "أيام" : "j"}</p>
                 </div>
               </div>
 
@@ -174,34 +174,34 @@ export function WeeklyScheduleGrid({
                       key={date}
                       onClick={() => onCellClick?.({ worker, date, shift: shift ?? null })}
                       className={cn(
-                        "text-center p-1.5 rounded-lg cursor-pointer transition-colors border min-h-[54px] flex flex-col justify-between",
+                        "text-center p-1.5 rounded-lg cursor-pointer transition-colors border min-h-14 flex flex-col justify-between",
                         isToday
-                          ? "bg-emerald-100 border-emerald-300 ring-1 ring-emerald-200 shadow-sm"
-                          : "bg-slate-50 border-slate-100",
+                          ? "bg-present/10 border-present/40 ring-1 ring-present/30 shadow-sm"
+                          : "bg-muted/40 border-border",
                         shift && !shift.checkOut
                           ? isToday
-                            ? "bg-emerald-200 border-emerald-400"
-                            : "bg-yellow-50 border-yellow-300"
+                            ? "bg-present/20 border-present"
+                            : "bg-shift/10 border-shift"
                           : shift
                             ? isToday
-                              ? "bg-emerald-100 border-emerald-300"
-                              : "bg-blue-50 border-blue-200"
+                              ? "bg-present/10 border-present/40"
+                              : "bg-info/10 border-info/30"
                             : ""
                       )}
                     >
                       <div>
-                        <p className={cn("text-[8px] font-medium uppercase", isToday ? "text-emerald-700" : "text-slate-400")}>
+                        <p className={cn("text-xs font-medium uppercase", isToday ? "text-present" : "text-muted-foreground")}>
                           {format(d, "EEE", { locale })}
                         </p>
-                        <p className={cn("text-sm font-bold leading-tight", isToday ? "text-emerald-800" : "text-slate-700")}>
+                        <p className={cn("text-sm font-bold leading-tight", isToday ? "text-present" : "text-foreground")}>
                           {format(d, "d", { locale })}
                         </p>
                       </div>
                       {shift && (
                         <div className="mt-0.5">
                           <p className={cn(
-                            "text-[9px] font-bold tabular-nums leading-tight",
-                            !shift.checkOut ? "text-amber-600" : "text-blue-600"
+                            "text-xs font-bold tabular-nums leading-tight",
+                            !shift.checkOut ? "text-shift" : "text-info"
                           )}>
                             {formatShortTime(shift.checkIn)}
                             {shift.checkOut ? `-${formatShortTime(shift.checkOut)}` : ''}
