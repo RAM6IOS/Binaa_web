@@ -8,7 +8,7 @@ import { GanttChart as ProjectGanttChart } from "./components/GanttChart";
 import {
   MapPin, Calendar, Loader2, AlertCircle, RefreshCcw, Landmark,
   ArrowRight, ArrowLeft, Eye, ClipboardList, Ruler, Users, CheckSquare,
-  FileText, BarChart3, Package, Truck
+  FileText, BarChart3, Package, Truck, ShoppingCart
 } from "lucide-react";
 import { Project, ProjectDocument, ProjectTask } from "@/lib/types/projects";
 import { projectsService } from "@/lib/services/projects-service";
@@ -27,6 +27,7 @@ import { WorkAttachmentsTab } from "./components/WorkAttachmentsTab";
 import { SituationsTab } from "./components/SituationsTab";
 import { MetresTab } from "./components/MetresTab";
 import { MaterialsTab } from "./components/MaterialsTab";
+import { PurchaseOrdersTab } from "./components/PurchaseOrdersTab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ProjectWithJoins = Project & {
@@ -41,6 +42,7 @@ const SECTIONS = [
   { id: 'work-attachments', icon: FileText, labelAr: 'محاضر القيس', labelFr: 'Attachements', color: 'bg-info/10', iconColor: 'text-info' },
   { id: 'situations',  icon: Landmark,     labelAr: 'الوضعيات',       labelFr: 'Situations',      color: 'bg-success/10', iconColor: 'text-success' },
   { id: 'materials',   icon: Package,      labelAr: 'المواد',         labelFr: 'Matériaux',       color: 'bg-warning/10',   iconColor: 'text-warning' },
+  { id: 'orders',      icon: ShoppingCart, labelAr: 'أوامر الطلب',    labelFr: 'Bons de commande', color: 'bg-info/10',     iconColor: 'text-info' },
   { id: 'workforce',   icon: Users,        labelAr: 'اليد العاملة',   labelFr: 'Main-d\'œuvre',   color: 'bg-info/10', iconColor: 'text-info' },
   { id: 'resources',   icon: Truck,        labelAr: 'المعدات',        labelFr: 'Équipements',     color: 'bg-warning/10', iconColor: 'text-warning' },
   { id: 'tasks',       icon: CheckSquare,  labelAr: 'المهام',         labelFr: 'Tâches',          color: 'bg-destructive/10',    iconColor: 'text-destructive' },
@@ -266,6 +268,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="workforce"><WorkforceTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><EquipmentTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="materials"><MaterialsTab project={project} isAr={isAr} /></TabsContent>
+          <TabsContent value="orders"><PurchaseOrdersTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="documents"><DocumentsTab project={project} isAr={isAr} /></TabsContent>
         </div>
       </Tabs>
@@ -289,6 +292,7 @@ function SectionContent({ sectionId, project, isAr, onRefresh }: {
     case 'work-attachments': return <WorkAttachmentsTab project={project} isAr={isAr} />;
     case 'situations':  return <SituationsTab project={project} isAr={isAr} />;
     case 'materials':   return <MaterialsTab project={project} isAr={isAr} />;
+    case 'orders':      return <PurchaseOrdersTab project={project} isAr={isAr} />;
     case 'workforce':   return <WorkforceTab project={project} isAr={isAr} />;
     case 'resources':   return <EquipmentTab project={project} isAr={isAr} />;
     case 'documents':   return <DocumentsTab project={project} isAr={isAr} />;

@@ -25,6 +25,11 @@
       "file": "src/components/situations/SituationOfficialPDF.tsx",
       "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
       "reason": "توليد PDF رسمي عبر jsPDF يتطلب hex حرفية (setFillColor/setTextColor...) — الـ tokens هي CSS vars وقت التشغيل لا يستطيع jsPDF قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
+    },
+    {
+      "file": "src/components/purchase-orders/PurchaseOrderPDF.tsx",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|rgba?\\(\\s*[0-9.,%\\s]+\\s*\\))$",
+      "reason": "توليد PDF لأمر الطلب عبر @react-pdf/renderer يتطلب hex حرفية في أنماط الوثيقة — الـ tokens هي CSS vars وقت التشغيل لا يستطيع react-pdf قراءتها، والـ PDF يجب أن يبقى مستقر الألوان بغض النظر عن الثيم."
     }
   ]
 }
