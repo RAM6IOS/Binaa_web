@@ -23,6 +23,7 @@
       "messages": {
         "success": "Connexion réussie",
         "error": "Échec de la connexion",
+        "invalidCredentials": "Adresse e-mail ou mot de passe incorrect",
         "resetSuccess": "Mot de passe réinitialisé. Vous pouvez vous connecter."
       }
     },
@@ -119,5 +120,11 @@
       "passwordRequired": "Le mot de passe est requis",
       "fieldRequired": "Ce champ est requis"
     }
+  },
+  "PWA": {
+    "withinWindow": "Vous êtes hors ligne — vos modifications sont enregistrées localement et seront synchronisées dès le retour du réseau.",
+    "withinWindowRemaining": "Temps restant dans la fenêtre hors ligne : {remaining}",
+    "windowExceeded": "La fenêtre de travail hors ligne est expirée. Lecture seulement — reconnectez-vous pour synchroniser.",
+    "retry": "Réessayer"
   }
 }

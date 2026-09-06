@@ -1,6 +1,7 @@
 import { db, SyncQueueItem } from '../db/offline-db';
 import { createClient } from '../supabase/client';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync } from '../utils/offline-window';
 import { toast } from 'sonner';
 
 export const syncService = {
@@ -17,8 +18,11 @@ export const syncService = {
     const supabase = createClient();
 
     try {
-      // Get all queue items sorted by ID (chronological)
-      const queueItems = await db.queue.orderBy('id').toArray();
+      // Get all queue items sorted by ID (chronological), skipping failed rows
+      const allItems = await db.queue.orderBy('id').toArray();
+      const queueItems = allItems.filter(
+        (item) => (item.status ?? 'pending') === 'pending'
+      );
       if (queueItems.length === 0) {
         this.isSyncing = false;
         return;
@@ -51,28 +55,52 @@ export const syncService = {
             break;
           }
 
-          // Otherwise, it's a validation, auth, or constraint error.
-          // We remove it from the active queue to avoid blocking future operations.
+          // Non-network error (validation/RLS/constraint): لا نحذف العنصر أبداً —
+          // نعلّمه failed للمراجعة، فلا تُفقد بيانات صامتة، ولا يحجب بقية الصفوف.
+          const message = error?.message || String(error);
           console.error(
-            `[SyncService] Failed to sync item ${item.id} (Table: ${item.table}, Action: ${item.action}):`,
+            `[SyncService] Failed to sync item ${item.id} (Table: ${item.table}, Action: ${item.action}). Marked failed for review:`,
             error
           );
-          await db.queue.delete(item.id!);
+          await db.queue.update(item.id!, {
+            status: 'failed',
+            errorCount: (item.errorCount ?? 0) + 1,
+            lastError: message,
+            updatedAt: Date.now(),
+          });
           errorCount++;
         }
       }
 
       if (processedCount > 0) {
+        markOnlineSync();
         toast.success(`تمت مزامنة ${processedCount} عمليات بنجاح.`);
       }
       if (errorCount > 0) {
-        toast.error(`فشلت مزامنة ${errorCount} عمليات بسبب أخطاء في البيانات.`);
+        toast.error(`فشلت مزامنة ${errorCount} عمليات بسبب أخطاء في البيانات — حُفظت للمراجعة.`);
       }
     } catch (err) {
       console.error('[SyncService] Critical error in sync process:', err);
     } finally {
       this.isSyncing = false;
     }
+  },
+
+  /** يعيد الصفوف الفاشلة إلى قائمة الانتظار لمحاولة التزامن مجدداً. */
+  async retryFailed() {
+    const failed = await db.queue
+      .filter((item) => item.status === 'failed')
+      .toArray();
+    if (failed.length === 0) return;
+
+    await db.queue.bulkUpdate(
+      failed.map((item) => ({
+        key: item.id!,
+        changes: { status: 'pending' as const, updatedAt: Date.now() },
+      }))
+    );
+    toast.info(`أُعيدت ${failed.length} عمليات إلى قائمة الانتظار.`);
+    await this.sync();
   },
 
   async syncItem(supabase: any, item: SyncQueueItem) {

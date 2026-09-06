@@ -2,6 +2,7 @@ import { createClient } from '../supabase/client';
 import { ProjectTask, TaskStatus } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 
 const supabase = createClient();
 
@@ -25,6 +26,7 @@ export const tasksService = {
         if (tasks.length > 0) {
           await db.tasks.bulkPut(tasks);
         }
+        markOnlineSync();
         return tasks;
       } catch (err) {
         console.warn('[TasksService] Online fetch failed, falling back to local DB:', err);
@@ -53,9 +55,11 @@ export const tasksService = {
       if (error) throw error;
       const created = data as ProjectTask;
       await db.tasks.put(created);
+      markOnlineSync();
       return created;
     }
 
+    assertOfflineWriteAllowed();
     const offlineTask: ProjectTask = {
       ...task,
       id: crypto.randomUUID(),
@@ -87,12 +91,14 @@ export const tasksService = {
       if (error) throw error;
       const updated = data as ProjectTask;
       await db.tasks.put(updated);
+      markOnlineSync();
       return updated;
     }
 
     const existing = await db.tasks.get(id);
     if (!existing) throw new Error("المهمة غير موجودة محلياً");
 
+    assertOfflineWriteAllowed();
     const offlineUpdated = { ...existing, ...updates } as ProjectTask;
     await db.tasks.put(offlineUpdated);
     await db.queue.add({
@@ -117,9 +123,11 @@ export const tasksService = {
 
       if (error) throw error;
       await db.tasks.delete(id);
+      markOnlineSync();
       return true;
     }
 
+    assertOfflineWriteAllowed();
     await db.tasks.delete(id);
     await db.queue.add({
       table: 'tasks',

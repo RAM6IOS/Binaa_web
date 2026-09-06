@@ -9,13 +9,13 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, Chrome, Eye, EyeOff } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
-import { Link, useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
+import { login } from '@/app/[locale]/auth/login/actions';
 
 export function LoginForm() {
   const t = useTranslations('Auth.Login');
   const tc = useTranslations('Common');
   const locale = useLocale();
-  const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -25,7 +25,7 @@ export function LoginForm() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        router.push('/projects');
+        window.location.href = `/${locale}/projects`;
       }
     });
 
@@ -33,32 +33,14 @@ export function LoginForm() {
     if (resetSuccess) {
       toast.success(t('messages.resetSuccess'));
     }
-  }, [supabase, router, t]);
 
-
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password) {
-      toast.error(t('validation.passwordRequired'));
-      return;
-    }
-    setLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'invalid_credentials') {
       toast.error(t('messages.error'), {
-        description: error.message
+        description: t('messages.invalidCredentials'),
       });
-    } else {
-      toast.success(t('messages.success'));
-      router.push('/projects');
     }
-    setLoading(false);
-  };
+  }, [supabase, t, locale]);
 
 
   const handleGoogleLogin = async () => {
@@ -97,13 +79,19 @@ export function LoginForm() {
       description={t('description')}
     >
       <div className="space-y-6">
-        <form onSubmit={handlePasswordLogin} className="space-y-5">
+        <form
+          action={login}
+          className="space-y-5"
+          onSubmit={() => setLoading(true)}
+        >
+          <input type="hidden" name="locale" value={locale} />
           <div className="space-y-2">
             <Label htmlFor="email">{t('email')}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="name@company.com"
                 value={email}
@@ -134,6 +122,7 @@ export function LoginForm() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground rtl:left-auto rtl:right-3" />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

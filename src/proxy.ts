@@ -1,50 +1,42 @@
 import createMiddleware from 'next-intl/middleware';
 import { routing } from '@/i18n/routing';
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import {
+  getSessionChunkNames,
+  parseSessionFromCookieEntries,
+} from '@/lib/auth/session-cookie';
 
 const intlMiddleware = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
   let response = await intlMiddleware(request);
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, {
-              ...options,
-              path: '/',
-            });
-          });
-        },
-      },
-    }
-  );
+  // تُحلَل الجلسة محلياً من الكوكيز — بلا أي استدعاء شبكي — حتى ينجو
+  // المستخدم المسجَّل من إعادة التحميل/التنقّل عند انقطاع الإنترنت.
+  const cookieEntries = request.cookies.getAll().map((c) => ({
+    name: c.name,
+    value: c.value,
+  }));
+  const parsed = parseSessionFromCookieEntries(cookieEntries);
+  const user = parsed.valid
+    ? { id: parsed.session?.user?.id ?? 'session' }
+    : null;
 
-  let user = null;
-  try {
-    const { data, error } = await supabase.auth.getUser();
-    if (!error && data?.user) {
-      user = data.user;
+  // كوكيز جلسة عالقة/تالفة/منتهية: تُمسح تلقائياً لتعالج «قفل حذف الكوكيز اليدوي».
+  const staleChunkNames = parsed.hasSessionCookie && !parsed.valid
+    ? cookieEntries
+        .map((c) => c.name)
+        .filter((name) => getSessionChunkNames().includes(name))
+    : [];
+  const clearStaleSession = staleChunkNames.length > 0;
+
+  const applyStaleClear = (res: NextResponse) => {
+    if (!clearStaleSession) return res;
+    for (const name of staleChunkNames) {
+      res.cookies.set(name, '', { path: '/', maxAge: 0 });
     }
-  } catch {
-    user = null;
-  }
+    return res;
+  };
 
   const pathname = request.nextUrl.pathname;
   const localeMatch = pathname.match(/^\/(ar|fr)/);
@@ -63,16 +55,23 @@ export async function proxy(request: NextRequest) {
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/projects`;
-    return NextResponse.redirect(url);
+    return applyStaleClear(NextResponse.redirect(url));
   }
 
   if (isProtectedPage && !user) {
+    // حالة شاذة: ارتداد مع وجود كوكيز جلسة — يوحي بمشكلة تثبيت/نقل
+    // لا بانتهاء جلسة؛ نُسجّله كمرجع ميداني.
+    if (parsed.hasSessionCookie) {
+      console.log(
+        `[proxy] protected bounce WITH session cookies: path=${pathname} reason=${parsed.reason ?? 'n/a'}`
+      );
+    }
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}`;
-    return NextResponse.redirect(url);
+    return applyStaleClear(NextResponse.redirect(url));
   }
 
-  return response;
+  return applyStaleClear(response);
 }
 
 export const config = {

@@ -2,6 +2,7 @@ import { createClient } from '../supabase/client';
 import { Project } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 
 const supabase = createClient();
 
@@ -38,6 +39,7 @@ export const projectsService = {
 
         const project = data as Project;
         await db.projects.put(project);
+        markOnlineSync();
         return project;
       } catch (err) {
         console.warn('[ProjectsService] Online fetch failed, falling back to local DB:', err);
@@ -71,6 +73,7 @@ export const projectsService = {
         if (projects.length > 0) {
           await db.projects.bulkPut(projects);
         }
+        markOnlineSync();
         return projects;
       } catch (err) {
         console.warn('[ProjectsService] Online fetch failed, falling back to local DB:', err);
@@ -98,10 +101,12 @@ export const projectsService = {
       if (error) throw error;
       const project = data as Project;
       await db.projects.put(project);
+      markOnlineSync();
       return project;
     }
 
     // Offline: save locally + queue
+    assertOfflineWriteAllowed();
     const offlineProject: Project = {
       ...projectData,
       id: crypto.randomUUID(),
@@ -136,10 +141,12 @@ export const projectsService = {
 
       const project = data as Project;
       await db.projects.put(project);
+      markOnlineSync();
       return project;
     }
 
     // Offline update
+    assertOfflineWriteAllowed();
     const existing = await db.projects.get(id);
     if (!existing) throw new Error("المشروع غير موجود محلياً");
 
@@ -166,9 +173,11 @@ export const projectsService = {
         .eq('id', id);
       if (error) throw error;
       await db.projects.delete(id);
+      markOnlineSync();
       return true;
     }
 
+    assertOfflineWriteAllowed();
     await db.projects.delete(id);
     await db.queue.add({
       table: 'projects',

@@ -3,6 +3,7 @@ import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto, DailyLogMaterialConsump
 import type { PostgrestError } from '@supabase/supabase-js';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { CreateMetreDto } from '../types/metres';
 import { materialsService } from './materials-service';
 
@@ -180,6 +181,7 @@ export const dailyLogService = {
         if (logs.length > 0) {
           await db.daily_logs.bulkPut(logs);
         }
+        markOnlineSync();
 
         return logs;
       } catch (err) {
@@ -224,6 +226,7 @@ export const dailyLogService = {
 
         // Cache locally
         await db.daily_logs.put(log);
+        markOnlineSync();
         return log;
       } catch (err) {
         console.warn('[DailyLogService] Error fetching log by ID, falling back to local DB:', err);
@@ -308,6 +311,7 @@ export const dailyLogService = {
       } as DailyLog;
 
       await db.daily_logs.put(createdLog);
+      markOnlineSync();
 
       // ربط نسبة التقدم مع المشروع
       if (createdLog.overall_progress > 0) {
@@ -326,6 +330,7 @@ export const dailyLogService = {
     }
 
     // Offline Mode: Generate client UUID and queue sync
+    assertOfflineWriteAllowed();
     const logId = crypto.randomUUID();
     const offlineLog: DailyLog = {
       id: logId,
@@ -450,6 +455,7 @@ export const dailyLogService = {
       } as DailyLog;
 
       await db.daily_logs.put(updatedLog);
+      markOnlineSync();
 
       // ربط نسبة التقدم مع المشروع
       if (updatedLog.overall_progress > 0) {
@@ -470,6 +476,7 @@ export const dailyLogService = {
     }
 
     // Offline update path
+    assertOfflineWriteAllowed();
     const existing = await db.daily_logs.get(id);
     if (!existing) {
       throw new Error('التقرير اليومي غير موجود في التخزين المحلي.');
@@ -532,10 +539,12 @@ export const dailyLogService = {
 
       if (error) throw error;
       await db.daily_logs.delete(id);
+      markOnlineSync();
       return;
     }
 
     // Offline delete path
+    assertOfflineWriteAllowed();
     await db.daily_logs.delete(id);
 
     const pendingCreate = await db.queue

@@ -2,6 +2,7 @@ import { createClient } from '../supabase/client';
 import { Worker } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 
 const supabase = createClient();
 
@@ -40,6 +41,7 @@ export const workersService = {
         if (workers.length > 0) {
           await db.workers.bulkPut(workers);
         }
+        markOnlineSync();
         return workers;
       } catch (err) {
         console.warn('[WorkersService] Online fetch failed, falling back to local DB:', err);
@@ -65,6 +67,7 @@ export const workersService = {
 
         const worker = data as Worker;
         await db.workers.put(worker);
+        markOnlineSync();
         return worker;
       } catch (err) {
         console.warn('[WorkersService] Online fetch by ID failed, falling back to local DB:', err);
@@ -93,9 +96,11 @@ export const workersService = {
       if (error) throw error;
       const worker = data as Worker;
       await db.workers.put(worker);
+      markOnlineSync();
       return worker;
     }
 
+    assertOfflineWriteAllowed();
     const offlineWorker: Worker = {
       ...payload,
       id: crypto.randomUUID(),
@@ -128,12 +133,14 @@ export const workersService = {
       if (error) throw error;
       const worker = data as Worker;
       await db.workers.put(worker);
+      markOnlineSync();
       return worker;
     }
 
     const existing = await db.workers.get(id);
     if (!existing) throw new Error("العامل غير موجود محلياً");
 
+    assertOfflineWriteAllowed();
     const updated = { ...existing, ...updates } as Worker;
     await db.workers.put(updated);
     await db.queue.add({
@@ -178,6 +185,7 @@ export const workersService = {
 
         if (error) throw error;
         await db.workers.delete(id);
+        markOnlineSync();
         return { softDeleted: true, projectCount };
       }
 
@@ -196,10 +204,12 @@ export const workersService = {
 
       if (error) throw error;
       await db.workers.delete(id);
+      markOnlineSync();
       return { softDeleted: false, projectCount: 0 };
     }
 
     // Offline delete: remove locally and queue
+    assertOfflineWriteAllowed();
     await db.workers.delete(id);
     await db.queue.add({
       table: 'workers',

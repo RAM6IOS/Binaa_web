@@ -2,6 +2,7 @@ import { createClient } from '../supabase/client';
 import { Equipment } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
+import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 
 const supabase = createClient();
 
@@ -40,6 +41,7 @@ export const equipmentService = {
         if (items.length > 0) {
           await db.equipment.bulkPut(items);
         }
+        markOnlineSync();
         return items;
       } catch (err) {
         console.warn('[EquipmentService] Online fetch failed, falling back to local DB:', err);
@@ -66,9 +68,11 @@ export const equipmentService = {
       if (error) throw error;
       const item = data as Equipment;
       await db.equipment.put(item);
+      markOnlineSync();
       return item;
     }
 
+    assertOfflineWriteAllowed();
     const offlineItem: Equipment = {
       ...payload,
       id: crypto.randomUUID(),
@@ -105,12 +109,14 @@ export const equipmentService = {
       if (error) throw error;
       const item = data as Equipment;
       await db.equipment.put(item);
+      markOnlineSync();
       return item;
     }
 
     const existing = await db.equipment.get(id);
     if (!existing) throw new Error("المعدة غير موجودة محلياً");
 
+    assertOfflineWriteAllowed();
     const updated = { ...existing, ...updates } as Equipment;
     await db.equipment.put(updated);
     await db.queue.add({
@@ -154,6 +160,7 @@ export const equipmentService = {
 
         if (error) throw error;
         await db.equipment.delete(id);
+        markOnlineSync();
         return { softDeleted: true, projectCount };
       }
 
@@ -172,9 +179,11 @@ export const equipmentService = {
 
       if (error) throw error;
       await db.equipment.delete(id);
+      markOnlineSync();
       return { softDeleted: false, projectCount: 0 };
     }
 
+    assertOfflineWriteAllowed();
     await db.equipment.delete(id);
     await db.queue.add({
       table: 'equipment',
