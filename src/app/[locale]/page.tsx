@@ -25,6 +25,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Navbar } from "@/components/layout/Navbar";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 import { useParams } from "next/navigation";
 
@@ -49,6 +50,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in-up text-right">
+              <BrandLogo size={64} className="mb-6" />
               <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium hover:bg-primary/20 transition-colors">
                 مستقبل إدارة الإنشاءات في الجزائر 🇩🇿
               </Badge>
@@ -360,10 +362,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-16 text-right">
             <div className="col-span-1 md:col-span-1">
               <LinkNext href={`/${locale}`} className="flex items-center gap-2 justify-end mb-6">
-                <span className="text-2xl font-bold tracking-tight text-primary">Binaa</span>
-                <div className="bg-primary p-1.5 rounded-lg">
-                  <Building2 className="w-5 h-5 text-primary-foreground" />
-                </div>
+                <BrandLogo size={40} />
               </LinkNext>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 المنصة الأولى في الجزائر المتخصصة في إدارة مشاريع الأشغال العمومية والإنشاءات الكبرى.

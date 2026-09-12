@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Globe, LogOut } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -15,6 +15,7 @@ import {
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { NotificationDropdown } from "./NotificationDropdown";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function Header({
   locale,
@@ -38,6 +39,9 @@ export function Header({
   return (
     <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-30">
       <div className="flex font-semibold text-lg text-foreground items-center gap-4">
+        <Link href="/" aria-label="Binaa">
+          <BrandLogo size={36} />
+        </Link>
         {/* Mobile Sidebar Trigger */}
         <div className="md:hidden">
           <Sheet>

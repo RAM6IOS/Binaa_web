@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Link, usePathname } from "@/i18n/routing";
-import { Building2, LayoutDashboard, Briefcase, Users, Construction, Settings, Clock, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Construction, Settings, Clock, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { teamService } from "@/lib/services/team-service";
 import { can, type MemberRole } from "@/lib/auth/permissions";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function Sidebar({ locale, className }: { locale: string; className?: string }) {
   const pathname = usePathname();
@@ -52,8 +53,8 @@ export function Sidebar({ locale, className }: { locale: string; className?: str
   return (
     <aside className={cn("fixed inset-y-0 w-64 bg-inverse text-inverse-foreground flex flex-col border-r border-inverse-foreground/10 rtl:border-l rtl:border-r-0 z-40", className)}>
       <div className="h-16 flex items-center px-6 border-b border-inverse-foreground/10 gap-3">
-        <Building2 className="w-8 h-8 text-primary" />
-        <span className="text-xl font-bold tracking-tight">Binaa SaaS</span>
+        <BrandLogo variant="dark" size={36} />
+        <span className="sr-only">Binaa</span>
       </div>
       <nav className="flex-1 py-6 px-3 space-y-1">
         {menuItems.map((item) => {

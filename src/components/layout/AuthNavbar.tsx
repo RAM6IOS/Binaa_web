@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { Building2, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function AuthNavbar() {
   const t = useTranslations('Navigation');
@@ -31,12 +32,8 @@ export function AuthNavbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href={`/`} className="flex items-center gap-2.5 group transition-all">
-            <div className="bg-primary p-2 rounded-lg shadow-sm group-hover:scale-105 transition-transform">
-              <Building2 className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">
-              Binaa<span className="text-success">.</span>
-            </span>
+            <BrandLogo size={44} className="group-hover:scale-105 transition-transform" />
+            <span className="sr-only">Binaa</span>
           </Link>
 
           {/* Desktop Nav Links */}

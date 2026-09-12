@@ -1,8 +1,8 @@
 "use client";
 
-import { Building2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthNavbar } from "@/components/layout/AuthNavbar";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useTranslations } from 'next-intl';
 
 interface AuthLayoutProps {
@@ -26,12 +26,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 pt-32 pb-12 relative z-10">
         <div className="animate-fade-in flex flex-col items-center gap-2 mb-8">
-          <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-            <Building2 className="w-10 h-10 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Binaa<span className="text-primary">.</span>
-          </h1>
+          <BrandLogo size={72} />
         </div>
         
         <div className="animate-scale-in w-full max-w-md">

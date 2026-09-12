@@ -3,12 +3,12 @@
 import React from "react";
 import { Link } from "@/i18n/routing";
 import { 
-  Building2, 
   Menu, 
   X 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 interface NavbarProps {
   locale: string;
@@ -31,10 +31,8 @@ export function Navbar({ locale }: NavbarProps) {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg">
-              <Building2 className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight text-primary">Binaa</span>
+            <BrandLogo size={44} />
+            <span className="sr-only">Binaa</span>
           </Link>
 
           {/* Desktop Nav */}
