@@ -16,6 +16,8 @@ export interface Project {
   actual_cost: number;
   progress: number;
   created_by?: string;
+  /** شركة المشروع — تُملأ تلقائياً من عضوية المنشئ (فصل multi-tenant). */
+  company_id?: string;
   contract_number?: string;
   client_name?: string;
   location_coordinates?: string;
@@ -104,6 +106,8 @@ export interface Worker {
   date_of_birth?: string;
   contract_type?: ContractType;
   notes?: string;
+  /** شركة العامل — تُملأ تلقائياً من عضوية المنشئ (فصل multi-tenant). */
+  company_id?: string;
   created_at?: string;
   deleted_at?: string;
 }
@@ -115,6 +119,8 @@ export type OwnerType = 'company' | 'rented' | 'subcontracted';
 export interface Equipment {
   id: string;
   user_id?: string;
+  /** شركة المعدة — تُملأ تلقائياً من عضوية المنشئ (فصل multi-tenant). */
+  company_id?: string;
   name: string;
   type: string;
   category: string;

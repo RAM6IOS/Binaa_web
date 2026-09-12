@@ -13,6 +13,7 @@ import {
   SlidersHorizontal, Wrench, Gauge,
 } from "lucide-react";
 import { equipmentService } from "@/lib/services/equipment-service";
+import { useCan } from "@/hooks/use-can";
 import { Equipment } from "@/lib/types/projects";
 import { AddEquipmentDialog } from "@/components/equipment/AddEquipmentDialog";
 import { EquipmentStatusBadge } from "@/components/equipment/EquipmentStatusBadge";
@@ -52,6 +53,11 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [editEquipment, setEditEquipment] = useState<Equipment | null>(null);
+
+  // قائمة العتاد العامة: العرض مفتوح لأعضاء الشركة،
+  // الإضافة/التعديل/الحذف → manage_projects فقط (owner/admin).
+  const { can } = useCan();
+  const canManage = can('manage_projects');
 
   const fetchEquipment = async () => {
     setIsLoading(true);
@@ -199,7 +205,7 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
             {isAr ? 'إدارة المعدات الثقيلة وتتبع حالتها' : 'Gérer les engins lourds et suivre leur état'}
           </p>
         </div>
-        <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />
+        {canManage && <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />}
       </div>
 
       {/* ════════════════════════════════════════════ */}
@@ -508,20 +514,24 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => { e.stopPropagation(); setEditEquipment(item); }}
-                              className="cursor-pointer gap-2"
-                            >
-                              <Edit className="w-4 h-4" />
-                              {isAr ? 'تعديل' : 'Modifier'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive cursor-pointer gap-2"
-                              onClick={() => askDelete(item.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
-                            </DropdownMenuItem>
+                            {canManage && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={(e) => { e.stopPropagation(); setEditEquipment(item); }}
+                                  className="cursor-pointer gap-2"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                  {isAr ? 'تعديل' : 'Modifier'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive cursor-pointer gap-2"
+                                  onClick={() => askDelete(item.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

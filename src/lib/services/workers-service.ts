@@ -3,6 +3,7 @@ import { Worker } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
+import { assertPermission, resolveMyCompanyId } from './guard';
 
 const supabase = createClient();
 
@@ -25,12 +26,15 @@ export const workersService = {
     if (isOnline) {
       try {
         const userId = await resolveUserId();
-        if (!userId) throw new Error("غير مصرح");
+        if (!userId) return [];
+
+        const companyId = await resolveMyCompanyId();
+        if (!companyId) return [];
 
         const { data, error } = await supabase
           .from('workers')
           .select('*')
-          .eq('user_id', userId)
+          .eq('company_id', companyId)
           .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
@@ -82,9 +86,13 @@ export const workersService = {
   async create(workerData: Omit<Worker, 'id' | 'created_at' | 'updated_at'>) {
     const userId = await resolveUserId();
     if (!userId) throw new Error('يجب تسجيل الدخول أولاً');
+    const membership = await assertPermission('manage_projects');
+
+    const companyId = membership?.company_id ?? (await resolveMyCompanyId());
+    if (!companyId) throw new Error('لم يتم العثور على شركة المستخدم');
 
     const isOnline = await checkNetworkStatus();
-    const payload = { ...workerData, user_id: userId };
+    const payload = { ...workerData, user_id: userId, company_id: companyId };
 
     if (isOnline) {
       const { data, error } = await supabase
@@ -120,6 +128,8 @@ export const workersService = {
   },
 
   async update(id: string, updates: Partial<Worker>) {
+    await assertPermission('manage_projects');
+
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -170,6 +180,7 @@ export const workersService = {
   async delete(id: string) {
     const userId = await resolveUserId();
     if (!userId) throw new Error("غير مصرح");
+    await assertPermission('manage_projects');
 
     const isOnline = await checkNetworkStatus();
 
@@ -180,8 +191,7 @@ export const workersService = {
         const { error } = await supabase
           .from('workers')
           .update({ deleted_at: new Date().toISOString() })
-          .eq('id', id)
-          .eq('user_id', userId);
+          .eq('id', id);
 
         if (error) throw error;
         await db.workers.delete(id);
@@ -199,8 +209,7 @@ export const workersService = {
       const { error } = await supabase
         .from('workers')
         .delete()
-        .eq('id', id)
-        .eq('user_id', userId);
+        .eq('id', id);
 
       if (error) throw error;
       await db.workers.delete(id);

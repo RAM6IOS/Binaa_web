@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 
 export interface GanttTask {
     id: string;
@@ -43,6 +44,8 @@ export const ganttService = {
      * تحديث تاريخ المهمة (Drag & Drop)
      */
     async updateTaskDates(taskId: string, startDate: string, dueDate: string) {
+        // تحريك مهام Gantt = تعديل بنية التخطيط (manage_projects) — member عرض فقط.
+        await assertPermission('manage_projects');
         const supabase = createClient();
 
         const { data, error } = await supabase
@@ -64,6 +67,7 @@ export const ganttService = {
      * تحديث ترتيب المهام (Order Index)
      */
     async updateTasksOrder(tasks: { id: string; order_index: number }[]) {
+        await assertPermission('manage_projects');
         const supabase = createClient();
 
         const updates = tasks.map(task =>
@@ -81,6 +85,7 @@ export const ganttService = {
      * إضافة تبعية بين مهمتين
      */
     async addDependency(taskId: string, dependencyId: string) {
+        await assertPermission('manage_projects');
         const supabase = createClient();
 
         const { data: task } = await supabase

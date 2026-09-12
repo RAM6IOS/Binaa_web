@@ -1,19 +1,23 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { User, Building2, Bell, ShieldCheck, CreditCard } from "lucide-react";
+import { User, Users } from "lucide-react";
 
 interface SettingsSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   locale: string;
+  canManageTeam?: boolean;
 }
 
-export function SettingsSidebar({ activeSection, onSectionChange, locale }: SettingsSidebarProps) {
+export function SettingsSidebar({ activeSection, onSectionChange, locale, canManageTeam = false }: SettingsSidebarProps) {
   const isAr = locale === 'ar';
 
   const sections = [
     { id: 'profile', label: isAr ? 'الإعدادات الشخصية' : 'Profil', icon: User },
+    ...(canManageTeam
+      ? [{ id: 'team', label: isAr ? 'الفريق' : 'Équipe', icon: Users }]
+      : []),
     // Temporarily hidden as requested
     // { id: 'company', label: isAr ? 'إعدادات الشركة' : 'Entreprise', icon: Building2 },
     // { id: 'notifications', label: isAr ? 'إعدادات الإشعارات' : 'Notifications', icon: Bell },

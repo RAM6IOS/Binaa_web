@@ -50,7 +50,8 @@ export async function proxy(request: NextRequest) {
     pathname.includes('/equipment') ||
     pathname.includes('/dashboard') ||
     pathname.includes('/marketplace') ||
-    pathname.includes('/pointage');
+    pathname.includes('/pointage') ||
+    pathname.includes('/roles');
 
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();

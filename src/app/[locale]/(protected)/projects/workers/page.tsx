@@ -14,6 +14,7 @@ import {
   SlidersHorizontal, PhoneCall,
 } from "lucide-react";
 import { workersService } from "@/lib/services/workers-service";
+import { useCan } from "@/hooks/use-can";
 import { Worker } from "@/lib/types/projects";
 import { AddWorkerDialog } from "@/components/workers/AddWorkerDialog";
 import { ImportWorkersDialog } from "@/components/workers/ImportWorkersDialog";
@@ -48,6 +49,11 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
   const [isCheckingAssoc, setIsCheckingAssoc] = useState(false);
 
   const [editWorker, setEditWorker] = useState<Worker | null>(null);
+
+  // سجلّ العمال (قائمة عامة): العرض مفتوح لأعضاء الشركة،
+  // الإضافة/التعديل/الحذف → manage_projects فقط (owner/admin).
+  const { can } = useCan();
+  const canManage = can('manage_projects');
 
   const [wilayaFilter, setWilayaFilter] = useState<string>('all');
   const [jobFilter, setJobFilter] = useState<string>('all');
@@ -160,12 +166,12 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
       header={{
         title: isAr ? 'إدارة الموارد البشرية' : 'Main d\'œuvre',
         description: isAr ? 'تنظيم العمال، تتبع الحرف والوثائق' : 'Gestion du personnel et métiers',
-        actions: (
+        actions: canManage ? (
           <>
             <ImportWorkersDialog isAr={isAr} onSuccess={fetchWorkers} existingWorkers={workers} />
             <AddWorkerDialog isAr={isAr} onSuccess={fetchWorkers} />
           </>
-        ),
+        ) : null,
       }}
     >
 
@@ -448,7 +454,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                       <TableCell><WorkerStatusBadge status={worker.availability} isAr={isAr} /></TableCell>
                       <TableCell><code className="text-xs font-mono font-bold bg-muted px-2 py-0.5 rounded text-muted-foreground">{worker.cin}</code></TableCell>
                       <TableCell className="text-right pe-8">
-                        <ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} />
+<ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} canManage={canManage} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -464,7 +470,7 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
 // ── القائمة المنسدلة ──
 
-function ActionMenu({ worker, isAr, refresh, onDeleteClick, onEdit }: any) {
+function ActionMenu({ worker, isAr, refresh, onDeleteClick, onEdit, canManage }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -473,20 +479,24 @@ function ActionMenu({ worker, isAr, refresh, onDeleteClick, onEdit }: any) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[170px] p-2 rounded-lg">
-        <DropdownMenuItem
-          onClick={(e) => { e.stopPropagation(); onEdit(worker); }}
-          className="cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md"
-        >
-          <Edit className="w-3.5 h-3.5 text-primary" />
-          {isAr ? 'تعديل الملف' : 'Détails / Modifier'}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="text-destructive cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
-          onClick={onDeleteClick}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
-        </DropdownMenuItem>
+        {canManage && (
+          <>
+            <DropdownMenuItem
+              onClick={(e) => { e.stopPropagation(); onEdit(worker); }}
+              className="cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md"
+            >
+              <Edit className="w-3.5 h-3.5 text-primary" />
+              {isAr ? 'تعديل الملف' : 'Détails / Modifier'}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive cursor-pointer gap-2 py-2.5 font-bold text-xs rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
+              onClick={onDeleteClick}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {isAr ? 'حذف / تعطيل' : 'Supprimer / Désactiver'}
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

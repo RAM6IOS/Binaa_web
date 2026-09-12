@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import {
   Material, CreateMaterialDto, UpdateMaterialDto,
   MaterialConsumption, CreateConsumptionDto,
@@ -80,6 +81,7 @@ export const materialsService = {
 
   // ── CRUD ──
   async create(dto: CreateMaterialDto): Promise<Material> {
+    await assertPermission('edit_field_data');
     const userId = await resolveUserId();
     if (!userId) throw new Error("غير مصرح");
 
@@ -97,6 +99,7 @@ export const materialsService = {
   },
 
   async update(id: string, dto: UpdateMaterialDto): Promise<Material> {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase
       .from('materials')
       .update({ ...dto, updated_at: new Date().toISOString() })
@@ -112,6 +115,7 @@ export const materialsService = {
   },
 
   async delete(id: string): Promise<void> {
+    await assertPermission('edit_field_data');
     const { error } = await supabase
       .from('materials')
       .delete()

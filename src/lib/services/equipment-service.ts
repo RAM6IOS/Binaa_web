@@ -3,6 +3,7 @@ import { Equipment } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
+import { assertPermission, resolveMyCompanyId } from './guard';
 
 const supabase = createClient();
 
@@ -25,12 +26,15 @@ export const equipmentService = {
     if (isOnline) {
       try {
         const userId = await resolveUserId();
-        if (!userId) throw new Error('غير مصرح');
+        if (!userId) return [];
+
+        const companyId = await resolveMyCompanyId();
+        if (!companyId) return [];
 
         const { data, error } = await supabase
           .from('equipment')
           .select('*')
-          .eq('user_id', userId)
+          .eq('company_id', companyId)
           .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
@@ -54,9 +58,13 @@ export const equipmentService = {
   async create(equipment: Omit<Equipment, 'id' | 'created_at' | 'user_id'>) {
     const userId = await resolveUserId();
     if (!userId) throw new Error('غير مصرح');
+    const membership = await assertPermission('manage_projects');
+
+    const companyId = membership?.company_id ?? (await resolveMyCompanyId());
+    if (!companyId) throw new Error('لم يتم العثور على شركة المستخدم');
 
     const isOnline = await checkNetworkStatus();
-    const payload = { ...equipment, user_id: userId };
+    const payload = { ...equipment, user_id: userId, company_id: companyId };
 
     if (isOnline) {
       const { data, error } = await supabase
@@ -92,17 +100,15 @@ export const equipmentService = {
   },
 
   async update(id: string, updates: Partial<Equipment>) {
+    await assertPermission('manage_projects');
+
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
-      const userId = await resolveUserId();
-      if (!userId) throw new Error('غير مصرح');
-
       const { data, error } = await supabase
         .from('equipment')
         .update(updates)
         .eq('id', id)
-        .eq('user_id', userId)
         .select()
         .single();
 
@@ -145,6 +151,7 @@ export const equipmentService = {
   async delete(id: string) {
     const userId = await resolveUserId();
     if (!userId) throw new Error('غير مصرح');
+    await assertPermission('manage_projects');
 
     const isOnline = await checkNetworkStatus();
 
@@ -155,8 +162,7 @@ export const equipmentService = {
         const { error } = await supabase
           .from('equipment')
           .update({ deleted_at: new Date().toISOString() })
-          .eq('id', id)
-          .eq('user_id', userId);
+          .eq('id', id);
 
         if (error) throw error;
         await db.equipment.delete(id);
@@ -174,8 +180,7 @@ export const equipmentService = {
       const { error } = await supabase
         .from('equipment')
         .delete()
-        .eq('id', id)
-        .eq('user_id', userId);
+        .eq('id', id);
 
       if (error) throw error;
       await db.equipment.delete(id);

@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { ProjectDocument } from '../types/projects';
 
 const supabase = createClient();
@@ -16,6 +17,7 @@ export const documentsService = {
   },
 
   async create(document: Omit<ProjectDocument, 'id'>) {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase
       .from('project_documents')
       .insert([document])
@@ -27,6 +29,7 @@ export const documentsService = {
   },
 
   async delete(id: string) {
+    await assertPermission('manage_projects');
     const { error } = await supabase
       .from('project_documents')
       .delete()
@@ -37,6 +40,7 @@ export const documentsService = {
   },
 
   async uploadFile(path: string, file: File) {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase.storage
       .from('project-documents')
       .upload(path, file);

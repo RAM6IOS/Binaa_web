@@ -1,4 +1,5 @@
 import { createClient as createBrowserClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ProjectDocument } from '../types/documents';
 
@@ -51,6 +52,7 @@ export const documentService = {
   ): Promise<ProjectDocument> {
     const supabase = getSupabase(customClient);
 
+    await assertPermission('edit_field_data');
     // Get current authenticated user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
@@ -122,8 +124,10 @@ export const documentService = {
     documentId: string,
     updates: Partial<Pick<ProjectDocument, 'file_name' | 'notes' | 'document_type' | 'document_date' | 'document_category'>>,
     customClient?: SupabaseClient
-  ): Promise<ProjectDocument> {
+): Promise<ProjectDocument> {
     const supabase = getSupabase(customClient);
+    // تعديل/حذف الوثائق = هيكلي (manage_projects)؛ member رفع فقط.
+    await assertPermission('manage_projects');
     const { data, error } = await supabase
       .from('project_documents')
       .update(updates)
@@ -140,6 +144,7 @@ export const documentService = {
 
   async deleteDocument(documentId: string, customClient?: SupabaseClient): Promise<boolean> {
     const supabase = getSupabase(customClient);
+    await assertPermission('manage_projects');
 
     // 1. Get document details to retrieve its storage URL
     const document = await this.getDocumentById(documentId, supabase);

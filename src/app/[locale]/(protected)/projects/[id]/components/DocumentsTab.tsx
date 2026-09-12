@@ -27,6 +27,7 @@ import { documentService } from "@/lib/services/document-service";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useCan } from "@/hooks/use-can";
 
 interface Props {
   project: Project & { project_documents?: ProjectDocument[] };
@@ -55,6 +56,10 @@ export function DocumentsTab({ project, isAr }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const supabase = createClient();
+
+  // الوثائق: member يعرض ويرفع فقط؛ الحذف/التعديل = هيكلي (manage_projects).
+  const { can } = useCan();
+  const canManageDocs = can('manage_projects');
 
   useEffect(() => {
     async function init() {
@@ -187,7 +192,7 @@ export function DocumentsTab({ project, isAr }: Props) {
                   <div className="absolute inset-0 bg-inverse/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                     <Button size="icon" variant="secondary" className="rounded-full shadow-sm" asChild><a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="Download"><Download className="w-4 h-4" /></a></Button>
                     <Button size="icon" variant="secondary" className="rounded-full shadow-sm" onClick={() => openPreview(doc)} aria-label="Preview"><Eye className="w-4 h-4" /></Button>
-                    {isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-sm" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 className="w-4 h-4" /></Button>}
+                    {canManageDocs && isOwner && <Button size="icon" variant="destructive" className="rounded-full shadow-sm" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 className="w-4 h-4" /></Button>}
                   </div>
                 </div>
 
@@ -251,7 +256,7 @@ export function DocumentsTab({ project, isAr }: Props) {
                     <td className="text-xs font-bold uppercase text-muted-foreground"><span>{doc.document_type || doc.file_type}</span></td>
                     <td className="text-xs font-bold uppercase text-muted-foreground"><span>{doc.document_category || '-'}</span></td>
                     <td className="font-mono text-xs opacity-60 tabular-nums uppercase">{doc.document_date ? new Date(doc.document_date).toLocaleDateString(isAr ? 'ar' : 'fr') : new Date(doc.uploaded_at).toLocaleDateString(isAr ? 'ar' : 'fr')}</td>
-                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-primary"><a href={doc.file_url} target="_blank" aria-label="Download"><Download size={16} /></a></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openPreview(doc)} aria-label="Preview"><Eye size={16} /></Button>{currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 size={16} /></Button>}</div></td>
+                    <td className="text-center pe-6"><div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="ghost" size="icon" asChild className="h-8 w-8 text-primary"><a href={doc.file_url} target="_blank" aria-label="Download"><Download size={16} /></a></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openPreview(doc)} aria-label="Preview"><Eye size={16} /></Button>{canManageDocs && currentUserId === doc.uploaded_by && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => askDelete(doc.id)} aria-label="Delete"><Trash2 size={16} /></Button>}</div></td>
                   </tr>
                 ))}
               </tbody>
@@ -264,7 +269,7 @@ export function DocumentsTab({ project, isAr }: Props) {
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         isAr={isAr}
-        isOwner={currentUserId === previewDoc?.uploaded_by}
+        isOwner={canManageDocs && currentUserId === previewDoc?.uploaded_by}
         onDelete={handlePreviewDelete}
         onUpdate={handlePreviewUpdate}
       />

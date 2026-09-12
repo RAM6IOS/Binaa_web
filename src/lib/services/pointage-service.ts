@@ -1,6 +1,7 @@
 import { createClient } from '../supabase/client';
 import { Pointage, PointageWorker } from '../types/daily-logs';
 import type { PostgrestError } from '@supabase/supabase-js';
+import { resolveMyCompanyId, assertPermission } from './guard';
 
 const supabase = createClient();
 
@@ -52,6 +53,8 @@ export const pointageService = {
   },
 
   async getAllPointages(filters?: { projectId?: string; location?: string; limit?: number }) {
+    // سجلّ الحضور كاملاً = عرض إداري: owner/admin فقط (manage_attendance).
+    await assertPermission('manage_attendance');
     const supabase = createClient();
 
     let query = supabase
@@ -111,6 +114,8 @@ export const pointageService = {
     endDate: string,
     projectId?: string
   ) {
+    // السجل الأسبوعي = عرض إداري: owner/admin فقط (manage_attendance).
+    await assertPermission('manage_attendance');
     const supabase = createClient();
 
     let query = supabase
@@ -137,6 +142,21 @@ export const pointageService = {
       } else {
         query = query.eq('project_id', projectId);
       }
+    } else {
+      // عزل الشركة: لا نعتمد على created_by وحده — نقيّد ببيانات مشاريع شركة
+      // المستخدم الحالية (أي عضو active في الشركة يرى سجلّها). إن تعذّر تحديد
+      // الشركة أو لم يملك المستخدم مشاريع، لا نُظهر شيئاً (فشل آمن).
+      const companyId = await resolveMyCompanyId();
+      if (companyId) {
+        const { data: projRows } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('company_id', companyId);
+        const ids = (projRows || []).map((p) => p.id);
+        query = query.in('project_id', ids.length > 0 ? ids : ['00000000-0000-0000-0000-0000-000000000000']);
+      } else {
+        query = query.in('project_id', ['00000000-0000-0000-0000-0000-000000000000']);
+      }
     }
 
     const { data, error } = await query;
@@ -158,6 +178,8 @@ export const pointageService = {
   },
 
   async getTodayPointages() {
+    // عرض إداري (قائمة اليوم): owner/admin فقط.
+    await assertPermission('manage_attendance');
     const today = new Date().toISOString().split('T')[0];
     const supabase = createClient();
 
@@ -312,6 +334,8 @@ export const pointageService = {
     workerId: string,
     options?: { projectId?: string; location?: string; notes?: string; date?: string }
   ): Promise<PointageWorker> {
+    // الحضور داخل المشروع = بيانات ميدانية (edit_field_data) متاحة لـ member.
+    await assertPermission('edit_field_data');
     const selectedDate = options?.date || new Date().toISOString().split('T')[0];
     if (isFutureDate(selectedDate)) {
       throw new Error("لا يمكن تسجيل الحضور لتاريخ مستقبلي");
@@ -399,6 +423,7 @@ export const pointageService = {
     workerId: string,
     options?: { projectId?: string; location?: string; date?: string }
   ): Promise<PointageWorker> {
+    await assertPermission('edit_field_data');
     const selectedDate = options?.date || new Date().toISOString().split('T')[0];
     if (isFutureDate(selectedDate)) {
       throw new Error("لا يمكن تسجيل الخروج لتاريخ مستقبلي");
@@ -465,6 +490,7 @@ export const pointageService = {
     checkOut?: string | null;
     breakMinutes?: number;
   }): Promise<PointageWorker> {
+    await assertPermission('edit_field_data');
     if (isFutureDate(params.date)) {
       throw new Error("لا يمكن تعديل الحضور لتاريخ مستقبلي");
     }

@@ -27,6 +27,7 @@ import { ProgressBar } from "@/components/projects/ProgressBar";
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
+import { useCan } from "@/hooks/use-can";
 
 // --- المكونات المساعدة ---
 
@@ -120,6 +121,10 @@ export function TaskBoardTab({ project, isAr }: { project: Project, isAr: boolea
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [activeTask, setActiveTask] = useState<ProjectTask | null>(null);
   const [mobileFilter, setMobileFilter] = useState<TaskStatus | 'all'>('all');
+
+  // إنشاء/حذف المهام = هيكلة تخطيطية (manage_projects)؛ member يحدّث الحالة/التقدم فقط.
+  const { can } = useCan();
+  const canManageTasks = can('manage_projects');
 
   const columns: { id: TaskStatus; title_ar: string; title_fr: string }[] = [
     { id: 'todo', title_ar: 'المهام الجديدة', title_fr: 'À faire' },
@@ -230,7 +235,7 @@ export function TaskBoardTab({ project, isAr }: { project: Project, isAr: boolea
             <button onClick={() => setView('kanban')} className={`p-2 rounded-lg transition-all ${view === 'kanban' ? 'bg-muted text-primary' : 'text-muted-foreground'}`} aria-label="Kanban view"><LayoutGrid className="w-4 h-4" /></button>
             <button onClick={() => setView('list')} className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-muted text-primary' : 'text-muted-foreground'}`} aria-label="List view"><List className="w-4 h-4" /></button>
           </div>
-          <AddTaskDialog isAr={isAr} projectId={project.id} onSuccess={() => refreshData(true)} />
+          {canManageTasks && <AddTaskDialog isAr={isAr} projectId={project.id} onSuccess={() => refreshData(true)} />}
         </div>
       </CardHeader>
 

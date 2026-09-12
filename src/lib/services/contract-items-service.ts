@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { ContractItem, CreateContractItemDto, UpdateContractItemDto } from '../types/metres';
 
 const supabase = createClient();
@@ -36,6 +37,8 @@ export const contractItemsService = {
   },
 
   async create(dto: CreateContractItemDto): Promise<ContractItem> {
+    // بنود العقد والأسعار الأساسية = هيكلة عقدية مملوكة لـ manage_projects.
+    await assertPermission('manage_projects');
     const { data, error } = await supabase
       .from('contract_items')
       .insert(dto)
@@ -51,6 +54,7 @@ export const contractItemsService = {
   },
 
   async createMany(dtos: CreateContractItemDto[]): Promise<ContractItem[]> {
+    await assertPermission('manage_projects');
     const { data, error } = await supabase
       .from('contract_items')
       .insert(dtos)
@@ -65,6 +69,7 @@ export const contractItemsService = {
   },
 
   async update(id: string, dto: UpdateContractItemDto): Promise<ContractItem> {
+    await assertPermission('manage_projects');
     const { data, error } = await supabase
       .from('contract_items')
       .update({ ...dto, updated_at: new Date().toISOString() })
@@ -81,6 +86,7 @@ export const contractItemsService = {
   },
 
   async delete(id: string): Promise<void> {
+    await assertPermission('manage_projects');
     const { error } = await supabase
       .from('contract_items')
       .delete()

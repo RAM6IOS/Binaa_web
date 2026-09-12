@@ -12,6 +12,7 @@ import {
   UpdateWorkSituationItemDto,
 } from "../types/situations";
 import { numberToWords } from "../utils/number-to-words";
+import { assertPermission } from "./guard";
 
 const supabase = createClient();
 
@@ -200,6 +201,7 @@ export const situationsService = {
 
   // إنشاء وضعية جديدة
   async create(dto: CreateWorkSituationDto): Promise<WorkSituationWithItems> {
+    await assertPermission('manage_finance');
     if (dto.period_start && dto.period_end && dto.period_start > dto.period_end) {
       throw new Error("تاريخ البداية يجب أن يسبق تاريخ النهاية أو يساويه");
     }
@@ -450,6 +452,7 @@ export const situationsService = {
 
   // تحديث حقول مالية للوضعية
   async updateFinancialFields(situationId: string, dto: UpdateWorkSituationFinancialsDto): Promise<void> {
+    await assertPermission('manage_finance');
     const { data: sit, error: fetchErr } = await supabase
       .from("work_situations")
       .select("status")
@@ -471,6 +474,7 @@ export const situationsService = {
 
   // تحديث لقطة الوضعية والبيانات الافتراضية للمشروع في نفس الوقت
   async updateSnapshotAndDefaults(situationId: string, projectId: string, dto: UpdateWorkSituationFinancialsDto): Promise<void> {
+    await assertPermission('manage_finance');
     // 1. تحديث الوضعية الحالية
     await this.updateFinancialFields(situationId, dto);
     
@@ -498,6 +502,7 @@ export const situationsService = {
 
   // تحديث بند في الوضعية
   async updateItem(itemId: string, dto: UpdateWorkSituationItemDto): Promise<void> {
+    await assertPermission('manage_finance');
     const { data: item, error: fetchErr } = await supabase
       .from("work_situation_items")
       .select("*, situation:work_situations(status)")
@@ -543,6 +548,7 @@ export const situationsService = {
 
   // إعادة حساب إجماليات الصفحة 1 وفق الترتيب المالي الرسمي (1 إلى 14)
   async recalculate(situationId: string): Promise<void> {
+    await assertPermission('manage_finance');
     // 1. جلب الوضعية
     const { data: sit, error: sitErr } = await supabase
       .from("work_situations")
@@ -647,6 +653,7 @@ export const situationsService = {
 
   // اعتماد الوضعية (مع منع الاعتماد ببيانات غير صالحة)
   async validate(id: string): Promise<void> {
+    await assertPermission('manage_finance');
     const sitWithItems = await this.getById(id);
     if (!sitWithItems) throw new Error("الوضعية غير موجودة / Situation introuvable");
 
@@ -713,6 +720,7 @@ export const situationsService = {
 
   // حذف وضعية (فقط إذا كانت draft)
   async delete(id: string): Promise<void> {
+    await assertPermission('manage_finance');
     const { data: sit, error: fetchErr } = await supabase
       .from("work_situations")
       .select("status")

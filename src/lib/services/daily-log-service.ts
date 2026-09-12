@@ -6,6 +6,7 @@ import { checkNetworkStatus } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { CreateMetreDto } from '../types/metres';
 import { materialsService } from './materials-service';
+import { assertPermission } from './guard';
 
 const supabase = createClient();
 
@@ -237,6 +238,7 @@ export const dailyLogService = {
   },
 
   async create(dto: CreateDailyLogDto): Promise<DailyLog> {
+    await assertPermission('edit_field_data');
     let userId: string | undefined;
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -387,6 +389,7 @@ export const dailyLogService = {
   },
 
   async update(id: string, dto: UpdateDailyLogDto): Promise<DailyLog> {
+    await assertPermission('edit_field_data');
     const isOnline = await checkNetworkStatus();
 
     // Resolve userId for consumption records
@@ -529,6 +532,8 @@ export const dailyLogService = {
   },
 
   async delete(id: string): Promise<void> {
+    // حذف تقرير يومي يؤثر على سجلّ التقدم — عمل هيكلي (manage_projects).
+    await assertPermission('manage_projects');
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -567,6 +572,7 @@ export const dailyLogService = {
   },
 
   async uploadPhoto(file: File, projectId: string): Promise<string> {
+    await assertPermission('edit_field_data');
     const isOnline = await checkNetworkStatus();
     if (!isOnline) {
       throw new Error('تحميل الصور يتطلب اتصالاً نشطاً بالإنترنت.');

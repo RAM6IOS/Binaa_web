@@ -3,6 +3,7 @@ import { Project } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
+import { assertPermission, resolveMyCompanyId } from './guard';
 
 const supabase = createClient();
 
@@ -28,12 +29,18 @@ export const projectsService = {
         const userId = await resolveUserId();
         if (!userId) throw new Error("غير مصرح");
 
-        const { data, error } = await supabase
+        const companyId = await resolveMyCompanyId();
+        let query = supabase
           .from('projects')
           .select('*')
-          .eq('id', id)
-          .eq('created_by', userId)
-          .single();
+          .eq('id', id);
+        if (companyId) {
+          query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
+        } else {
+          query = query.eq('created_by', userId);
+        }
+
+        const { data, error } = await query.single();
 
         if (error) throw error;
 
@@ -59,11 +66,18 @@ export const projectsService = {
         const userId = await resolveUserId();
         if (!userId) return [];
 
-        const { data, error } = await supabase
+        const companyId = await resolveMyCompanyId();
+        let query = supabase
           .from('projects')
-          .select('*')
-          .eq('created_by', userId)
-          .order('created_at', { ascending: false });
+          .select('*');
+        if (companyId) {
+          query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
+        } else {
+          query = query.eq('created_by', userId);
+        }
+        query = query.order('created_at', { ascending: false });
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
@@ -87,10 +101,19 @@ export const projectsService = {
     const userId = await resolveUserId();
     if (!userId) throw new Error("غير مصرح");
 
+    // الشرط المُلزم: owner/admin فقط (manage_projects). العضوية (مع الدور) هي أيضاً
+    // المصدر الوحيد لشركة الإدراج — يمنع إنشاء مشروع خارج الشركة أو بلا شركة (RLS).
+    const membership = await assertPermission('manage_projects');
+    const companyId = membership?.company_id ?? null;
+
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
-      const payload = { ...projectData, created_by: userId };
+      const payload = {
+        ...projectData,
+        created_by: userId,
+        ...(companyId ? { company_id: companyId } : {}),
+      };
 
       const { data, error } = await supabase
         .from('projects')
@@ -105,12 +128,13 @@ export const projectsService = {
       return project;
     }
 
-    // Offline: save locally + queue
+    // Offline: save locally + queue (التحقق من الدور أعلاه يمر عبر كاش العضوية)
     assertOfflineWriteAllowed();
     const offlineProject: Project = {
       ...projectData,
       id: crypto.randomUUID(),
       created_by: userId,
+      company_id: companyId ?? undefined,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     } as Project;
@@ -128,6 +152,8 @@ export const projectsService = {
   },
 
   async update(id: string, updates: Partial<Project>) {
+    await assertPermission('manage_projects');
+
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -164,6 +190,8 @@ export const projectsService = {
   },
 
   async delete(id: string) {
+    await assertPermission('manage_projects');
+
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {

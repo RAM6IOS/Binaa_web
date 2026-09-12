@@ -28,9 +28,11 @@ interface DailyLogCardProps {
   projectId: string;
   onEdit?: () => void;
   onDelete: (id: string) => void;
+  /** حذف التقرير = manage_projects؛ member إضافة/تعديل فقط. */
+  canDelete?: boolean;
 }
 
-export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }: DailyLogCardProps) {
+export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete, canDelete = true }: DailyLogCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [attachments, setAttachments] = useState<any[]>([]);
   const [isAttachmentsLoading, setIsAttachmentsLoading] = useState(false);
@@ -179,6 +181,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
               }
             />
 
+            {canDelete && (
             <Button
               variant="ghost"
               size="icon"
@@ -188,6 +191,7 @@ export function DailyLogCard({ log, project, isAr, projectId, onEdit, onDelete }
             >
               <Trash2 className="w-4.5 h-4.5" />
             </Button>
+          )}
           </div>
         </div>
 

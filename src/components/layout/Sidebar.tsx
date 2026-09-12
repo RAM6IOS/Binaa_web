@@ -1,19 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Link, usePathname } from "@/i18n/routing";
-import { Building2, LayoutDashboard, Briefcase, FileText, PieChart, Users, Construction, Settings, Clock } from "lucide-react";
+import { Building2, LayoutDashboard, Briefcase, Users, Construction, Settings, Clock, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { teamService } from "@/lib/services/team-service";
+import { can, type MemberRole } from "@/lib/auth/permissions";
 
 export function Sidebar({ locale, className }: { locale: string; className?: string }) {
   const pathname = usePathname();
   const isAr = locale === 'ar';
+
+  // الصلاحيات تُجلب من العضوية (تخزين محلي عند الانقطاع).
+  // الافتراضي: مخفي حتى تتأكد — لا تظهر لموظف/عضو أبداً.
+  const [canManageTeam, setCanManageTeam] = useState<boolean>(false);
+  const [canManageAttendance, setCanManageAttendance] = useState<boolean>(false);
+
+  useEffect(() => {
+    let mounted = true;
+    teamService
+      .getMyMembership()
+      .then((m) => {
+        if (!mounted) return;
+        const role = m?.role as MemberRole | undefined;
+        setCanManageTeam(can(role, 'manage_team'));
+        setCanManageAttendance(can(role, 'manage_attendance'));
+      })
+      .catch(() => {
+        setCanManageTeam(false);
+        setCanManageAttendance(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const menuItems = [
     { name: isAr ? 'لوحة القيادة' : 'Tableau de bord', href: '/projects/dashboard', icon: LayoutDashboard },
     { name: isAr ? 'المشاريع' : 'Projets', href: '/projects', icon: Briefcase },
     { name: isAr ? 'العمال' : 'العمال / Ouvriers', href: '/projects/workers', icon: Users },
     { name: isAr ? 'العتاد' : 'Équipement', href: '/projects/equipment', icon: Construction },
-    { name: isAr ? 'تسجيل الحضور' : 'Pointage / Présence', href: '/pointage', icon: Clock },
+    ...(canManageAttendance
+      ? [{ name: isAr ? 'تسجيل الحضور' : 'Pointage / Présence', href: '/pointage', icon: Clock }]
+      : []),
+    ...(canManageTeam
+      ? [{ name: isAr ? 'الأدوار والصلاحيات' : 'Rôles & Permissions', href: '/roles', icon: ShieldCheck }]
+      : []),
     { name: isAr ? 'الإعدادات' : 'Paramètres', href: '/settings', icon: Settings },
   ];
 

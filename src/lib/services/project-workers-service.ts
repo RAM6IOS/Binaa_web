@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { ProjectWorker } from '../types/projects';
 
 const supabase = createClient();
@@ -26,6 +27,7 @@ export const projectWorkersService = {
   },
 
   async assign(assignments: Omit<ProjectWorker, 'id' | 'assigned_at'>[]) {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase
       .from('project_workers')
       .insert(assignments)
@@ -36,6 +38,7 @@ export const projectWorkersService = {
   },
 
   async remove(id: string) {
+    await assertPermission('edit_field_data');
     const { error } = await supabase
       .from('project_workers')
       .delete()
@@ -46,6 +49,7 @@ export const projectWorkersService = {
   },
 
   async update(id: string, updates: Partial<ProjectWorker>) {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase
       .from('project_workers')
       .update(updates)

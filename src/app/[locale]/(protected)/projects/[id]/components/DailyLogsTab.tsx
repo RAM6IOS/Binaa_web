@@ -27,6 +27,7 @@ import { Project } from "@/lib/types/projects";
 import { AddDailyLogDialog } from "./AddDailyLogDialog";
 import { DailyLogCard } from "./DailyLogCard";
 import { toast } from "sonner";
+import { useCan } from "@/hooks/use-can";
 
 interface DailyLogsTabProps {
   project: Project;
@@ -35,6 +36,10 @@ interface DailyLogsTabProps {
 }
 
 export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
+  // حذف تقرير = manage_projects؛ member إضافة/تعديل فقط.
+  const { can } = useCan();
+  const canDeleteLogs = can('manage_projects');
+
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [needsMigration, setNeedsMigration] = useState(false);
@@ -317,6 +322,7 @@ export function DailyLogsTab({ project, isAr, onRefresh }: DailyLogsTabProps) {
               projectId={project.id}
               onEdit={() => { fetchLogs(true); onRefresh?.(); }}
               onDelete={handleDelete}
+              canDelete={canDeleteLogs}
             />
           ))}
         </div>

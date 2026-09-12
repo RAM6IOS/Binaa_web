@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { ProjectTask, TaskStatus } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus } from '../utils/network';
@@ -43,6 +44,8 @@ export const tasksService = {
   },
 
   async create(task: Omit<ProjectTask, 'id'>) {
+    // إنشاء المهام هيكلي (تخطيط) — ليست من أعمال التنفيذ الميداني.
+    await assertPermission('manage_projects');
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -78,6 +81,8 @@ export const tasksService = {
   },
 
   async update(id: string, updates: Partial<ProjectTask>) {
+    // تحديث حالة/تقدم/تفاصيل المهمة = عمل ميداني (edit_field_data).
+    await assertPermission('edit_field_data');
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -113,6 +118,8 @@ export const tasksService = {
   },
 
   async delete(id: string) {
+    // حذف مهمة = بنية تخطيطية (manage_projects)، وليس عمل ميداني.
+    await assertPermission('manage_projects');
     const isOnline = await checkNetworkStatus();
 
     if (isOnline) {
@@ -140,6 +147,7 @@ export const tasksService = {
   },
 
   async updateStatus(taskId: string, status: TaskStatus) {
+    await assertPermission('edit_field_data');
     const updates: Partial<ProjectTask> = { status };
     if (status === 'done') updates.progress = 100;
     if (status === 'todo') updates.progress = 0;

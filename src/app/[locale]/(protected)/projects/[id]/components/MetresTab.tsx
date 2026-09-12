@@ -22,6 +22,7 @@ import { contractItemsService } from "@/lib/services/contract-items-service";
 import { AddContractItemDialog } from "./AddContractItemDialog";
 import { ImportContractItemsDialog } from "@/components/metres/ImportContractItemsDialog";
 import { SituationPDFDownload } from "@/components/daily-log/SituationPDF";
+import { useCan } from "@/hooks/use-can";
 
 interface Props {
   project: Project;
@@ -34,6 +35,10 @@ export function MetresTab({ project, isAr }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<ContractItemWithProgress | null>(null);
+
+  // بنود العقد والأسعار = هيكلة عقدية (manage_projects)؛ member يُدخل الكميات عبر السجل اليومي فقط.
+  const { can } = useCan();
+  const canManageContract = can('manage_projects');
 
   // ── فلتر الفترة الزمنية ──
   const [dateFrom, setDateFrom] = useState("");
@@ -110,23 +115,27 @@ export function MetresTab({ project, isAr }: Props) {
                 : "Ajoutez les articles du bordereau (BPU) pour suivre les quantités réalisées"}
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <AddContractItemDialog
-                isAr={isAr}
-                projectId={project.id}
-                onSuccess={() => fetchData(true)}
-                trigger={
-                  <Button className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    {isAr ? "إضافة بنود العقد" : "Ajouter les articles BPU"}
-                  </Button>
-                }
-              />
-              <ImportContractItemsDialog
-                isAr={isAr}
-                projectId={project.id}
-                onSuccess={() => fetchData(true)}
-                existingItems={items}
-              />
+              {canManageContract && (
+                <>
+                  <AddContractItemDialog
+                    isAr={isAr}
+                    projectId={project.id}
+                    onSuccess={() => fetchData(true)}
+                    trigger={
+                      <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        {isAr ? "إضافة بنود العقد" : "Ajouter les articles BPU"}
+                      </Button>
+                    }
+                  />
+                  <ImportContractItemsDialog
+                    isAr={isAr}
+                    projectId={project.id}
+                    onSuccess={() => fetchData(true)}
+                    existingItems={items}
+                  />
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -156,29 +165,33 @@ export function MetresTab({ project, isAr }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <AddContractItemDialog
-            isAr={isAr}
-            projectId={project.id}
-            onSuccess={() => fetchData(true)}
-            trigger={
-              <Button variant="secondary" className="gap-2">
-                <Plus className="w-4 h-4" />
-                {isAr ? "إضافة بند" : "Ajouter article"}
-              </Button>
-            }
-          />
-          <ImportContractItemsDialog
-            isAr={isAr}
-            projectId={project.id}
-            onSuccess={() => fetchData(true)}
-            existingItems={items}
-            trigger={
-              <Button variant="secondary" className="gap-2">
-                <FileSpreadsheet className="w-4 h-4 text-success" />
-                {isAr ? "استيراد" : "Importer"}
-              </Button>
-            }
-          />
+          {canManageContract && (
+            <>
+              <AddContractItemDialog
+                isAr={isAr}
+                projectId={project.id}
+                onSuccess={() => fetchData(true)}
+                trigger={
+                  <Button variant="secondary" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    {isAr ? "إضافة بند" : "Ajouter article"}
+                  </Button>
+                }
+              />
+              <ImportContractItemsDialog
+                isAr={isAr}
+                projectId={project.id}
+                onSuccess={() => fetchData(true)}
+                existingItems={items}
+                trigger={
+                  <Button variant="secondary" className="gap-2">
+                    <FileSpreadsheet className="w-4 h-4 text-success" />
+                    {isAr ? "استيراد" : "Importer"}
+                  </Button>
+                }
+              />
+            </>
+          )}
           <SituationPDFDownload items={items} summary={summary} project={project} isAr={isAr}>
             <Button variant="secondary" className="gap-2">
               <FileText className="w-4 h-4" />
@@ -358,8 +371,8 @@ export function MetresTab({ project, isAr }: Props) {
                 {items.map((item, idx) => (
                   <TableRow
                     key={item.id}
-                    className={`cursor-pointer hover:bg-primary/10 transition-colors ${idx % 2 === 0 ? "" : "bg-muted/50"}`}
-                    onClick={() => setEditingItem(item)}
+                    className={`${canManageContract ? "cursor-pointer hover:bg-primary/10" : ""} transition-colors ${idx % 2 === 0 ? "" : "bg-muted/50"}`}
+                    onClick={canManageContract ? () => setEditingItem(item) : undefined}
                   >
                     <TableCell className="text-center text-xs font-bold text-muted-foreground">{idx + 1}</TableCell>
                     <TableCell className="font-mono font-bold text-xs">{item.item_number}</TableCell>
@@ -389,19 +402,21 @@ export function MetresTab({ project, isAr }: Props) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
-                        disabled={deletingId === item.id}
-                      >
-                        {deletingId === item.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3.5 h-3.5" />
-                        )}
-                      </Button>
+                      {canManageContract && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
+                          disabled={deletingId === item.id}
+                        >
+                          {deletingId === item.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5" />
+                          )}
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -414,8 +429,8 @@ export function MetresTab({ project, isAr }: Props) {
             {items.map((item, idx) => (
               <div
                 key={item.id}
-                className="border rounded-lg p-4 bg-card shadow-sm space-y-3 cursor-pointer hover:bg-primary/10 transition-colors"
-                onClick={() => setEditingItem(item)}
+                className={`border rounded-lg p-4 bg-card shadow-sm space-y-3 ${canManageContract ? "cursor-pointer hover:bg-primary/10" : ""} transition-colors`}
+                onClick={canManageContract ? () => setEditingItem(item) : undefined}
               >
                 {/* Top: designation + delete */}
                 <div className="flex items-start justify-between gap-2">
@@ -425,19 +440,21 @@ export function MetresTab({ project, isAr }: Props) {
                       {isAr ? "بند رقم" : "Art"} {item.item_number}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
-                    onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
-                    disabled={deletingId === item.id}
-                  >
-                    {deletingId === item.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="w-3.5 h-3.5" />
-                    )}
-                  </Button>
+                  {canManageContract && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
+                      disabled={deletingId === item.id}
+                    >
+                      {deletingId === item.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
+                  )}
                 </div>
 
                 {/* Key stats: achieved qty + progress */}

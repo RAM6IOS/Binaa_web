@@ -42,6 +42,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { workersService } from "@/lib/services/workers-service";
 import { projectsService } from "@/lib/services/projects-service";
 import { pointageService } from "@/lib/services/pointage-service";
+import { useRouter } from "@/i18n/routing";
+import { useCan } from "@/hooks/use-can";
 import { Worker } from "@/lib/types/projects";
 import { WeeklyScheduleGrid } from "@/components/pointage/WeeklyScheduleGrid";
 import {
@@ -112,6 +114,19 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   const isAr = locale === "ar";
   const dateLocale = isAr ? arDZ : fr;
 
+  const router = useRouter();
+  const { can: hasPermission, isLoaded: roleLoaded } = useCan();
+  const canManageAttendance = hasPermission('manage_attendance');
+  const attendanceAllowed = roleLoaded && canManageAttendance;
+
+  // حماية المسار: member/غير المخوّل يُحوَّل فوراً إلى المشاريع (لا نعتمد على إخفاء السايدبار).
+  // لا تُجلب أي بيانات قبل التأكد — تُحجب fetchData عند منع الوصول.
+  useEffect(() => {
+    if (roleLoaded && !canManageAttendance) {
+      router.replace('/projects');
+    }
+  }, [roleLoaded, canManageAttendance, router]);
+
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
 
@@ -135,6 +150,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   const endDateStr = format(weekEnd, "yyyy-MM-dd");
 
   const fetchData = useCallback(async () => {
+    if (!attendanceAllowed) return;
     setIsLoading(true);
     try {
       const [allWorkers, allProjects, weekData] = await Promise.all([
@@ -151,11 +167,11 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
     } finally {
       setIsLoading(false);
     }
-  }, [startDateStr, endDateStr, projectFilter, isAr]);
+  }, [startDateStr, endDateStr, projectFilter, isAr, attendanceAllowed]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (attendanceAllowed) fetchData();
+  }, [fetchData, attendanceAllowed]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -220,6 +236,9 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   const [statsOpen, setStatsOpen] = useState(true);
 
   const isCurrentWeek = isSameWeek(today, weekStart, { weekStartsOn: WEEK_STARTS_ON });
+
+  // لا يُعرض أي محتوى لغير المخوّل — التوجيه يحدث أعلاه (redirect).
+  if (roleLoaded && !canManageAttendance) return null;
 
   const weekLabel = `${format(weekStart, "d MMM", { locale: dateLocale })} – ${format(weekEnd, "d MMM yyyy", { locale: dateLocale })}`;
 

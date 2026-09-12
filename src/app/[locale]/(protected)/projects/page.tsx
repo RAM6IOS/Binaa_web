@@ -40,6 +40,8 @@ import {
   Filter,
 } from "lucide-react";
 import { projectsService } from "@/lib/services/projects-service";
+import { teamService } from "@/lib/services/team-service";
+import { can } from "@/lib/auth/permissions";
 import { Project } from "@/lib/types/projects";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
@@ -246,6 +248,7 @@ const MobileProjectCard = memo(function MobileProjectCard({
   askDelete,
   isPriority,
   onEdit,
+  canManage,
 }: {
   p: Project;
   isAr: boolean;
@@ -253,6 +256,7 @@ const MobileProjectCard = memo(function MobileProjectCard({
   askDelete: () => void;
   isPriority: boolean;
   onEdit: (project: Project) => void;
+  canManage: boolean;
 }) {
   return (
     <Link
@@ -289,7 +293,7 @@ const MobileProjectCard = memo(function MobileProjectCard({
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} />
+          <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} canManage={canManage} />
         </div>
       </div>
 
@@ -353,6 +357,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
   askDelete,
   isPriority,
   onEdit,
+  canManage,
 }: {
   p: Project;
   isAr: boolean;
@@ -360,6 +365,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
   askDelete: () => void;
   isPriority: boolean;
   onEdit: (project: Project) => void;
+  canManage: boolean;
 }) {
   const router = useRouter();
   return (
@@ -422,7 +428,7 @@ const DesktopTableRow = memo(function DesktopTableRow({
         </div>
       </TableCell>
       <TableCell className="text-end pe-8">
-        <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} />
+        <ActionMenu p={p} isAr={isAr} refresh={refresh} askDelete={askDelete} onEdit={onEdit} canManage={canManage} />
       </TableCell>
     </TableRow>
   );
@@ -531,6 +537,8 @@ export default function ProjectsListPage({
 
   const [editProject, setEditProject] = useState<Project | null>(null);
 
+  const [canManageProjects, setCanManageProjects] = useState(false);
+
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [wilayaFilter, setWilayaFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -552,6 +560,20 @@ export default function ProjectsListPage({
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  // عضو بأي دور: لا يُنشئ المشاريع ولا يعدّلها ولا يحذفها (manage_projects = owner/admin فقط)
+  useEffect(() => {
+    let cancelled = false;
+    teamService
+      .getMyMembership()
+      .then((membership) => {
+        if (!cancelled) setCanManageProjects(can(membership?.role, "manage_projects"));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isDeleteModalOpen) {
@@ -665,7 +687,9 @@ export default function ProjectsListPage({
         description: isAr
           ? "متابعة الورشات، الميزانيات، وحالات الإنجاز الميدانية"
           : "Suivi des chantiers et avancement réel",
-        actions: <CreateProjectDialog isAr={isAr} onSuccess={fetchProjects} />,
+        actions: canManageProjects ? (
+          <CreateProjectDialog isAr={isAr} onSuccess={fetchProjects} />
+        ) : null,
       }}
     >
       <DeleteConfirmationDialog
@@ -686,7 +710,7 @@ export default function ProjectsListPage({
         isAr={isAr}
         onSuccess={fetchProjects}
         project={editProject ?? undefined}
-        open={!!editProject}
+        open={!!(editProject && canManageProjects)}
         onOpenChange={(open) => { if (!open) setEditProject(null); }}
         trigger={<span className="hidden" />}
       />
@@ -868,7 +892,8 @@ export default function ProjectsListPage({
                       refresh={fetchProjects}
                       askDelete={() => askDelete(p.id)}
                       isPriority={idx < 3}
-                      onEdit={(proj) => setEditProject(proj)}
+onEdit={(proj) => { if (canManageProjects) setEditProject(proj); }}
+                       canManage={canManageProjects}
                     />
                   ))
                 )}
@@ -915,7 +940,8 @@ export default function ProjectsListPage({
                           refresh={fetchProjects}
                           askDelete={() => askDelete(p.id)}
                           isPriority={idx < 3}
-                          onEdit={(proj) => setEditProject(proj)}
+                          onEdit={(proj) => { if (canManageProjects) setEditProject(proj); }}
+                          canManage={canManageProjects}
                         />
                       ))
                     )}
@@ -1180,12 +1206,14 @@ const ActionMenu = memo(function ActionMenu({
   refresh,
   askDelete,
   onEdit,
+  canManage,
 }: {
   p: Project;
   isAr: boolean;
   refresh: () => void;
   askDelete: () => void;
   onEdit: (project: Project) => void;
+  canManage: boolean;
 }) {
   return (
     <DropdownMenu>
@@ -1213,20 +1241,24 @@ const ActionMenu = memo(function ActionMenu({
             {isAr ? "فتح الورشة" : "Consulter"}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={(e) => { e.stopPropagation(); onEdit(p); }}
-          className="cursor-pointer font-bold text-xs uppercase gap-2 py-3 rounded-md"
-        >
-          <Edit size={14} className="text-warning" />
-          {isAr ? "تعديل" : "Modifier"}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={askDelete}
-          className="text-destructive font-bold text-xs uppercase gap-2 py-3 rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
-        >
-          <Trash2 size={14} />
-          {isAr ? "حذف" : "Supprimer"}
-        </DropdownMenuItem>
+        {canManage && (
+          <>
+            <DropdownMenuItem
+              onClick={(e) => { e.stopPropagation(); onEdit(p); }}
+              className="cursor-pointer font-bold text-xs uppercase gap-2 py-3 rounded-md"
+            >
+              <Edit size={14} className="text-warning" />
+              {isAr ? "تعديل" : "Modifier"}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={askDelete}
+              className="text-destructive font-bold text-xs uppercase gap-2 py-3 rounded-md hover:bg-destructive/10 focus:bg-destructive/10"
+            >
+              <Trash2 size={14} />
+              {isAr ? "حذف" : "Supprimer"}
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

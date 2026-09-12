@@ -6,6 +6,7 @@ import {
   CreateWorkAttachmentDto,
   UpdateWorkAttachmentItemDto,
 } from "../types/work-attachments";
+import { assertPermission } from "./guard";
 
 const supabase = createClient();
 
@@ -97,6 +98,7 @@ export const workAttachmentsService = {
 
   // إنشاء محضر جديد وربطه ببنود العقد وحساب الكميات السابقة من المحاضر المعتمدة أو جدول المقاسات (metres)
   async create(dto: CreateWorkAttachmentDto): Promise<WorkAttachmentWithItems> {
+    await assertPermission('manage_finance');
     // 0. التحقق من صحة التواريخ
     if (dto.period_start > dto.period_end) {
       throw new Error("تاريخ البداية يجب أن يسبق تاريخ النهاية أو يساويه (La date de début doit être antérieure ou égale à la date de fin)");
@@ -239,6 +241,7 @@ export const workAttachmentsService = {
 
   // تحديث بند في المحضر (إعادة حساب التراكمي فوراً)
   async updateItem(itemId: string, dto: UpdateWorkAttachmentItemDto): Promise<void> {
+    await assertPermission('manage_finance');
     const { data: item, error: fetchErr } = await supabase
       .from("work_attachment_items")
       .select("previous_qty, period_qty")
@@ -268,6 +271,7 @@ export const workAttachmentsService = {
 
   // اعتماد المحضر
   async validate(id: string): Promise<void> {
+    await assertPermission('manage_finance');
     const { error } = await supabase
       .from("work_attachments")
       .update({
@@ -282,6 +286,7 @@ export const workAttachmentsService = {
 
   // حذف محضر (فقط إذا كان مسودة)
   async delete(id: string): Promise<void> {
+    await assertPermission('manage_finance');
     const { data: att, error: fetchErr } = await supabase
       .from("work_attachments")
       .select("status")

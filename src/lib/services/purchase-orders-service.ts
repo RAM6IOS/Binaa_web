@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import {
   PurchaseOrder, PurchaseOrderItem, PurchaseOrderWithItems,
   CreatePurchaseOrderInput, UpdatePurchaseOrderInput, CreatePurchaseOrderItemInput,
@@ -105,6 +106,8 @@ export const purchaseOrdersService = {
 
   // ── إنشاء أمـر طلب (مع ترقيم تلقائي) ──
   async create(input: CreatePurchaseOrderInput): Promise<PurchaseOrderWithItems> {
+    // أوامر الشراء = نطاق التوريد (manage_procurement) — ينفذها أيضًا member.
+    await assertPermission('manage_procurement');
     const year = new Date(input.order_date || Date.now()).getFullYear().toString();
     const number = input.number?.trim() || await generateNextNumber(input.project_id, year);
     const tva_rate = input.tva_rate ?? 19;
@@ -150,6 +153,7 @@ export const purchaseOrdersService = {
 
   // ── تحديث الرأس (فقط في draft) ──
   async update(id: string, input: UpdatePurchaseOrderInput): Promise<PurchaseOrder> {
+    await assertPermission('manage_procurement');
     const { data: current } = await supabase
       .from('purchase_orders')
       .select('status')
@@ -186,6 +190,7 @@ export const purchaseOrdersService = {
 
   // ── تحديث الحالة فقط ──
   async updateStatus(id: string, status: PurchaseOrder['status']): Promise<PurchaseOrder> {
+    await assertPermission('manage_procurement');
     const { data: current } = await supabase
       .from('purchase_orders')
       .select('status')
@@ -215,6 +220,7 @@ export const purchaseOrdersService = {
 
   // ── حذف (في draft فقط) ──
   async remove(id: string): Promise<void> {
+    await assertPermission('manage_procurement');
     const { data: current } = await supabase
       .from('purchase_orders')
       .select('status')
@@ -253,6 +259,7 @@ export const purchaseOrdersService = {
   },
 
   async addItem(orderId: string, projectId: string, input: CreatePurchaseOrderItemInput): Promise<PurchaseOrderItem> {
+    await assertPermission('manage_procurement');
     await assertItemsEditable(orderId);
 
     const { data, error } = await supabase
@@ -282,6 +289,7 @@ export const purchaseOrdersService = {
   },
 
   async updateItem(id: string, input: Partial<CreatePurchaseOrderItemInput>): Promise<PurchaseOrderItem> {
+    await assertPermission('manage_procurement');
     const { data: current } = await supabase
       .from('purchase_order_items')
       .select('purchase_order_id, quantity, unit_price_ht')
@@ -320,6 +328,7 @@ export const purchaseOrdersService = {
   },
 
   async deleteItem(id: string): Promise<void> {
+    await assertPermission('manage_procurement');
     const { data: current } = await supabase
       .from('purchase_order_items')
       .select('purchase_order_id')
@@ -343,6 +352,7 @@ export const purchaseOrdersService = {
 
   // ── إعادة حساب الإجماليات ──
   async recalculateTotals(orderId: string): Promise<void> {
+    await assertPermission('manage_procurement');
     const { data: order } = await supabase
       .from('purchase_orders')
       .select('tva_rate')

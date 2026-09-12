@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import { ProjectEquipment } from '../types/projects';
 
 const supabase = createClient();
@@ -30,6 +31,7 @@ export const projectEquipmentService = {
   },
 
   async assign(data: Omit<ProjectEquipment, 'id' | 'assigned_at'>) {
+    await assertPermission('edit_field_data');
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("غير مصرح");
 
@@ -49,6 +51,7 @@ export const projectEquipmentService = {
   },
 
   async remove(id: string) {
+    await assertPermission('edit_field_data');
     const { error } = await supabase
       .from('project_equipment')
       .delete()

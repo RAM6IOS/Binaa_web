@@ -10,6 +10,8 @@ import { projectsService } from "@/lib/services/projects-service";
 import { toast } from "sonner";
 import { Loader2, Check, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
+import { useCan } from "@/hooks/use-can";
 
 interface Props {
   project: Project;
@@ -19,6 +21,10 @@ interface Props {
 
 export function OverviewTab({ project, isAr, onRefresh }: Props) {
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const { can } = useCan();
+  const canManageProjects = can('manage_projects');
+  const canManageFinance = can('manage_finance');
 
   const [editStatus, setEditStatus] = useState<ProjectStatus>(project.status);
   const [editProgress, setEditProgress] = useState(project.progress);
@@ -82,24 +88,30 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
           <div className="space-y-2">
             <label className="text-sm font-medium">{isAr ? 'الحالة التشغيلية' : 'Statut'}</label>
             <div className="flex gap-2">
-              <Select 
-                value={editStatus} 
-                onValueChange={(v: ProjectStatus) => {
-                  setEditStatus(v);
-                  handleUpdate('status', v);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="planning">{isAr ? "قيد التخطيط" : "En planification"}</SelectItem>
-                  <SelectItem value="in_progress">{isAr ? "قيد الإنجاز" : "En cours"}</SelectItem>
-                  <SelectItem value="completed">{isAr ? "مكتمل" : "Terminé"}</SelectItem>
-                  <SelectItem value="delayed">{isAr ? "متأخر" : "En retard"}</SelectItem>
-                  <SelectItem value="cancelled">{isAr ? "ملغى" : "Annulé"}</SelectItem>
-                </SelectContent>
-              </Select>
+              {canManageProjects ? (
+                <Select 
+                  value={editStatus} 
+                  onValueChange={(v: ProjectStatus) => {
+                    setEditStatus(v);
+                    handleUpdate('status', v);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planning">{isAr ? "قيد التخطيط" : "En planification"}</SelectItem>
+                    <SelectItem value="in_progress">{isAr ? "قيد الإنجاز" : "En cours"}</SelectItem>
+                    <SelectItem value="completed">{isAr ? "مكتمل" : "Terminé"}</SelectItem>
+                    <SelectItem value="delayed">{isAr ? "متأخر" : "En retard"}</SelectItem>
+                    <SelectItem value="cancelled">{isAr ? "ملغى" : "Annulé"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex-1 py-2 px-3 rounded-md bg-muted text-sm font-semibold">
+                  <ProjectStatusBadge status={editStatus} isAr={isAr} />
+                </div>
+              )}
               {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-primary self-center" />}
             </div>
           </div>
@@ -107,18 +119,22 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium">{isAr ? 'نسبة التقدم (%)' : 'Progrès (%)'}</label>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  min="0" max="100" 
-                  className="w-20 h-8 text-right"
-                  value={editProgress}
-                  onChange={(e) => setEditProgress(Number(e.target.value))}
-                />
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleUpdate('progress', editProgress)} aria-label="Confirm">
-                   <Check className="w-4 h-4" />
-                </Button>
-              </div>
+              {canManageProjects ? (
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="number" 
+                    min="0" max="100" 
+                    className="w-20 h-8 text-right"
+                    value={editProgress}
+                    onChange={(e) => setEditProgress(Number(e.target.value))}
+                  />
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleUpdate('progress', editProgress)} aria-label="Confirm">
+                    <Check className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <span className="text-sm font-bold text-foreground">{editProgress}%</span>
+              )}
             </div>
             <ProgressBar progress={project.progress} status={project.status} showText={false} className="w-full" />
           </div>
@@ -141,22 +157,28 @@ export function OverviewTab({ project, isAr, onRefresh }: Props) {
           <div className="space-y-3 pt-4 border-t">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-destructive">{isAr ? 'التكلفة الفعلية (المستهلك)' : 'Coût réel (Consommé)'}</label>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  className="flex-1 font-semibold text-destructive h-10 md:h-auto"
-                  value={editActualCost}
-                  onChange={(e) => setEditActualCost(Number(e.target.value))}
-                />
-                <Button 
-                  variant="outline" 
-                  className="text-primary h-10 px-3 md:px-4 shrink-0" 
-                  onClick={() => handleUpdate('actual_cost', editActualCost)}
-                >
-                  <Check className="w-4 h-4 md:hidden" />
-                  <span className="hidden md:inline">{isAr ? 'تحديث' : 'Mettre à jour'}</span>
-                </Button>
-              </div>
+              {canManageFinance ? (
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="number" 
+                    className="flex-1 font-semibold text-destructive h-10 md:h-auto"
+                    value={editActualCost}
+                    onChange={(e) => setEditActualCost(Number(e.target.value))}
+                  />
+                  <Button 
+                    variant="outline" 
+                    className="text-primary h-10 px-3 md:px-4 shrink-0" 
+                    onClick={() => handleUpdate('actual_cost', editActualCost)}
+                  >
+                    <Check className="w-4 h-4 md:hidden" />
+                    <span className="hidden md:inline">{isAr ? 'تحديث' : 'Mettre à jour'}</span>
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-xl font-bold text-destructive mt-1">
+                  {editActualCost.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">DZD</span>
+                </div>
+              )}
             </div>
             
             <div className="space-y-1">

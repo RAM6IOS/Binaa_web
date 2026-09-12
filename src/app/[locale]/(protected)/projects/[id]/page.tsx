@@ -16,6 +16,7 @@ import { documentsService } from "@/lib/services/documents-service";
 import { tasksService } from "@/lib/services/tasks-service";
 import { useRouter } from "@/i18n/routing";
 import { OverviewTab } from "./components/OverviewTab";
+import { GanttTab } from "./components/GanttTab";
 import { TaskBoardTab } from "./components/TaskBoardTab";
 import { WorkforceTab } from "./components/WorkforceTab";
 import { EquipmentTab } from "./components/EquipmentTab";
@@ -29,6 +30,7 @@ import { MetresTab } from "./components/MetresTab";
 import { MaterialsTab } from "./components/MaterialsTab";
 import { PurchaseOrdersTab } from "./components/PurchaseOrdersTab";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCan } from "@/hooks/use-can";
 
 type ProjectWithJoins = Project & {
   project_documents: ProjectDocument[];
@@ -64,6 +66,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
   const tabsScrollRef = useRef<HTMLDivElement>(null);
   const [scrollEdges, setScrollEdges] = useState({ left: false, right: false });
 
+  const { can, membership: myMembership, isLoaded: roleLoaded } = useCan();
+
   const handleTabsScroll = useCallback(() => {
     const el = tabsScrollRef.current;
     if (!el) return;
@@ -98,6 +102,15 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
 
   useEffect(() => { fetchProject(); }, [id, fetchProject]);
 
+  // حماية متعددة المستأجرين: من يصل لمشروع ليس في شركته يُحوَّل فوراً.
+  // (RLS طبقته محلياً، وهذا تحصين إضافي صريح لضمان عدم ظهور بيانات شركة أخرى.)
+  useEffect(() => {
+    if (!roleLoaded || !project) return;
+    if (myMembership?.company_id && project.company_id && myMembership.company_id !== project.company_id) {
+      router.replace('/projects');
+    }
+  }, [roleLoaded, myMembership, project, router]);
+
   useEffect(() => {
     if (!isLoading && project) requestAnimationFrame(handleTabsScroll);
   }, [isLoading, project, handleTabsScroll]);
@@ -110,7 +123,19 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
   if (isLoading && !project) return <ProjectDetailSkeleton isAr={isAr} />;
   if (error || !project) return <ErrorState error={error} isAr={isAr} retry={() => fetchProject()} />;
 
-  const activeSection = SECTIONS.find(s => s.id === mobileSection);
+  const canManageFinance = can('manage_finance');
+  const visibleSections = SECTIONS.filter(
+    (s) => s.id !== 'work-attachments' && s.id !== 'situations' ? true : canManageFinance
+  );
+  const canManageProjects = can('manage_projects');
+  // لا نعرض محتوى مشروع من شركة أخرى إطلاقاً (التوجيه يحدث في useEffect أعلاه).
+  const isForeignProject =
+    roleLoaded && !!project &&
+    !!myMembership?.company_id && !!project.company_id &&
+    myMembership.company_id !== project.company_id;
+  if (isForeignProject) return null;
+
+  const activeSection = visibleSections.find(s => s.id === mobileSection);
 
   return (
     <div className="space-y-3 md:space-y-6 max-w-screen-2xl mx-auto animate-in fade-in duration-300 md:duration-500 pb-6 md:pb-12" dir={isAr ? 'rtl' : 'ltr'}>
@@ -186,7 +211,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
         {!mobileSection ? (
           /* ── شبكة الأقسام ── */
           <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
-            {SECTIONS.map((section) => {
+            {visibleSections.map((section) => {
               const Icon = section.icon;
               return (
                 <button
@@ -228,7 +253,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
                 {isAr ? 'العودة للأقسام' : 'Retour aux sections'}
               </Button>
             </div>
-            <SectionContent sectionId={mobileSection} project={project} isAr={isAr} onRefresh={() => fetchProject(true)} />
+            <SectionContent sectionId={mobileSection} project={project} isAr={isAr} canManageProjects={canManageProjects} onRefresh={() => fetchProject(true)} />
           </div>
         )}
       </div>
@@ -244,7 +269,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
             className="overflow-x-auto no-scrollbar scroll-smooth"
           >
             <TabsList className="w-auto justify-start h-14 p-0 bg-transparent rounded-none gap-6">
-              {SECTIONS.map(section => (
+              {visibleSections.map(section => (
                 <TabsTrigger
                   key={section.id}
                   value={section.id}
@@ -264,7 +289,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
           <TabsContent value="metres"><MetresTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="work-attachments"><WorkAttachmentsTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="situations"><SituationsTab project={project} isAr={isAr} /></TabsContent>
-          <TabsContent value="gantt" className="min-h-[60vh]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></TabsContent>
+          <TabsContent value="gantt" className="min-h-[60vh]">
+            {canManageProjects
+              ? <ProjectGanttChart projectId={project.id} isAr={isAr} />
+              : <GanttTab project={project} isAr={isAr} />}
+          </TabsContent>
           <TabsContent value="workforce"><WorkforceTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="resources"><EquipmentTab project={project} isAr={isAr} /></TabsContent>
           <TabsContent value="materials"><MaterialsTab project={project} isAr={isAr} /></TabsContent>
@@ -278,10 +307,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ locale
 
 // ── مكوّن عرض محتوى القسم على الموبايل ──
 
-function SectionContent({ sectionId, project, isAr, onRefresh }: {
+function SectionContent({ sectionId, project, isAr, canManageProjects, onRefresh }: {
   sectionId: string;
   project: ProjectWithJoins;
   isAr: boolean;
+  canManageProjects: boolean;
   onRefresh: () => void;
 }) {
   switch (sectionId) {
@@ -296,7 +326,14 @@ function SectionContent({ sectionId, project, isAr, onRefresh }: {
     case 'workforce':   return <WorkforceTab project={project} isAr={isAr} />;
     case 'resources':   return <EquipmentTab project={project} isAr={isAr} />;
     case 'documents':   return <DocumentsTab project={project} isAr={isAr} />;
-    case 'gantt':       return <div className="min-h-[60vh]"><ProjectGanttChart projectId={project.id} isAr={isAr} /></div>;
+    case 'gantt':
+      return (
+        <div className="min-h-[60vh]">
+          {canManageProjects
+            ? <ProjectGanttChart projectId={project.id} isAr={isAr} />
+            : <GanttTab project={project} isAr={isAr} />}
+        </div>
+      );
     default:            return null;
   }
 }

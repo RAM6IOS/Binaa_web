@@ -10,6 +10,7 @@
     "check:design": "node scripts/check-design-tokens.mjs",
     "test:k6:tokens": "node scripts/k6/generate-tokens.mjs",
     "test:smoke": "k6 run scripts/k6/smoke.js",
+    "test:member-create": "node scripts/test-member-create.mjs",
     "test:load": "k6 run scripts/k6/load.js",
     "test:stress": "k6 run scripts/k6/stress.js",
     "test:write-smoke": "k6 run scripts/k6/write-smoke.js",

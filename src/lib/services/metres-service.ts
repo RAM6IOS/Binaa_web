@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/client';
+import { assertPermission } from './guard';
 import {
   Metre, CreateMetreDto, UpdateMetreDto,
   ContractItem, ContractItemWithProgress, MetresSummary
@@ -49,6 +50,7 @@ export const metresService = {
 
   // ── تسجيل كمية منجزة ──
   async create(dto: CreateMetreDto): Promise<Metre> {
+    await assertPermission('edit_field_data');
     let userId: string | undefined;
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -79,6 +81,7 @@ export const metresService = {
 
   // ── تسجيل عدة كميات دفعة واحدة ──
   async createMany(dtos: CreateMetreDto[]): Promise<Metre[]> {
+    await assertPermission('edit_field_data');
     let userId: string | undefined;
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -105,6 +108,7 @@ export const metresService = {
 
   // ── تحديث كمية ──
   async update(id: string, dto: UpdateMetreDto): Promise<Metre> {
+    await assertPermission('edit_field_data');
     const { data, error } = await supabase
       .from('metres')
       .update({ ...dto, updated_at: new Date().toISOString() })
@@ -118,6 +122,7 @@ export const metresService = {
 
   // ── حذف كمية ──
   async delete(id: string): Promise<void> {
+    await assertPermission('edit_field_data');
     const { error } = await supabase
       .from('metres')
       .delete()
@@ -128,6 +133,7 @@ export const metresService = {
 
   // ── حذف كل كميات يومية معينة ──
   async deleteByDailyLogId(dailyLogId: string): Promise<void> {
+    await assertPermission('edit_field_data');
     const { error } = await supabase
       .from('metres')
       .delete()

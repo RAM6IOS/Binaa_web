@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { financialService } from '@/lib/services/financial-service';
+import { teamService } from '@/lib/services/team-service';
+import { assertCan } from '@/lib/auth/permissions';
 
 /**
  * GET /api/projects/[id]/budget
@@ -69,6 +71,17 @@ export async function POST(
       return NextResponse.json(
         { error: 'غير مصرح به. يرجى تسجيل الدخول أولاً.', details: authError?.message },
         { status: 401 }
+      );
+    }
+
+    let actor: Awaited<ReturnType<typeof teamService.getMyMembership>>;
+    try {
+      actor = await teamService.getMyMembership(supabase);
+      assertCan(actor?.role ?? null, 'manage_finance');
+    } catch (err) {
+      return NextResponse.json(
+        { error: 'غير مصرح — هذه العملية تتطلب إدارة المالية.', details: (err as Error).message },
+        { status: 403 }
       );
     }
 
