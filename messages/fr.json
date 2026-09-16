@@ -121,6 +121,45 @@
       "fieldRequired": "Ce champ est requis"
     }
   },
+  "Contact": {
+    "Page": {
+      "title": "Contactez-nous",
+      "description": "Nous serions ravis de vous aider — écrivez-nous, nous répondrons rapidement."
+    },
+    "Form": {
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Mohamed Bennane",
+      "email": "Adresse email",
+      "phone": "Téléphone (optionnel)",
+      "phonePlaceholder": "+213 000 00 00 00",
+      "subject": "Sujet",
+      "subjectPlaceholder": "Choisissez un sujet",
+      "subjects": {
+        "inquiry": "Demande d'information",
+        "demo": "Demande de démo",
+        "partnership": "Partenariat"
+      },
+      "message": "Votre message",
+      "messagePlaceholder": "Expliquez-nous comment nous pouvons vous aider...",
+      "submit": "Envoyer le message",
+      "messages": {
+        "success": "Votre message a été envoyé avec succès — nous vous répondrons bientôt.",
+        "error": "Échec de l'envoi. Vérifiez votre connexion et réessayez.",
+        "errorNotConfigured": "Le service de messagerie est en cours de mise en place. Utilisez l'email ci-contre entretemps."
+      }
+    },
+    "Info": {
+      "title": "Coordonnées",
+      "emailLabel": "Adresse email",
+      "emailCopy": "Copier l'email",
+      "copySuccess": "Adresse email copiée",
+      "copyError": "Échec de la copie de l'email",
+      "phoneLabel": "Téléphone",
+      "phoneValue": "+213 (0) 23 45 67 89",
+      "hoursLabel": "Horaires",
+      "hoursValue": "Dimanche – Jeudi, 8h00 – 17h00"
+    }
+  },
   "PWA": {
     "withinWindow": "Vous êtes hors ligne — vos modifications sont enregistrées localement et seront synchronisées dès le retour du réseau.",
     "withinWindowRemaining": "Temps restant dans la fenêtre hors ligne : {remaining}",

@@ -2,37 +2,31 @@
 
 import React from "react";
 import LinkNext from "next/link";
-import Image from "next/image";
 import {
-  Building2,
   Calendar,
   Users,
   Wrench,
-  FileText,
   BarChart3,
   Bell,
   CheckCircle2,
-  ArrowLeft,
-  Menu,
-  X,
   Smartphone,
   ShieldCheck,
-  Zap,
-  Phone
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Navbar } from "@/components/layout/Navbar";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { Footer } from "@/components/layout/Footer";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { ProblemsSolutionsSection } from "@/components/landing/ProblemsSolutionsSection";
 
 import { useParams } from "next/navigation";
 
 export default function LandingPage() {
   const params = useParams();
   const locale = params.locale as string;
-  const isAr = locale === 'ar';
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
@@ -40,72 +34,10 @@ export default function LandingPage() {
       <Navbar locale={locale} />
 
       {/* 2. Hero Section */}
-      <section className="relative pt-24 pb-16 md:pt-40 md:pb-32 overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 -z-10 w-full h-full">
-          <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-success/10 rounded-full blur-3xl" />
-        </div>
+      <HeroSection locale={locale} />
 
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in-up text-right">
-              <BrandLogo size={64} className="mb-6" />
-              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-medium hover:bg-primary/20 transition-colors">
-                مستقبل إدارة الإنشاءات في الجزائر 🇩🇿
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2] text-foreground mb-6">
-                <span className="block mb-2">سيّر مشروعك بذكاء</span>
-                <span className="block text-3xl md:text-4xl lg:text-5xl font-bold text-muted-foreground">
-                  من البناء الخاص إلى{" "}
-                  <span className="text-primary font-bold">الأشغال العمومية</span>
-                </span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed max-w-xl ml-auto">
-                منصة جزائرية متكاملة تساعد المقاولين على متابعة المشاريع، العمال، والمعدات في الوقت الفعلي ومن أي مكان.
-              </p>
-              <div className="flex flex-col sm:flex-row-reverse gap-4 justify-start">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground text-lg rounded-lg shadow-sm group" asChild>
-                  <LinkNext href={`/${locale}/auth/register`}>
-                    ابدأ تجربة مجانية
-                    <ArrowLeft className="mr-2 w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                  </LinkNext>
-                </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-lg rounded-lg border-border hover:bg-muted" onClick={() => alert(isAr ? "سيتم توفير فيديو توضيحي قريباً" : "Vidéo de présentation bientôt disponible")}>
-                  شاهد الفيديو
-                </Button>
-              </div>
-
-              <div className="mt-12 flex flex-col sm:flex-row items-end sm:items-center gap-4 sm:gap-6 justify-end text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                  <span>لا يلزم بطاقة ائتمان</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                  <span>دعم فني 24/7</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="animate-fade-in-right relative">
-              <div className="relative z-10 rounded-lg overflow-hidden shadow-sm border-8 border-background">
-                <Image
-                  src="/images/hero_dashboard.png"
-                  alt="Binaa Dashboard"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto"
-                  priority
-                />
-              </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-success/10 rounded-full blur-2xl" />
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 3. Problems → Solutions */}
+      <ProblemsSolutionsSection locale={locale} />
 
       {/* 4. Features Section */}
       <section id="features" className="py-24 bg-background">
@@ -343,7 +275,7 @@ export default function LandingPage() {
                   </LinkNext>
                 </Button>
                 <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 px-10 bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 text-xl font-bold rounded-lg" asChild>
-                  <LinkNext href="#contact">
+                  <LinkNext href={`/${locale}/contact`}>
                     تواصل مع المبيعات
                   </LinkNext>
                 </Button>
@@ -357,76 +289,7 @@ export default function LandingPage() {
       </section>
 
       {/* 8. Footer */}
-      <footer id="contact" className="bg-muted border-t border-border pt-20 pb-10">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid md:grid-cols-4 gap-12 mb-16 text-right">
-            <div className="col-span-1 md:col-span-1">
-              <LinkNext href={`/${locale}`} className="flex items-center gap-2 justify-end mb-6">
-                <BrandLogo size={40} />
-              </LinkNext>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                المنصة الأولى في الجزائر المتخصصة في إدارة مشاريع الأشغال العمومية والإنشاءات الكبرى.
-              </p>
-              <div className="mt-8 flex gap-4 justify-end">
-                {/* Social links placeholders */}
-                <div className="w-10 h-10 bg-background border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-primary cursor-pointer transition-colors">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="w-10 h-10 bg-background border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-primary cursor-pointer transition-colors">
-                  <Users className="w-5 h-5" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-foreground mb-6">المنصة</h4>
-              <ul className="space-y-4 text-muted-foreground text-sm">
-                <li><LinkNext href="#features" className="hover:text-primary">المميزات</LinkNext></li>
-                <li><LinkNext href="#pricing" className="hover:text-primary">الأسعار</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-primary">تحديثات النظام</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-primary">دليل الاستخدام</LinkNext></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-foreground mb-6">الشركة</h4>
-              <ul className="space-y-4 text-muted-foreground text-sm">
-                <li><LinkNext href="#" className="hover:text-primary">عن بيناء</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-primary">الوظائف</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-primary">المدونة</LinkNext></li>
-                <li><LinkNext href="#" className="hover:text-primary">شركاء النجاح</LinkNext></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-foreground mb-6">اتصل بنا</h4>
-              <ul className="space-y-4 text-muted-foreground text-sm">
-                <li className="flex items-center gap-3 justify-end">
-                  <span>contact@binaa.dz</span>
-                  <FileText className="w-4 h-4 text-primary" />
-                </li>
-                <li className="flex items-center gap-3 justify-end">
-                  <span>+213 (0) 23 45 67 89</span>
-                  <Phone className="w-4 h-4 text-primary" />
-                </li>
-                <li className="flex items-center gap-3 justify-end text-left">
-                  <span>سيدي عبد الله، الجزائر العاصمة</span>
-                  <Building2 className="w-4 h-4 text-primary" />
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex gap-6">
-              <LinkNext href="#" className="hover:text-primary">سياسة الخصوصية</LinkNext>
-              <LinkNext href="#" className="hover:text-primary">شروط الخدمة</LinkNext>
-              <LinkNext href="#" className="hover:text-primary">ملفات تعريف الارتباط</LinkNext>
-            </div>
-            <p>© 2026 Binaa - جميع الحقوق محفوظة لشركة بيناء تكنولوجي.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer locale={locale} />
     </div>
   );
 }
