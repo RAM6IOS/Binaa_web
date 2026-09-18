@@ -46,6 +46,7 @@ import { useRouter } from "@/i18n/routing";
 import { useCan } from "@/hooks/use-can";
 import { Worker } from "@/lib/types/projects";
 import { WeeklyScheduleGrid } from "@/components/pointage/WeeklyScheduleGrid";
+import { useAutoRefresh } from "@/lib/hooks/use-auto-refresh";
 import {
   DayShift,
   WEEK_STARTS_ON,
@@ -149,29 +150,37 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
   const startDateStr = format(weekStart, "yyyy-MM-dd");
   const endDateStr = format(weekEnd, "yyyy-MM-dd");
 
-  const fetchData = useCallback(async () => {
-    if (!attendanceAllowed) return;
-    setIsLoading(true);
-    try {
-      const [allWorkers, allProjects, weekData] = await Promise.all([
-        workersService.getAll(),
-        projectsService.getAll(),
-        pointageService.getWeekPointages(startDateStr, endDateStr, projectFilter),
-      ]);
-      setWorkers(allWorkers || []);
-      setProjects(allProjects || []);
-      setWeekPointages(weekData || []);
-    } catch (error) {
-      console.error(error);
-      toast.error(isAr ? "خطأ في تحميل البيانات" : "Erreur de chargement");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [startDateStr, endDateStr, projectFilter, isAr, attendanceAllowed]);
+  const fetchData = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!attendanceAllowed) return;
+      // الجلب الصامت (عودة الاتصال/التركيز) لا يومض شاشة التحميل ولا ينبّه بخطأ.
+      if (!options?.silent) setIsLoading(true);
+      try {
+        const [allWorkers, allProjects, weekData] = await Promise.all([
+          workersService.getAll(),
+          projectsService.getAll(),
+          pointageService.getWeekPointages(startDateStr, endDateStr, projectFilter),
+        ]);
+        setWorkers(allWorkers || []);
+        setProjects(allProjects || []);
+        setWeekPointages(weekData || []);
+      } catch (error) {
+        console.error(error);
+        if (!options?.silent) toast.error(isAr ? "خطأ في تحميل البيانات" : "Erreur de chargement");
+      } finally {
+        if (!options?.silent) setIsLoading(false);
+      }
+    },
+    [startDateStr, endDateStr, projectFilter, isAr, attendanceAllowed]
+  );
 
   useEffect(() => {
     if (attendanceAllowed) fetchData();
   }, [fetchData, attendanceAllowed]);
+
+  // إعادة الجلب بصمت عند عودة الاتصال/التركيز — لا جدول فارغ معلّق بعد تجميد الخلفية.
+  const refreshPointageSilently = useCallback(() => fetchData({ silent: true }), [fetchData]);
+  useAutoRefresh({ onReconnect: refreshPointageSilently, onFocus: refreshPointageSilently });
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -332,7 +341,7 @@ export default function PointagePage({ params }: { params: Promise<{ locale: str
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" onClick={fetchData} className="gap-1.5 text-muted-foreground hidden sm:inline-flex">
+            <Button variant="ghost" size="sm" onClick={() => fetchData()} className="gap-1.5 text-muted-foreground hidden sm:inline-flex">
               <RefreshCw className="w-3.5 h-3.5" />
               {isAr ? "تحديث" : "Actualiser"}
             </Button>

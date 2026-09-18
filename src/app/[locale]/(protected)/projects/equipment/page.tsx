@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataState } from "@/components/ui/data-state";
+import { CompanyScopeNotice } from "@/components/team/CompanyScopeNotice";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   Search, Loader2, Truck, MapPin, MoreVertical, Edit, Trash2, Plus,
@@ -19,6 +21,7 @@ import { AddEquipmentDialog } from "@/components/equipment/AddEquipmentDialog";
 import { EquipmentStatusBadge } from "@/components/equipment/EquipmentStatusBadge";
 import { MaintenanceStatusBadge } from "@/components/equipment/MaintenanceStatusBadge";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useAutoRefresh } from "@/lib/hooks/use-auto-refresh";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,6 +75,17 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
   };
 
   useEffect(() => { fetchEquipment(); }, []);
+
+  // إعادة الجلب بصمت عند عودة الاتصال/التركيز — لا قائمة فارغة معلّقة بعد تجميد الخلفية.
+  const refreshEquipmentSilently = async () => {
+    try {
+      const data = await equipmentService.getAll();
+      setEquipment(data);
+    } catch {
+      // تُبقى الحالة الحالية؛ الجلب الأولي يعرض الخطأ إن وُجد.
+    }
+  };
+  useAutoRefresh({ onReconnect: refreshEquipmentSilently, onFocus: refreshEquipmentSilently });
 
   useEffect(() => {
     if (!isDeleteModalOpen && !isDisableModalOpen) {
@@ -155,6 +169,15 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
 
   const activeFilterCount = [wilayaFilter, categoryFilter, statusFilter, maintenanceFilter].filter(f => f !== 'all').length;
 
+  // رسالة الفارغ واعية بالفلاتر: جدول فارغ وتصفية نشطة ≠ لا بيانات أصلية
+  const hasActiveFilters = Boolean(searchQuery.trim()) || activeFilterCount > 0;
+  const listEmptyTitle = hasActiveFilters
+    ? (isAr ? 'لا توجد نتائج مطابقة' : 'Aucun résultat')
+    : (isAr ? 'لا توجد معدات' : 'Aucun équipement');
+  const listEmptyDescription = hasActiveFilters
+    ? (isAr ? 'عدّل الفلاتر أو البحث لعرض نتائج أخرى' : 'Modifiez les filtres ou la recherche')
+    : (isAr ? 'أضف معدة جديدة لبدء التتبع' : 'Ajoutez un équipement pour commencer le suivi');
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
 
@@ -207,6 +230,9 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
         </div>
         {canManage && <AddEquipmentDialog isAr={isAr} onSuccess={fetchEquipment} />}
       </div>
+
+      {/* إشعار غياب العضوية — يظهر لجميع مقاسات الشاشة */}
+      <CompanyScopeNotice isAr={isAr} />
 
       {/* ════════════════════════════════════════════ */}
       {/* ── MOBILE ── */}
@@ -322,10 +348,11 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
           </div>
         ) : filteredEquipment.length === 0 ? (
-          <div className="py-16 text-center text-muted-foreground">
-            <Truck className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm font-bold">{isAr ? 'لا توجد معدات' : 'Aucun équipement'}</p>
-          </div>
+          <DataState.Empty
+            icon={<Truck className="h-12 w-12 text-muted-foreground" />}
+            title={listEmptyTitle}
+            description={listEmptyDescription}
+          />
         ) : (
           <div className="space-y-2">
             {filteredEquipment.map((item) => (
@@ -457,10 +484,11 @@ export default function EquipmentListPage({ params }: { params: Promise<{ locale
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
             </div>
           ) : filteredEquipment.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Truck className="mx-auto w-10 h-10 text-muted-foreground mb-3" />
-              {isAr ? 'لا توجد معدات مطابقة' : 'Aucun équipement trouvé'}
-            </div>
+            <DataState.Empty
+              icon={<Truck className="h-12 w-12 text-muted-foreground" />}
+              title={listEmptyTitle}
+              description={listEmptyDescription}
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>

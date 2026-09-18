@@ -1,7 +1,7 @@
 import { createClient } from '../supabase/client';
 import { Project } from '../types/projects';
 import { db } from '../db/offline-db';
-import { checkNetworkStatus } from '../utils/network';
+import { checkNetworkStatus, isNetworkError } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { assertPermission, resolveMyCompanyId } from './guard';
 
@@ -22,79 +22,79 @@ async function resolveUserId(): Promise<string | null> {
 
 export const projectsService = {
   async getById(id: string) {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const userId = await resolveUserId();
+      if (!userId) throw new Error("غير مصرح");
 
-    if (isOnline) {
-      try {
-        const userId = await resolveUserId();
-        if (!userId) throw new Error("غير مصرح");
-
-        const companyId = await resolveMyCompanyId();
-        let query = supabase
-          .from('projects')
-          .select('*')
-          .eq('id', id);
-        if (companyId) {
-          query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
-        } else {
-          query = query.eq('created_by', userId);
-        }
-
-        const { data, error } = await query.single();
-
-        if (error) throw error;
-
-        const project = data as Project;
-        await db.projects.put(project);
-        markOnlineSync();
-        return project;
-      } catch (err) {
-        console.warn('[ProjectsService] Online fetch failed, falling back to local DB:', err);
+      const companyId = await resolveMyCompanyId();
+      let query = supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id);
+      if (companyId) {
+        query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
+      } else {
+        query = query.eq('created_by', userId);
       }
-    }
 
-    const local = await db.projects.get(id);
-    if (!local) throw new Error("المشروع غير موجود في التخزين المحلي");
-    return local;
+      const { data, error } = await query.single();
+
+      if (error) {
+        // غير موجود على الخادم (حذف/لا صلاحية): لا نُخفيه خلف كاش قديم.
+        if ((error.code === 'PGRST116') || (error as any).status === 406) throw error;
+        if (!isNetworkError(error)) throw error;
+        const local = await db.projects.get(id);
+        if (!local) throw error;
+        return local;
+      }
+
+      const project = data as Project;
+      await db.projects.put(project);
+      markOnlineSync();
+      return project;
+    } catch (err) {
+      if (!isNetworkError(err)) throw err;
+      console.warn('[ProjectsService] الشبكة غير متاحة، قراءة المشروع محلياً:', err);
+      const local = await db.projects.get(id);
+      if (!local) throw new Error("المشروع غير موجود في التخزين المحلي");
+      return local;
+    }
   },
 
   async getAll() {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const userId = await resolveUserId();
+      if (!userId) return [];
 
-    if (isOnline) {
-      try {
-        const userId = await resolveUserId();
-        if (!userId) return [];
-
-        const companyId = await resolveMyCompanyId();
-        let query = supabase
-          .from('projects')
-          .select('*');
-        if (companyId) {
-          query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
-        } else {
-          query = query.eq('created_by', userId);
-        }
-        query = query.order('created_at', { ascending: false });
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        const projects = data as Project[];
-        // Replace local cache with fresh data
-        await db.projects.clear();
-        if (projects.length > 0) {
-          await db.projects.bulkPut(projects);
-        }
-        markOnlineSync();
-        return projects;
-      } catch (err) {
-        console.warn('[ProjectsService] Online fetch failed, falling back to local DB:', err);
+      const companyId = await resolveMyCompanyId();
+      let query = supabase
+        .from('projects')
+        .select('*');
+      if (companyId) {
+        query = query.or(`created_by.eq.${userId},company_id.eq.${companyId}`);
+      } else {
+        query = query.eq('created_by', userId);
       }
-    }
+      query = query.order('created_at', { ascending: false });
 
-    return await db.projects.toArray();
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      const projects = data as Project[];
+      // Replace local cache with fresh data
+      await db.projects.clear();
+      if (projects.length > 0) {
+        await db.projects.bulkPut(projects);
+      }
+      markOnlineSync();
+      return projects;
+    } catch (err) {
+      // «الخادم أولاً»: الكاش ملاذ أخير عند انقطاع حقيقي فقط.
+      if (!isNetworkError(err)) throw err;
+      console.warn('[ProjectsService] الشبكة غير متاحة، قراءة من التخزين المحلي:', err);
+      return await db.projects.toArray();
+    }
   },
 
   async create(projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {

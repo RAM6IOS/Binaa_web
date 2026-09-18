@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { DataState } from "@/components/ui/data-state";
+import { CompanyScopeNotice } from "@/components/team/CompanyScopeNotice";
 import {
   Search, Phone, MapPin,
   MoreVertical, Edit, Trash2, HardHat, Banknote,
@@ -27,6 +28,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useAutoRefresh } from "@/lib/hooks/use-auto-refresh";
 import { toast } from "sonner";
 
 export default function WorkersListPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -78,6 +80,17 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
     const unsubscribe = workersService.subscribe(() => { fetchWorkers(); });
     return () => { unsubscribe(); };
   }, []);
+
+  // إعادة الجلب بصمت عند عودة الاتصال/التركيز — لا قائمة فارغة معلّقة بعد تجميد الخلفية.
+  const refreshWorkersSilently = async () => {
+    try {
+      const data = await workersService.getAll();
+      setWorkers(data || []);
+    } catch {
+      // تُبقى الحالة الحالية؛ الجلب الأولي يعرض الخطأ إن وُجد.
+    }
+  };
+  useAutoRefresh({ onReconnect: refreshWorkersSilently, onFocus: refreshWorkersSilently });
 
   useEffect(() => {
     if (!isDeleteModalOpen) {
@@ -159,6 +172,15 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
   const activeFilterCount = [wilayaFilter, jobFilter, availabilityFilter].filter(f => f !== 'all').length;
 
+  // رسالة الفارغ واعية بالفلاتر: جدول فارغ وتصفية نشطة ≠ لا بيانات أصلية
+  const hasActiveFilters = Boolean(searchQuery.trim()) || activeFilterCount > 0;
+  const listEmptyTitle = hasActiveFilters
+    ? (isAr ? 'لا توجد نتائج مطابقة' : 'Aucun résultat')
+    : (isAr ? 'لا يوجد عمال' : 'Aucun ouvrier');
+  const listEmptyDescription = hasActiveFilters
+    ? (isAr ? 'عدّل الفلاتر أو البحث لعرض نتائج أخرى' : 'Modifiez les filtres ou la recherche')
+    : (isAr ? 'أضف عاملاً جديداً لبدء التتبع' : 'Ajoutez un ouvrier pour commencer le suivi');
+
   return (
     <PageContainer
       dir={isAr ? 'rtl' : 'ltr'}
@@ -204,9 +226,13 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 
 
 
+      {/* إشعار غياب العضوية — يظهر لجميع مقاسات الشاشة */}
+
+
       {/* ════════════════════════════════════════════ */}
       {/* ── MOBILE ── */}
       {/* ════════════════════════════════════════════ */}
+      <CompanyScopeNotice isAr={isAr} />
       <div className="md:hidden space-y-4">
         {/* شريط البحث + زر الفلاتر */}
         <div className="flex items-center gap-2">
@@ -304,8 +330,8 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
         ) : filteredWorkers.length === 0 ? (
           <DataState.Empty
             icon={<HardHat className="h-12 w-12 text-muted-foreground" />}
-            title={isAr ? 'لا يوجد عمال' : 'Aucun ouvrier'}
-            description={isAr ? 'أضف عاملاً جديداً لبدء التتبع' : 'Ajoutez un ouvrier pour commencer le suivi'}
+            title={listEmptyTitle}
+            description={listEmptyDescription}
           />
         ) : (
           <div className="space-y-2">
@@ -433,7 +459,18 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-start">
-                  {filteredWorkers.map((worker) => (
+                  {filteredWorkers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-64">
+                        <DataState.Empty
+                          icon={<HardHat className="h-12 w-12 text-muted-foreground" />}
+                          title={listEmptyTitle}
+                          description={listEmptyDescription}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredWorkers.map((worker) => (
                     <TableRow key={worker.id} className="group hover:bg-muted/50 transition-colors">
                       <TableCell className="ps-8 py-4">
                         <div className="flex items-center gap-4">
@@ -457,7 +494,8 @@ export default function WorkersListPage({ params }: { params: Promise<{ locale: 
 <ActionMenu worker={worker} isAr={isAr} refresh={fetchWorkers} onDeleteClick={() => askDelete(worker.id)} onEdit={(w: Worker) => setEditWorker(w)} canManage={canManage} />
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

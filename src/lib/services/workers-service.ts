@@ -1,90 +1,71 @@
 import { createClient } from '../supabase/client';
 import { Worker } from '../types/projects';
 import { db } from '../db/offline-db';
-import { checkNetworkStatus } from '../utils/network';
+import { checkNetworkStatus, isNetworkError } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { assertPermission, resolveMyCompanyId } from './guard';
+import { resolveCurrentUserId, resolveMyDataScope } from './user-scope';
 
 const supabase = createClient();
 
-async function resolveUserId(): Promise<string | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user?.id) return session.user.id;
-
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export const workersService = {
   async getAll() {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { userId, companyId } = await resolveMyDataScope();
+      if (!userId) return [];
 
-    if (isOnline) {
-      try {
-        const userId = await resolveUserId();
-        if (!userId) return [];
+      const base = supabase
+        .from('workers')
+        .select('*')
+        .is('deleted_at', null);
+      // لا عضوية شركة (بيانات قديمة أو حساب غير مرتبط): نقرأ بيانات الحساب
+      // الشخصي بدل الإرجاع الفارغ الصامت الذي أَخفى محتوى المستخدمين.
+      const scoped = companyId ? base.eq('company_id', companyId) : base.eq('user_id', userId);
+      const { data, error } = await scoped.order('created_at', { ascending: false });
 
-        const companyId = await resolveMyCompanyId();
-        if (!companyId) return [];
+      if (error) throw error;
 
-        const { data, error } = await supabase
-          .from('workers')
-          .select('*')
-          .eq('company_id', companyId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const workers = data as Worker[];
-        await db.workers.clear();
-        if (workers.length > 0) {
-          await db.workers.bulkPut(workers);
-        }
-        markOnlineSync();
-        return workers;
-      } catch (err) {
-        console.warn('[WorkersService] Online fetch failed, falling back to local DB:', err);
+      const workers = data as Worker[];
+      await db.workers.clear();
+      if (workers.length > 0) {
+        await db.workers.bulkPut(workers);
       }
+      markOnlineSync();
+      return workers;
+    } catch (err) {
+      // «الخادم أولاً»: لا نتراجع للكاش إلا عند انقطاع شبكة حقيقي؛ أخطاء
+      // الصلاحية/البيانات تُرمى لتظهر للمستخدم بدل إخفائها خلف كاش قديم.
+      if (!isNetworkError(err)) throw err;
+      console.warn('[WorkersService] الشبكة غير متاحة، قراءة من التخزين المحلي:', err);
+      return (await db.workers.toArray()).filter(w => !w.deleted_at);
     }
-
-    // Offline: return locally cached workers (filter out soft-deleted)
-    return (await db.workers.toArray()).filter(w => !w.deleted_at);
   },
 
   async getById(id: string) {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { data, error } = await supabase
+        .from('workers')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (isOnline) {
-      try {
-        const { data, error } = await supabase
-          .from('workers')
-          .select('*')
-          .eq('id', id)
-          .single();
+      if (error) throw error;
 
-        if (error) throw error;
-
-        const worker = data as Worker;
-        await db.workers.put(worker);
-        markOnlineSync();
-        return worker;
-      } catch (err) {
-        console.warn('[WorkersService] Online fetch by ID failed, falling back to local DB:', err);
-      }
+      const worker = data as Worker;
+      await db.workers.put(worker);
+      markOnlineSync();
+      return worker;
+    } catch (err) {
+      if (!isNetworkError(err)) throw err;
+      console.warn('[WorkersService] الشبكة غير متاحة، قراءة العامل محلياً:', err);
+      const local = await db.workers.get(id);
+      if (!local) throw new Error('العامل غير موجود في التخزين المحلي');
+      return local;
     }
-
-    const local = await db.workers.get(id);
-    if (!local) throw new Error("العامل غير موجود في التخزين المحلي");
-    return local;
   },
 
   async create(workerData: Omit<Worker, 'id' | 'created_at' | 'updated_at'>) {
-    const userId = await resolveUserId();
+    const userId = await resolveCurrentUserId();
     if (!userId) throw new Error('يجب تسجيل الدخول أولاً');
     const membership = await assertPermission('manage_projects');
 
@@ -178,7 +159,7 @@ export const workersService = {
   },
 
   async delete(id: string) {
-    const userId = await resolveUserId();
+    const userId = await resolveCurrentUserId();
     if (!userId) throw new Error("غير مصرح");
     await assertPermission('manage_projects');
 

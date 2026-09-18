@@ -12,6 +12,7 @@ import { syncService } from "@/lib/services/sync-service";
 import {
   formatOfflineRemaining,
   getOfflineWindowStatus,
+  onNetworkConfirmed,
 } from "@/lib/utils/offline-window";
 import { useTranslations } from "next-intl";
 import { Lock, WifiOff } from "lucide-react";
@@ -23,7 +24,19 @@ export const usePWA = () => useContext(PWAContext);
 export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [isOnline, setIsOnline] = useState(true);
   const [lastCheckedAt, setLastCheckedAt] = useState(() => Date.now());
+  // «آخر تأكيد حقيقي للاتصال» (طلب بيانات/كتابة ناجح ضد الخادم). بادئ الأمر نعطيه
+  // فترة سماح، فلا يومض الشريط عند أول شاشة. هذا ما يُغلق الشريط فور أي نجاح
+  // حقيقي — لا ننتظر حظّ فاحص متذبذب.
+  const [lastConfirmedAt, setLastConfirmedAt] = useState<number>(() => Date.now());
   const t = useTranslations("PWA");
+
+  useEffect(() => {
+    // أي نجاح حقيقي (markOnlineSync) يعلن الاتصال فوراً ويغلق الشريط.
+    return onNetworkConfirmed(() => {
+      setLastConfirmedAt(Date.now());
+      setIsOnline(true);
+    });
+  }, []);
 
   const updateOnlineStatus = useCallback(async () => {
     const online = await checkNetworkStatus();
@@ -115,10 +128,15 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
   const readOnly = !isOnline && !windowStatus.withinWindow;
   const remainingText = formatOfflineRemaining(windowStatus.remainingMs);
 
+  // الشريط الصادق: لا يظهر إلا بعد فشل الفاحص مع غياب أي نجاح حقيقي حديث
+  // (مهلة قصيرة) — فيختفي الوميض الذي كان يظهر رغم نجاح القراءات.
+  const staleConfirmation = Date.now() - lastConfirmedAt > 10_000;
+  const showOfflineBanner = !isOnline && staleConfirmation;
+
   return (
     <PWAContext.Provider value={{ isOnline }}>
       {children}
-      {!isOnline && (
+      {showOfflineBanner && (
         <div
           className={
             readOnly

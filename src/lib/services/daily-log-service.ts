@@ -2,7 +2,7 @@ import { createClient } from '../supabase/client';
 import { DailyLog, CreateDailyLogDto, UpdateDailyLogDto, DailyLogMaterialConsumption } from '../types/daily-logs';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { db } from '../db/offline-db';
-import { checkNetworkStatus } from '../utils/network';
+import { checkNetworkStatus, isNetworkError } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { CreateMetreDto } from '../types/metres';
 import { materialsService } from './materials-service';
@@ -129,112 +129,104 @@ async function saveConsumptions(
 
 export const dailyLogService = {
   async getByProjectId(projectId: string): Promise<DailyLog[]> {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('log_date', { ascending: false });
 
-    if (isOnline) {
-      try {
-        const { data, error } = await supabase
-          .from('daily_logs')
-          .select('*')
-          .eq('project_id', projectId)
-          .order('log_date', { ascending: false });
-
-        if (error) {
-          logSupabaseError('Error fetching daily logs', error);
-          throw error;
-        }
-
-        const logs = (data || []).map(row => ({
-          ...row,
-          workers_present: row.workers_present || [],
-          equipment_used: row.equipment_used || [],
-          quantities: row.quantities || [],
-          materials: row.materials || [],
-          photos: row.photos || [],
-        })) as DailyLog[];
-
-        // جلب استهلاكات المواد لكل التقارير دفعة واحدة
-        const logIds = logs.map(l => l.id);
-        if (logIds.length > 0) {
-          const { data: consumptionRows } = await supabase
-            .from('material_consumptions')
-            .select('daily_log_id, material_id, quantity, notes, materials(name)')
-            .in('daily_log_id', logIds);
-
-          const consumptionMap: Record<string, DailyLogMaterialConsumption[]> = {};
-          for (const row of (consumptionRows || []) as any[]) {
-            if (!consumptionMap[row.daily_log_id]) consumptionMap[row.daily_log_id] = [];
-            consumptionMap[row.daily_log_id].push({
-              material_id: row.material_id,
-              material_name: row.materials?.name ?? '',
-              consumed_quantity: Number(row.quantity),
-              notes: row.notes ?? undefined,
-            });
-          }
-
-          for (const log of logs) {
-            log.material_consumptions = consumptionMap[log.id] || [];
-          }
-        }
-
-        // Cache locally (delete old ones and store the fresh ones)
-        await db.daily_logs.where('project_id').equals(projectId).delete();
-        if (logs.length > 0) {
-          await db.daily_logs.bulkPut(logs);
-        }
-        markOnlineSync();
-
-        return logs;
-      } catch (err) {
-        console.warn('[DailyLogService] Error fetching from Supabase, falling back to local DB:', err);
+      if (error) {
+        logSupabaseError('Error fetching daily logs', error);
+        throw error;
       }
+
+      const logs = (data || []).map(row => ({
+        ...row,
+        workers_present: row.workers_present || [],
+        equipment_used: row.equipment_used || [],
+        quantities: row.quantities || [],
+        materials: row.materials || [],
+        photos: row.photos || [],
+      })) as DailyLog[];
+
+      // جلب استهلاكات المواد لكل التقارير دفعة واحدة
+      const logIds = logs.map(l => l.id);
+      if (logIds.length > 0) {
+        const { data: consumptionRows } = await supabase
+          .from('material_consumptions')
+          .select('daily_log_id, material_id, quantity, notes, materials(name)')
+          .in('daily_log_id', logIds);
+
+        const consumptionMap: Record<string, DailyLogMaterialConsumption[]> = {};
+        for (const row of (consumptionRows || []) as any[]) {
+          if (!consumptionMap[row.daily_log_id]) consumptionMap[row.daily_log_id] = [];
+          consumptionMap[row.daily_log_id].push({
+            material_id: row.material_id,
+            material_name: row.materials?.name ?? '',
+            consumed_quantity: Number(row.quantity),
+            notes: row.notes ?? undefined,
+          });
+        }
+
+        for (const log of logs) {
+          log.material_consumptions = consumptionMap[log.id] || [];
+        }
+      }
+
+      // Cache locally (delete old ones and store the fresh ones)
+      await db.daily_logs.where('project_id').equals(projectId).delete();
+      if (logs.length > 0) {
+        await db.daily_logs.bulkPut(logs);
+      }
+      markOnlineSync();
+
+      return logs;
+    } catch (err) {
+      // «الخادم أولاً»: الكاش ملاذ أخير عند انقطاع حقيقي فقط.
+      if (!isNetworkError(err)) throw err;
+      console.warn('[DailyLogService] الشبكة غير متاحة، قراءة التقارير محلياً:', err);
+      const localLogs = await db.daily_logs
+        .where('project_id')
+        .equals(projectId)
+        .toArray();
+
+      return localLogs.sort((a, b) => b.log_date.localeCompare(a.log_date));
     }
-
-    // Offline or network error fallback
-    const localLogs = await db.daily_logs
-      .where('project_id')
-      .equals(projectId)
-      .toArray();
-
-    return localLogs.sort((a, b) => b.log_date.localeCompare(a.log_date));
   },
 
   async getById(id: string): Promise<DailyLog | null> {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (isOnline) {
-      try {
-        const { data, error } = await supabase
-          .from('daily_logs')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          if (error.code === 'PGRST116') return null;
-          throw error;
-        }
-
-        const log = {
-          ...data,
-          workers_present: data.workers_present || [],
-          equipment_used: data.equipment_used || [],
-          quantities: data.quantities || [],
-          materials: data.materials || [],
-          photos: data.photos || [],
-          material_consumptions: await materialsService.getConsumptionsByDailyLogId(id),
-        } as DailyLog;
-
-        // Cache locally
-        await db.daily_logs.put(log);
-        markOnlineSync();
-        return log;
-      } catch (err) {
-        console.warn('[DailyLogService] Error fetching log by ID, falling back to local DB:', err);
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
       }
-    }
 
-    return (await db.daily_logs.get(id)) || null;
+      const log = {
+        ...data,
+        workers_present: data.workers_present || [],
+        equipment_used: data.equipment_used || [],
+        quantities: data.quantities || [],
+        materials: data.materials || [],
+        photos: data.photos || [],
+        material_consumptions: await materialsService.getConsumptionsByDailyLogId(id),
+      } as DailyLog;
+
+      // Cache locally
+      await db.daily_logs.put(log);
+      markOnlineSync();
+      return log;
+    } catch (err) {
+      if (!isNetworkError(err)) throw err;
+      console.warn('[DailyLogService] الشبكة غير متاحة، قراءة التقرير محلياً:', err);
+      return (await db.daily_logs.get(id)) || null;
+    }
   },
 
   async create(dto: CreateDailyLogDto): Promise<DailyLog> {

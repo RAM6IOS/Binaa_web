@@ -39,7 +39,8 @@ export function getLastOnlineSyncAt(): number | null {
 
 /**
  * يُسجّل «آخر اتصال ناجح» الآن. يُستدعى فقط عند نجاح عملية بيانات حقيقية مع
- * الخادم (ولو كما isCheckNetworkStatus، لأن مجرد ping قد ينجح دون جلسة صالحة).
+ * الخادم (لو كما isCheckNetworkStatus، لأن مجرد ping قد ينجح دون جلسة صالحة).
+ * ويُعلن تأكيد الاتصال للمهتمّين (PWAProvider) فيُغلق الشريط فوراً.
  */
 export function markOnlineSync(): void {
   if (!isBrowser()) return;
@@ -48,6 +49,19 @@ export function markOnlineSync(): void {
   } catch {
     // localStorage غير متاح (مثل وضع التصفح الخاص) — نتجاهل بلا إنهيار.
   }
+  notifyNetworkConfirmed();
+}
+
+const networkConfirmListeners = new Set<() => void>();
+
+/** اشترك ليتنبّه فور تأكيد اتصال حقيقي (طلب بيانات/كتابة ناجح). تُرجع فك الاشتراك. */
+export function onNetworkConfirmed(listener: () => void): () => void {
+  networkConfirmListeners.add(listener);
+  return () => networkConfirmListeners.delete(listener);
+}
+
+function notifyNetworkConfirmed(): void {
+  networkConfirmListeners.forEach((listener) => listener());
 }
 
 export interface OfflineWindowStatus {

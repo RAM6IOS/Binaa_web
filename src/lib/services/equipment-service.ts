@@ -1,62 +1,47 @@
 import { createClient } from '../supabase/client';
 import { Equipment } from '../types/projects';
 import { db } from '../db/offline-db';
-import { checkNetworkStatus } from '../utils/network';
+import { checkNetworkStatus, isNetworkError } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { assertPermission, resolveMyCompanyId } from './guard';
+import { resolveCurrentUserId, resolveMyDataScope } from './user-scope';
 
 const supabase = createClient();
 
-async function resolveUserId(): Promise<string | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user?.id) return session.user.id;
-
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export const equipmentService = {
   async getAll() {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { userId, companyId } = await resolveMyDataScope();
+      if (!userId) return [];
 
-    if (isOnline) {
-      try {
-        const userId = await resolveUserId();
-        if (!userId) return [];
+      const base = supabase
+        .from('equipment')
+        .select('*')
+        .is('deleted_at', null);
+      // لا عضوية شركة (بيانات قديمة أو حساب غير مرتبط): نقرأ بيانات الحساب
+      // الشخصي بدل الإرجاع الفارغ الصامت الذي أَخفى محتوى المستخدمين.
+      const scoped = companyId ? base.eq('company_id', companyId) : base.eq('user_id', userId);
+      const { data, error } = await scoped.order('created_at', { ascending: false });
 
-        const companyId = await resolveMyCompanyId();
-        if (!companyId) return [];
+      if (error) throw error;
 
-        const { data, error } = await supabase
-          .from('equipment')
-          .select('*')
-          .eq('company_id', companyId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const items = data as Equipment[];
-        await db.equipment.clear();
-        if (items.length > 0) {
-          await db.equipment.bulkPut(items);
-        }
-        markOnlineSync();
-        return items;
-      } catch (err) {
-        console.warn('[EquipmentService] Online fetch failed, falling back to local DB:', err);
+      const items = data as Equipment[];
+      await db.equipment.clear();
+      if (items.length > 0) {
+        await db.equipment.bulkPut(items);
       }
+      markOnlineSync();
+      return items;
+    } catch (err) {
+      // «الخادم أولاً»: الكاش ملاذ أخير عند انقطاع حقيقي فقط.
+      if (!isNetworkError(err)) throw err;
+      console.warn('[EquipmentService] الشبكة غير متاحة، قراءة من التخزين المحلي:', err);
+      return (await db.equipment.toArray()).filter(e => !e.deleted_at);
     }
-
-    return (await db.equipment.toArray()).filter(e => !e.deleted_at);
   },
 
   async create(equipment: Omit<Equipment, 'id' | 'created_at' | 'user_id'>) {
-    const userId = await resolveUserId();
+    const userId = await resolveCurrentUserId();
     if (!userId) throw new Error('غير مصرح');
     const membership = await assertPermission('manage_projects');
 
@@ -149,7 +134,7 @@ export const equipmentService = {
   },
 
   async delete(id: string) {
-    const userId = await resolveUserId();
+    const userId = await resolveCurrentUserId();
     if (!userId) throw new Error('غير مصرح');
     await assertPermission('manage_projects');
 

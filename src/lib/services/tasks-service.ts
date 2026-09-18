@@ -2,45 +2,42 @@ import { createClient } from '../supabase/client';
 import { assertPermission } from './guard';
 import { ProjectTask, TaskStatus } from '../types/projects';
 import { db } from '../db/offline-db';
-import { checkNetworkStatus } from '../utils/network';
+import { checkNetworkStatus, isNetworkError } from '../utils/network';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 
 const supabase = createClient();
 
 export const tasksService = {
   async getByProjectId(projectId: string) {
-    const isOnline = await checkNetworkStatus();
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
 
-    if (isOnline) {
-      try {
-        const { data, error } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('project_id', projectId)
-          .order('created_at', { ascending: false });
+      if (error) throw error;
 
-        if (error) throw error;
-
-        const tasks = data as ProjectTask[];
-        // Replace cache for this project
-        await db.tasks.where('project_id').equals(projectId).delete();
-        if (tasks.length > 0) {
-          await db.tasks.bulkPut(tasks);
-        }
-        markOnlineSync();
-        return tasks;
-      } catch (err) {
-        console.warn('[TasksService] Online fetch failed, falling back to local DB:', err);
+      const tasks = data as ProjectTask[];
+      // Replace cache for this project
+      await db.tasks.where('project_id').equals(projectId).delete();
+      if (tasks.length > 0) {
+        await db.tasks.bulkPut(tasks);
       }
+      markOnlineSync();
+      return tasks;
+    } catch (err) {
+      // «الخادم أولاً»: الكاش ملاذ أخير عند انقطاع حقيقي فقط.
+      if (!isNetworkError(err)) throw err;
+      console.warn('[TasksService] الشبكة غير متاحة، قراءة المهام محلياً:', err);
+      const local = await db.tasks
+        .where('project_id')
+        .equals(projectId)
+        .toArray();
+      return local.sort((a, b) =>
+        (b.created_by ?? '').localeCompare(a.created_by ?? '')
+      );
     }
-
-    const local = await db.tasks
-      .where('project_id')
-      .equals(projectId)
-      .toArray();
-    return local.sort((a, b) =>
-      (b.created_by ?? '').localeCompare(a.created_by ?? '')
-    );
   },
 
   async create(task: Omit<ProjectTask, 'id'>) {

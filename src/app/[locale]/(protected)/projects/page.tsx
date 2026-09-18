@@ -48,6 +48,7 @@ import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProjectTypeBadge } from "@/components/projects/ProjectTypeBadge";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { DeleteConfirmationDialog } from "@/components/ui/DeleteConfirmationDialog";
+import { useAutoRefresh } from "@/lib/hooks/use-auto-refresh";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -560,6 +561,21 @@ export default function ProjectsListPage({
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  // إعادة الجلب بصمت (بلا وميض تحميل) عند عودة الاتصال أو عودة التركيز للنافذة —
+  // فلا تُرتَك قائمة فارغة/قديمة معلّقة نتيجة تجميد مؤقّتات الخلفية.
+  const refreshProjectsSilently = useCallback(async () => {
+    try {
+      const data = await projectsService.getAll();
+      setProjects(data || []);
+    } catch {
+      // تُبقى الحالة الحالية؛ الجلب الأولي يعرض الخطأ إن وُجد.
+    }
+  }, []);
+  useAutoRefresh({
+    onReconnect: refreshProjectsSilently,
+    onFocus: refreshProjectsSilently,
+  });
 
   // عضو بأي دور: لا يُنشئ المشاريع ولا يعدّلها ولا يحذفها (manage_projects = owner/admin فقط)
   useEffect(() => {

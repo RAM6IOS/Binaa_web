@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AreaChart } from "@/components/ui/area-chart";
 import { CopySlash, AlertTriangle, CheckCircle2, Factory, Loader2, AlertCircle, Users, HardHat, Construction } from "lucide-react";
@@ -10,6 +10,7 @@ import { equipmentService } from "@/lib/services/equipment-service";
 import { Project } from "@/lib/types/projects";
 import { ProgressBar } from "@/components/projects/ProgressBar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAutoRefresh } from "@/lib/hooks/use-auto-refresh";
 
 export default function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const unwrappedParams = use(params);
@@ -22,10 +23,14 @@ export default function DashboardPage({ params }: { params: Promise<{ locale: st
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  const loadDashboard = useCallback(
+    async (options?: { silent?: boolean }) => {
+      // الجلب الصامت (عودة الاتصال/التركيز) لا يومض شاشة التحميل ولا ينبّه.
+      if (!options?.silent) {
         setIsLoading(true);
+        setError(null);
+      }
+      try {
         const [projectsData, workersData, equipmentData] = await Promise.all([
           projectsService.getAll(),
           workersService.getAll(),
@@ -36,13 +41,23 @@ export default function DashboardPage({ params }: { params: Promise<{ locale: st
         setEquipmentCount(equipmentData.length);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
-        setError(isAr ? "فشل في تحميل بيانات لوحة القيادة" : "Échec du chargement des données du tableau de bord");
+        if (!options?.silent) {
+          setError(isAr ? "فشل في تحميل بيانات لوحة القيادة" : "Échec du chargement des données du tableau de bord");
+        }
       } finally {
-        setIsLoading(false);
+        if (!options?.silent) setIsLoading(false);
       }
-    };
-    fetchData();
-  }, [isAr]);
+    },
+    [isAr]
+  );
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  // إعادة الجلب بصمت عند عودة الاتصال/التركيز — لا لوحة فارغة معلّقة بعد تجميد الخلفية.
+  const refreshDashboardSilently = useCallback(() => loadDashboard({ silent: true }), [loadDashboard]);
+  useAutoRefresh({ onReconnect: refreshDashboardSilently, onFocus: refreshDashboardSilently });
 
   const totalProjects = projects.length;
   const delayedProjects = projects.filter(p => p.status === 'delayed').length;
