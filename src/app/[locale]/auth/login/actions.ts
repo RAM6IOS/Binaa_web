@@ -1,9 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { routing } from "@/i18n/routing";
+import { syncProfileToDb } from "@/lib/profile-sync";
 
 const SUPPORTED_LOCALES = ["ar", "fr"];
 
@@ -27,14 +27,6 @@ export async function login(formData: FormData) {
     password,
   });
 
-  // تشخيصي مؤقت: تأكيد أن الجلسة أُنشئت وأن الكوكي كُتبت قبل التوجيه (يُحذف بعد التحقق).
-  const cookieStore = await cookies();
-  console.log("[login] session user:", data.session?.user?.id ?? "none");
-  console.log(
-    "[login] cookies after signIn:",
-    cookieStore.getAll().map((c) => c.name)
-  );
-
   if (error || !data.session) {
     console.warn(
       "[login] signInWithPassword failed:",
@@ -43,6 +35,9 @@ export async function login(formData: FormData) {
     );
     redirect(`/${locale}/auth/login?error=invalid_credentials`);
   }
+
+  // مزامنة بيانات الملف الشخصي (الاسم/الهاتف/البريد) بعد نجاح الدخول — لا تُسقط التوجيه عند فشلها.
+  await syncProfileToDb(data.session.user);
 
   redirect(`/${locale}/projects`);
 }

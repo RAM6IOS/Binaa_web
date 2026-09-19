@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Loader2, Mail, User, Phone, Building, Briefcase, Eye, EyeOff, Lock } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
+import { saveProfile } from '@/app/[locale]/auth/profile/actions';
 
 export function RegisterForm() {
   const t = useTranslations('Auth.Register');
@@ -46,7 +47,7 @@ export function RegisterForm() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
@@ -60,12 +61,23 @@ export function RegisterForm() {
     });
 
     if (error) {
-      toast.error(t('messages.error'), {
-        description: error.message
-      });
+      const isDuplicate = error.message.toLowerCase().includes('already registered');
+      toast.error(
+        isDuplicate ? t('messages.emailExists') : t('messages.error'),
+        { description: isDuplicate ? undefined : error.message }
+      );
     } else {
       toast.success(t('messages.success'));
-      router.push('/projects');
+
+      if (data.session) {
+        // دخول مباشر: مزامنة الملف (الاسم/الهاتف/البريد) إلى profiles ثم المتابعة
+        await saveProfile();
+        router.push('/projects');
+      } else {
+        // البريد يحتاج تأكيداً — النظر عند الدخول لاحقاً، ولا نعرض تنظيماً متشابكاً الآن
+        toast.success(t('messages.checkEmail'));
+        router.push('/auth/login');
+      }
     }
     setLoading(false);
   };
@@ -129,6 +141,12 @@ export function RegisterForm() {
                 placeholder="+213..."
                 value={formData.phone}
                 onChange={handleChange}
+                onInvalid={(e) => {
+                  if (e.currentTarget.validity.valueMissing) {
+                    e.currentTarget.setCustomValidity(tc('validation.phoneRequired'));
+                  }
+                }}
+                required
                 className="pl-10 rtl:pl-3 rtl:pr-10"
               />
             </div>

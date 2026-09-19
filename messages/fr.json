@@ -41,7 +41,9 @@
       "loginNow": "Se connecter",
       "messages": {
         "success": "Compte créé avec succès",
-        "error": "Erreur lors de la création du compte"
+        "error": "Erreur lors de la création du compte",
+        "emailExists": "Cet email ou numéro de téléphone est déjà utilisé",
+        "checkEmail": "Vérifiez votre email pour confirmer le compte puis connectez-vous"
       }
     },
     "ForgotPassword": {
@@ -118,7 +120,8 @@
       "emailRequired": "L'adresse email est requise",
       "emailInvalid": "Veuillez saisir un email valide",
       "passwordRequired": "Le mot de passe est requis",
-      "fieldRequired": "Ce champ est requis"
+      "fieldRequired": "Ce champ est requis",
+      "phoneRequired": "Le numéro de téléphone est requis"
     }
   },
   "Contact": {
