@@ -21,7 +21,6 @@ export function Navbar({ locale }: NavbarProps) {
   const navLinks = [
     { name: isAr ? "الرئيسية" : "Accueil", href: "/" },
     { name: isAr ? "المميزات" : "Fonctionnalités", href: "/#features" },
-    { name: isAr ? "الأسعار" : "Tarifs", href: "/#pricing" },
     { name: isAr ? "اتصل بنا" : "Contact", href: "/contact" },
   ];
 

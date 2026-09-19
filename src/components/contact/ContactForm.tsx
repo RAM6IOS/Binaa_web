@@ -19,6 +19,9 @@ import {
 const SUBJECTS = ["inquiry", "demo", "partnership"] as const;
 type Subject = (typeof SUBJECTS)[number];
 
+// يطابق قيد الخادم في route.ts (min 10) — التحقق الأمامي يمنع تصلب خطأ تقني إنجليزي للمستخدم.
+const MESSAGE_MIN_LENGTH = 10;
+
 const initialFormData = {
   full_name: "",
   email: "",
@@ -33,16 +36,24 @@ export function ContactForm() {
   const locale = useLocale();
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
+  const [messageError, setMessageError] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    if (e.target.id === "message") setMessageError(false);
     setFormData({ ...formData, [e.target.id]: e.target.value });
     e.currentTarget.setCustomValidity("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.message.trim().length < MESSAGE_MIN_LENGTH) {
+      setMessageError(true);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -170,16 +181,24 @@ export function ContactForm() {
             placeholder={t("messagePlaceholder")}
             value={formData.message}
             onChange={handleChange}
+            maxLength={2000}
+            required
+            disabled={loading}
+            aria-invalid={messageError}
+            aria-describedby={messageError ? "message-error" : undefined}
             onInvalid={(e) => {
               if (e.currentTarget.validity.valueMissing) {
                 e.currentTarget.setCustomValidity(tc("validation.fieldRequired"));
               }
             }}
-            required
-            disabled={loading}
             className="pl-10 rtl:pl-3 rtl:pr-10 min-h-32"
           />
         </div>
+        {messageError ? (
+          <p id="message-error" role="alert" className="text-xs text-destructive">
+            {t("messageMinLength")}
+          </p>
+        ) : null}
       </div>
 
       <Button type="submit" size="lg" className="w-full md:w-auto" disabled={loading}>

@@ -2,7 +2,7 @@ import { Link } from "@/i18n/routing";
 import { Building2 as Logo, Mail, Phone, Users, FileText } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
-const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contact@binaa.dz";
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "mohmedbouc4@gmail.com";
 
 interface FooterProps {
   locale: string;
@@ -13,16 +13,12 @@ export function Footer({ locale }: FooterProps) {
 
   const menuLinks = [
     { name: isAr ? "المميزات" : "Fonctionnalités", href: "/#features" },
-    { name: isAr ? "الأسعار" : "Tarifs", href: "/#pricing" },
     { name: isAr ? "تحديثات النظام" : "Mises à jour", href: "#" },
     { name: isAr ? "دليل الاستخدام" : "Guide d'utilisation", href: "#" },
   ];
 
   const companyLinks = [
     { name: isAr ? "اتصل بنا" : "Contact", href: "/contact" },
-    { name: isAr ? "عن بيناء" : "À propos de Binaa", href: "#" },
-    { name: isAr ? "الوظائف" : "Carrières", href: "#" },
-    { name: isAr ? "شركاء النجاح" : "Nos partenaires", href: "#" },
   ];
 
   return (
@@ -96,7 +92,7 @@ export function Footer({ locale }: FooterProps) {
               <li className="flex items-center gap-3">
                 <span className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-primary" />
-                  {isAr ? "+213 (0) 23 45 67 89" : "+213 (0) 23 45 67 89"}
+                  0553058879
                 </span>
               </li>
             </ul>

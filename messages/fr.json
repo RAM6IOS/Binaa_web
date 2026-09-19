@@ -144,6 +144,7 @@
       },
       "message": "Votre message",
       "messagePlaceholder": "Expliquez-nous comment nous pouvons vous aider...",
+      "messageMinLength": "Votre message est trop court — veuillez écrire au moins 10 caractères.",
       "submit": "Envoyer le message",
       "messages": {
         "success": "Votre message a été envoyé avec succès — nous vous répondrons bientôt.",
@@ -158,7 +159,7 @@
       "copySuccess": "Adresse email copiée",
       "copyError": "Échec de la copie de l'email",
       "phoneLabel": "Téléphone",
-      "phoneValue": "+213 (0) 23 45 67 89",
+      "phoneValue": "0553058879",
       "hoursLabel": "Horaires",
       "hoursValue": "Dimanche – Jeudi, 8h00 – 17h00"
     }
@@ -168,5 +169,98 @@
     "withinWindowRemaining": "Temps restant dans la fenêtre hors ligne : {remaining}",
     "windowExceeded": "La fenêtre de travail hors ligne est expirée. Lecture seulement — reconnectez-vous pour synchroniser.",
     "retry": "Réessayer"
+  },
+  "Landing": {
+    "Hero": {
+      "badge": "L'avenir de la gestion de chantiers en Algérie 🇩🇿",
+      "heading": "Gérez vos chantiers du terrain au bureau, sur <primary>une seule plateforme</primary>.",
+      "description": "Binaa est une plateforme de gestion de projets de construction destinée aux entrepreneurs. Elle regroupe en un seul endroit le suivi des projets, les rapports journaliers, la main-d'œuvre, les équipements et les quantités.",
+      "cta": "Essayer gratuitement",
+      "trustNoCard": "Aucune carte bancaire requise",
+      "trustSupport": "Support technique 24/7",
+      "imageAlt": "Tableau de bord Binaa — Gestion de projets de construction"
+    },
+    "Features": {
+      "heading": "Tout ce qu'il vous faut pour gérer vos projets au même endroit",
+      "description": "Nous avons conçu Binaa pour couvrir tous les aspects de la gestion de projets de construction, du chantier aux rapports administratifs.",
+      "items": [
+        { "title": "Suivi des projets et planning", "description": "Suivez l'avancement du projet en temps réel avec des outils de planification avancés et des graphiques interactifs." },
+        { "title": "Gestion de la main-d'œuvre", "description": "Enregistrez les présences des ouvriers, répartissez les tâches et suivez la productivité sur les différents chantiers." },
+        { "title": "Gestion des équipements + maintenance", "description": "Suivez la localisation des équipements, la consommation de carburant et le calendrier de maintenance pour éviter les arrêts imprévus." },
+        { "title": "Rapports de chantier et photos", "description": "Envoyez les rapports journaliers et les photos directement depuis le chantier par téléphone, pour une transmission immédiate à l'administration." },
+        { "title": "Suivi des coûts et du budget", "description": "Surveillez les dépenses, factures et paiements pour ne pas dépasser le budget du projet." },
+        { "title": "Alertes et notifications en temps réel", "description": "Recevez des alertes immédiates en cas de retard, de manque de matériaux ou de livraison imminente." }
+      ]
+    },
+    "WhyBinaa": {
+      "heading": "Pourquoi Binaa ?",
+      "items": [
+        { "title": "Réduction des retards de projets", "description": "Nos outils vous aident à détecter les obstacles tôt et à prendre des décisions correctives rapides." },
+        { "title": "Maîtrise efficace des coûts", "description": "Fini les dépenses imprévues. Suivez chaque centime dépensé sur le projet." },
+        { "title": "Meilleure coordination d'équipe", "description": "Un lien complet entre les ingénieurs au bureau et les ouvriers sur le terrain, via une seule plateforme." },
+        { "title": "Conçu pour l'entrepreneur algérien", "description": "Notre connaissance approfondie du marché et de la réglementation algériens nous a permis de concevoir la solution idéale pour vous." }
+      ],
+      "demoCard": {
+        "projectName": "Projet AADL – Alger",
+        "timeAgo": "il y a 5 minutes",
+        "status": "En cours",
+        "progressLabel": "Taux d'avancement",
+        "budgetLabel": "Budget consommé",
+        "planningLabel": "Planning",
+        "delayed": "En retard de 3 jours",
+        "savedTitle": "15% économisés",
+        "savedDescription": "sur les coûts d'équipement ce mois-ci"
+      }
+    },
+    "Testimonials": {
+      "heading": "Ce que disent nos partenaires",
+      "description": "Nous sommes fiers d'accompagner les grandes entreprises de BTP en Algérie dans la réalisation de leurs objectifs.",
+      "items": [
+        { "name": "Ahmed Ben Aouda", "role": "Directeur, SARL Construction", "text": "Depuis que nous utilisons Binaa, nous avons constaté une nette amélioration de la précision des rapports de chantier. Les informations me parviennent immédiatement à mon bureau, ce qui a facilité la prise de décision." },
+        { "name": "Samir Djebbar", "role": "Ingénieur de projets - ETPBH", "text": "La gestion de la main-d'œuvre et des équipements était un cauchemar pour nous. Grâce à Binaa, nous avons une vision claire de tout ce qui se passe sur le chantier et nous savons exactement où va notre budget." },
+        { "name": "Lila Kacem", "role": "Architecte indépendante", "text": "Ce qui m'a le plus séduite, c'est la simplicité de l'interface et son adéquation avec la réalité du travail en Algérie. Le support technique est excellent et toujours disponible." }
+      ]
+    },
+    "Cta": {
+      "heading": "Prêt à gérer vos projets de manière professionnelle ?",
+      "register": "Commencez gratuitement",
+      "sales": "Contacter l'équipe commerciale",
+      "note": "Aucune carte bancaire requise – mise en place en moins de deux minutes"
+    },
+    "ProblemsSolutions": {
+      "badge": "Les défis quotidiens du chantier",
+      "heading": "Des problèmes quotidiens du chantier à un suivi organisé",
+      "intro": "Binaa regroupe les opérations du projet au même endroit : de la planification et des rapports journaliers aux métrés, attachements et situations des travaux.",
+      "problemLabel": "Le problème",
+      "solutionLabel": "La solution dans Binaa",
+      "ctaHeading": "Découvrez comment Binaa peut organiser votre projet",
+      "ctaButton": "Essai gratuit",
+      "cards": [
+        {
+          "problemHeadline": "Des informations éparpillées entre Excel, WhatsApp et le papier",
+          "problemDesc": "Les informations se perdent entre fichiers et messages, et il est difficile d'accéder à la dernière version des données du projet.",
+          "solutionTitle": "Un espace de travail unifié pour le projet",
+          "solutionDesc": "Binaa réunit projets, tâches, rapports, documents et équipes au même endroit."
+        },
+        {
+          "problemHeadline": "Difficile de savoir ce qui est réellement fait sur le chantier",
+          "problemDesc": "Aucune vision quotidienne claire des travaux réalisés ni de l'avancement réel du chantier.",
+          "solutionTitle": "Rapports Journaliers + Planning + Métrés",
+          "solutionDesc": "Enregistrez les travaux quotidiens et reliez-les aux tâches, quantités et à l'avancement réel du projet."
+        },
+        {
+          "problemHeadline": "Suivi manuel de la main-d'œuvre, des équipements et des matériaux",
+          "problemDesc": "Difficile de connaître les présences, les ressources utilisées et la consommation des matériaux dans chaque projet.",
+          "solutionTitle": "Main-d'œuvre + Équipements + Matériaux",
+          "solutionDesc": "Suivez les équipes, équipements et matériaux dans le contexte du projet, avec une vision plus claire des ressources et des coûts."
+        },
+        {
+          "problemHeadline": "Erreurs dans le calcul des métrés, attachements et situations",
+          "problemDesc": "Les calculs périodiques prennent du temps et peuvent générer des erreurs lors de l'agrégation des quantités et des montants.",
+          "solutionTitle": "Métrés + Attachements + Situations des travaux",
+          "solutionDesc": "Définissez la période, extrayez les quantités et calculez le précédent, le cumulé, le restant et les montants de manière organisée."
+        }
+      ]
+    }
   }
 }

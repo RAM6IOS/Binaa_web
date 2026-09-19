@@ -22,7 +22,6 @@ export function AuthNavbar() {
   const navLinks = [
     { name: t('home'), href: `/` },
     { name: t('features'), href: `/#features` },
-    { name: t('pricing'), href: `/#pricing` },
     { name: t('contact'), href: `/#contact` },
   ];
 
