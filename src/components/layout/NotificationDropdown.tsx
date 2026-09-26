@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import { notificationService } from "@/lib/services/notification-service";
+import { projectSiteHref } from "@/lib/projects/sections";
 import { Notification } from "@/lib/types/notifications";
 import { toast } from "sonner";
 
@@ -439,7 +440,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                               {/* روابط الانتقال السريع في حال توفرها بالبيانات الوصفية */}
                               {notification.metadata?.project_id && (
                                 <a
-                                  href={`/${locale}/projects/${notification.metadata.project_id}`}
+                                  href={`/${locale}${projectSiteHref(notification.metadata.project_id)}`}
                                   onClick={() => setIsOpen(false)}
                                   className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline mt-2.5"
                                 >

@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
 
 type PageHeaderProps = {
-  title: string;
-  description?: string;
+  /** يقبل ReactNode لعرض شارة حالة بجانب العنوان (مُستخدم في رأس المشروع). */
+  title: React.ReactNode;
+  description?: React.ReactNode;
   actions?: React.ReactNode;
   dir?: "rtl" | "ltr";
   className?: string;

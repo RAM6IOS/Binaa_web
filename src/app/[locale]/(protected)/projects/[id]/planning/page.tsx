@@ -11,6 +11,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
+import { projectSiteHref } from "@/lib/projects/sections";
 import { projectsService } from "@/lib/services/projects-service";
 import { Project } from "@/lib/types/projects";
 import { GanttChart } from "../components/GanttChart";
@@ -90,7 +91,7 @@ export default function PlanningPage({
       {/* Back Button */}
       <Button
         variant="ghost"
-        onClick={() => router.push(`/projects/${projectId}`)}
+        onClick={() => router.push(projectSiteHref(projectId))}
         className="gap-2 -ml-2 text-muted-foreground hover:text-foreground text-xs font-bold"
       >
         {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}

@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 type PageHeaderConfig = {
-  title: string;
-  description?: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
   actions?: React.ReactNode;
 };
 
