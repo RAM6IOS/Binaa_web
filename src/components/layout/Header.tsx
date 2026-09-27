@@ -40,7 +40,7 @@ export function Header({
     <header className="h-16 border-b bg-background flex items-center justify-between px-6 sticky top-0 z-30">
       <div className="flex font-semibold text-lg text-foreground items-center gap-4">
         <Link href="/" aria-label="Binaa">
-          <BrandLogo size={36} />
+          <BrandLogo size={36} priority />
         </Link>
         {/* Mobile Sidebar Trigger */}
         <div className="md:hidden">

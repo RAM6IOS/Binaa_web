@@ -2,6 +2,7 @@ import { createClient } from '../supabase/client';
 import { Project } from '../types/projects';
 import { db } from '../db/offline-db';
 import { checkNetworkStatus, isNetworkError } from '../utils/network';
+import { retryOnceOnAuthLock } from '../utils/retry';
 import { markOnlineSync, assertOfflineWriteAllowed } from '../utils/offline-window';
 import { assertPermission, resolveMyCompanyId } from './guard';
 
@@ -63,7 +64,7 @@ export const projectsService = {
 
   async getAll() {
     try {
-      const userId = await resolveUserId();
+      const userId = await retryOnceOnAuthLock(() => resolveUserId());
       if (!userId) return [];
 
       const companyId = await resolveMyCompanyId();

@@ -1,40 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { cloneElement, useCallback } from "react";
 import {
   Document,
   Page,
   Text,
   View,
   StyleSheet,
-  Font,
   Image,
-  PDFDownloadLink,
   PDFViewer,
 } from "@react-pdf/renderer";
 import { DailyLog } from "@/lib/types/daily-logs";
 import { Project } from "@/lib/types/projects";
+import { registerPdfFonts } from "@/components/pdf/register-fonts";
+import { usePdfDownload } from "@/components/pdf/use-pdf-download";
 
-// ═══════════════════════════════════════════════════════════
-// ─── Font Registration (Cairo for Arabic) ───
-// ═══════════════════════════════════════════════════════════
-const FONT_URL = "https://fonts.cdnfonts.com/css/cairo";
-
-let fontsRegistered = false;
-try {
-  if (!fontsRegistered) {
-    Font.register({
-      family: "Cairo",
-      fonts: [
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-      ],
-    });
-    fontsRegistered = true;
-  }
-} catch (e) {
-  console.error("Font registration error:", e);
-}
+registerPdfFonts();
 
 // ═══════════════════════════════════════════════════════════
 // ─── Props ───
@@ -877,18 +858,17 @@ export function DailyLogPDFDownload({
   project,
   isAr = false,
   children,
-}: DailyLogPDFProps & { children: React.ReactNode }) {
-  return (
-    <PDFDownloadLink
-      document={
-        <DailyLogPDFDocument dailyLog={dailyLog} project={project} isAr={isAr} />
-      }
-      fileName={`Rapport_${dailyLog.log_date}.pdf`}
-      style={{ textDecoration: "none" }}
-    >
-      {children}
-    </PDFDownloadLink>
-  );
+}: DailyLogPDFProps & { children: React.ReactElement }) {
+  const { download, isGenerating } = usePdfDownload({
+    buildDocument: useCallback(
+      () => <DailyLogPDFDocument dailyLog={dailyLog} project={project} isAr={isAr} />,
+      [dailyLog, project, isAr]
+    ),
+    fileName: `Rapport_${dailyLog.log_date}.pdf`,
+    isAr,
+  });
+
+  return cloneElement(children, { onClick: download, disabled: isGenerating });
 }
 
 /** معاينة PDF داخل الصفحة */

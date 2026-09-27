@@ -13,6 +13,7 @@ import {
   Clock,
   X,
   Inbox,
+  RefreshCw,
   ExternalLink
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -25,7 +26,8 @@ import { projectSiteHref } from "@/lib/projects/sections";
 import { Notification } from "@/lib/types/notifications";
 import { toast } from "sonner";
 
-// قائمة الإشعارات التجريبية في حال عدم وجود جدول الإشعارات في قاعدة البيانات بعد
+// إشعارات المعاينة: تُستخدم فقط حين لا توجد جلسة مصادقة أصلاً، لا عند
+// فشل الشبكة أو الخادم — حتى لا يظن المستخدم أن بيانات حقيقية.
 const getMockNotifications = (): Notification[] => [
   {
     id: "mock-1",
@@ -85,6 +87,7 @@ export function NotificationDropdown({ locale }: { locale: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isMockMode, setIsMockMode] = useState(false);
 
@@ -94,30 +97,44 @@ export function NotificationDropdown({ locale }: { locale: string }) {
 
   // 1. جلب هوية المستخدم وجلب الإشعارات الأولية
   useEffect(() => {
+    const abortController = new AbortController();
+    let isActive = true;
+
     async function initUserAndFetch() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setUserId(user.id);
-          await fetchNotifications();
-        } else {
-          // في حال عدم وجود مستخدم حقيقي في التطوير، نستخدم النمط التجريبي تلقائياً لتجنب توقف الواجهة
-          console.info("No active user session found. Initializing mock notifications for preview.");
-          setIsMockMode(true);
-          setNotifications(getMockNotifications());
-          setUnreadCount(3);
-          setIsLoading(false);
+        // getSession() يقرأ من التخزين المحلي بلا طلب شبكة، فلا يدخل قفل
+        // المصادقة ولا ينافس الطلبات المتزامنة على lock:sb-*-auth-token.
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isActive) return;
+
+        if (session?.user) {
+          setUserId(session.user.id);
+          await fetchNotifications(abortController.signal);
+          return;
         }
-      } catch (err) {
-        console.error("Error initializing user notifications:", err);
+
+        // لا توجد جلسة حقيقية: وضع المعاينة بقيم تجريبية، لا وضع خطأ.
+        console.info("No active user session found. Initializing mock notifications for preview.");
         setIsMockMode(true);
         setNotifications(getMockNotifications());
         setUnreadCount(3);
+        setIsLoading(false);
+      } catch (err) {
+        if (!isActive) return;
+        // لا نُظهر إشعارات مفبركة عند فشل تقني: المستخدم سيتخذ قراراً
+        // بناءً على بيانات غير حقيقية (صيانة مستحقة، مستند مرفوع...).
+        console.error("Error initializing user notifications:", err);
+        setLoadError(true);
         setIsLoading(false);
       }
     }
 
     initUserAndFetch();
+
+    return () => {
+      isActive = false;
+      abortController.abort();
+    };
   }, []);
 
   // 2. تفعيل الاشتراك في الوقت الفعلي (Realtime Live Updates)
@@ -165,9 +182,9 @@ export function NotificationDropdown({ locale }: { locale: string }) {
   }, [isOpen]);
 
   // دالة جلب الإشعارات من API الخاص بنا
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (signal?: AbortSignal) => {
     try {
-      const response = await fetch("/api/notifications?limit=25");
+      const response = await fetch("/api/notifications?limit=25", signal ? { signal } : {});
 
       if (!response.ok) {
         let errorMsg = "Failed to fetch";
@@ -183,17 +200,24 @@ export function NotificationDropdown({ locale }: { locale: string }) {
         setNotifications(data.notifications);
         setUnreadCount(data.unreadCount);
         setIsMockMode(false);
+        setLoadError(false);
       }
     } catch (err: any) {
-      console.warn("Notifications API Error (Falling back to Mock Mode):", err.message);
+      if (err?.name === "AbortError") return;
 
-      // تفعيل النمط التجريبي في حال عدم وجود الجدول في قاعدة البيانات
-      setIsMockMode(true);
-      setNotifications(getMockNotifications());
-      setUnreadCount(3);
+      // الفشل يُعرض كخطأ مع زر إعادة محاولة. البديل السابق (إشعارات
+      // تجريبية) كان يخفي عطلاً حقيقياً behind بيانات ملفّقة.
+      console.warn("Notifications API Error:", err.message);
+      setLoadError(true);
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) setIsLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setLoadError(false);
+    fetchNotifications();
   };
 
   // دالة تحديد إشعار فردي كمقروء
@@ -389,6 +413,31 @@ export function NotificationDropdown({ locale }: { locale: string }) {
                   <p className="text-sm text-muted-foreground">
                     {isAr ? "جاري تحميل الإشعارات..." : "Chargement des notifications..."}
                   </p>
+                </div>
+              ) : loadError ? (
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center border border-destructive/25">
+                    <AlertTriangle className="w-8 h-8 text-destructive" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">
+                      {isAr ? "تعذّر تحميل الإشعارات" : "Chargement impossible"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+                      {isAr
+                        ? "تحقق من الاتصال ثم أعد المحاولة."
+                        : "Vérifiez la connexion puis réessayez."}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRetry}
+                    className="gap-1 font-bold"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    {isAr ? "إعادة المحاولة" : "Réessayer"}
+                  </Button>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-4">

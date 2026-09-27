@@ -1,29 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { cloneElement, useCallback } from "react";
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, StyleSheet,
 } from "@react-pdf/renderer";
 import { ContractItemWithProgress, MetresSummary } from "@/lib/types/metres";
 import { Project } from "@/lib/types/projects";
+import { registerPdfFonts } from "@/components/pdf/register-fonts";
+import { usePdfDownload } from "@/components/pdf/use-pdf-download";
 
-// ─── Font Registration ───
-let fontsRegistered = false;
-try {
-  if (!fontsRegistered) {
-    const { Font } = require("@react-pdf/renderer");
-    Font.register({
-      family: "Cairo",
-      fonts: [
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-      ],
-    });
-    fontsRegistered = true;
-  }
-} catch (e) {
-  console.error("Font registration error:", e);
-}
+registerPdfFonts();
 
 // ─── Colors ───
 const C = {
@@ -266,16 +252,17 @@ const SituationDocument: React.FC<SituationPDFProps> = ({ items, summary, projec
 // ─── Exported Components ───
 export function SituationPDFDownload({
   items, summary, project, isAr = false, children,
-}: SituationPDFProps & { children: React.ReactNode }) {
-  return (
-    <PDFDownloadLink
-      document={<SituationDocument items={items} summary={summary} project={project} isAr={isAr} />}
-      fileName={`Situation_Travaux_${project.name.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
-      style={{ textDecoration: "none" }}
-    >
-      {children}
-    </PDFDownloadLink>
-  );
+}: SituationPDFProps & { children: React.ReactElement }) {
+  const { download, isGenerating } = usePdfDownload({
+    buildDocument: useCallback(
+      () => <SituationDocument items={items} summary={summary} project={project} isAr={isAr} />,
+      [items, summary, project, isAr]
+    ),
+    fileName: `Situation_Travaux_${project.name.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`,
+    isAr,
+  });
+
+  return cloneElement(children, { onClick: download, disabled: isGenerating });
 }
 
 export default SituationDocument;

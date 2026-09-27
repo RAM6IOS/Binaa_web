@@ -11,6 +11,11 @@ type BrandLogoProps = {
   size?: number;
   rounded?: boolean;
   className?: string;
+  /**
+   * الشعار في أول الشاشة المرئي هو غالباً عنصر LCP، و`priority` يجعل Next
+   * يحمّله عبر preload بدل انتظار اكتشافه من JS. يُمرَّر فقط للشعار العلوي.
+   */
+  priority?: boolean;
 };
 
 export function BrandLogo({
@@ -18,6 +23,7 @@ export function BrandLogo({
   size = 40,
   rounded = true,
   className,
+  priority = false,
 }: BrandLogoProps) {
   const src =
     variant === "dark"
@@ -32,6 +38,7 @@ export function BrandLogo({
       height={size}
       className={cn(rounded && "rounded-lg", "object-contain", className)}
       draggable={false}
+      priority={priority}
     />
   );
 }

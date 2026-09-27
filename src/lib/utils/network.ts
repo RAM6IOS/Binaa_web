@@ -76,6 +76,27 @@ export async function checkNetworkStatus(): Promise<boolean> {
   return inFlightProbe;
 }
 
+type ErrorLike = {
+  message?: string;
+  name?: string;
+  code?: string;
+  status?: number;
+  isAcquireTimeout?: boolean;
+};
+
+/**
+ * هل الخطأ تعارض على قفل Supabase (lock:*) وليس انقطاع شبكة؟
+ *
+ * @supabase/auth-js يضع `isAcquireTimeout = true` على أخطاء القفل، وينصح
+ * مكتوباً في locks.js باستخدام هذه العلامة بدل instanceof. تحدث هذه الأخطاء
+ * عندما يتبادل عدة تبويبات/استعلامات القفل نفسه، أو يُلغى استعلام أثناء
+ * تركيب المكوّن — أي أن الشبكة سليمة تماماً والمتصفح هو من ألغى.
+ */
+export function isAuthLockTimeout(error: unknown): boolean {
+  if (!error) return false;
+  return (error as ErrorLike).isAcquireTimeout === true;
+}
+
 /**
  * هل الخطأ خطأ شبكة حقيقي (انقطاع/مهلة) أم خطأ تطبيق (RLS/فصل/قيود)؟
  * نستخدمه للتراجع إلى التخزين المحلي عند فشل حقيقي فقط، دون إخفاء
@@ -83,8 +104,13 @@ export async function checkNetworkStatus(): Promise<boolean> {
  */
 export function isNetworkError(error: unknown): boolean {
   if (!error) return false;
-  const e = error as { message?: string; name?: string; code?: string; status?: number };
-  const message = String(e?.message ?? e ?? '');
+
+  // تعارض القفل كان يُصنَّف خطأ شبكة عبر e.name === 'AbortError'، فيُقرأ
+  // كأن الجهاز غير متصل بينما الشبكة سليمة، فتُخفى البيانات الصلبة.
+  if (isAuthLockTimeout(error)) return false;
+
+  const e = error as ErrorLike;
+  const message = String(e?.message ?? error ?? '');
   return (
     message.includes('Failed to fetch') ||
     message.includes('NetworkError') ||
@@ -93,8 +119,8 @@ export function isNetworkError(error: unknown): boolean {
     message.includes('fetch failed') ||
     message.includes('Connection reset') ||
     message.includes('timed out') ||
+    // fetch يرفض بـ TypeError عند انقطاع حقيقي.
     e?.name === 'TypeError' ||
-    e?.name === 'AbortError' ||
     e?.code === 'TypeError' ||
     e?.code === 'ERR_NETWORK' ||
     e?.status === 0

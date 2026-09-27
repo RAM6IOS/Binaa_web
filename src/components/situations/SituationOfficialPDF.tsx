@@ -2,29 +2,15 @@
 // الوضعية الرسمية للأشغال (SITUATION DE TRAVAUX — النموذج الجزائري الرسمي) - PDF
 // ═══════════════════════════════════════════════════════════════════
 
-import React from "react";
+import React, { cloneElement, useCallback } from "react";
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, StyleSheet,
 } from "@react-pdf/renderer";
 import { WorkSituationWithItems } from "@/lib/types/situations";
+import { registerPdfFonts } from "@/components/pdf/register-fonts";
+import { usePdfDownload } from "@/components/pdf/use-pdf-download";
 
-// ─── Font Registration ───
-let fontsRegistered = false;
-try {
-  if (!fontsRegistered) {
-    const { Font } = require("@react-pdf/renderer");
-    Font.register({
-      family: "Cairo",
-      fonts: [
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-      ],
-    });
-    fontsRegistered = true;
-  }
-} catch (e) {
-  console.error("Font registration error:", e);
-}
+registerPdfFonts();
 
 // ─── Administrative Official Styles (Strict Black & White / Clean Admin) ───
 const styles = StyleSheet.create({
@@ -369,9 +355,9 @@ const SituationOfficialPDFDocument: React.FC<SituationPDFProps> = ({ situation }
         {/* II PARTIE MAÎTRE DE L'OUVRAGE */}
         <View style={styles.versoSection}>
           <Text style={styles.versoTitle}>II. Partie Maître de l'Ouvrage / Service Contractant</Text>
-          <View style={styles.rowText}><Text style={styles.label}>Pénalités de retard appliquées:</Text> <Text>{(situation.penalite_retard || 0).toLocaleString()} DZD</Text></View>
-          <View style={styles.rowText}><Text style={styles.label}>Autres déductions ({situation.autre_deduction_label || "Néant"}):</Text> <Text>{(situation.autre_deduction || 0).toLocaleString()} DZD</Text></View>
-          <View style={styles.rowText}><Text style={styles.label}>Montant Net retenu par le Maître d'Ouvrage:</Text> <Text style={{ fontWeight: "bold" }}>{(situation.montant_net_maitre_ouvrage || situation.net_a_payer || 0).toLocaleString()} DZD</Text></View>
+          <Text style={styles.rowText}><Text style={styles.label}>Pénalités de retard appliquées:</Text> <Text>{(situation.penalite_retard || 0).toLocaleString()} DZD</Text></Text>
+          <Text style={styles.rowText}><Text style={styles.label}>Autres déductions ({situation.autre_deduction_label || "Néant"}):</Text> <Text>{(situation.autre_deduction || 0).toLocaleString()} DZD</Text></Text>
+          <Text style={styles.rowText}><Text style={styles.label}>Montant Net retenu par le Maître d'Ouvrage:</Text> <Text style={{ fontWeight: "bold" }}>{(situation.montant_net_maitre_ouvrage || situation.net_a_payer || 0).toLocaleString()} DZD</Text></Text>
           <View style={{ marginTop: 20, flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={{ fontSize: 6.5 }}>Date de réception: ___/___/202___</Text>
             <Text style={{ fontSize: 6.5, fontWeight: "bold" }}>Signature & Cachet du Maître d'Ouvrage</Text>
@@ -381,8 +367,8 @@ const SituationOfficialPDFDocument: React.FC<SituationPDFProps> = ({ situation }
         {/* III PARTIE ORGANISME PAYEUR */}
         <View style={styles.versoSection}>
           <Text style={styles.versoTitle}>III. Partie Organisme Payeur (Trésorerie / Contrôle Financier)</Text>
-          <View style={styles.rowText}><Text style={styles.label}>Visa du Contrôle Financier (CF):</Text> <Text>N° _________ du ____/____/202___</Text></View>
-          <View style={styles.rowText}><Text style={styles.label}>Mandatement / Ordonnancement:</Text> <Text>Mandat N° _________ du ____/____/202___</Text></View>
+          <Text style={styles.rowText}><Text style={styles.label}>Visa du Contrôle Financier (CF):</Text> <Text>N° _________ du ____/____/202___</Text></Text>
+          <Text style={styles.rowText}><Text style={styles.label}>Mandatement / Ordonnancement:</Text> <Text>Mandat N° _________ du ____/____/202___</Text></Text>
           <View style={{ marginTop: 20, flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={{ fontSize: 6.5 }}>Date de paiement effectif: ___/___/202___</Text>
             <Text style={{ fontSize: 6.5, fontWeight: "bold" }}>Signature & Cachet du Trésorier / Organisme Payeur</Text>
@@ -451,16 +437,17 @@ const SituationOfficialPDFDocument: React.FC<SituationPDFProps> = ({ situation }
 
 export function SituationOfficialPDFDownload({
   situation, isAr = false, children,
-}: SituationPDFProps & { children: React.ReactNode }) {
-  return (
-    <PDFDownloadLink
-      document={<SituationOfficialPDFDocument situation={situation} isAr={isAr} />}
-      fileName={`Situation_Officielle_N${situation.situation_number}_${(situation.project_name || 'Projet').replace(/\s+/g, '_')}.pdf`}
-      style={{ textDecoration: "none" }}
-    >
-      {children}
-    </PDFDownloadLink>
-  );
+}: SituationPDFProps & { children: React.ReactElement }) {
+  const { download, isGenerating } = usePdfDownload({
+    buildDocument: useCallback(
+      () => <SituationOfficialPDFDocument situation={situation} isAr={isAr} />,
+      [situation, isAr]
+    ),
+    fileName: `Situation_Officielle_N${situation.situation_number}_${(situation.project_name || "Projet").replace(/\s+/g, "_")}.pdf`,
+    isAr,
+  });
+
+  return cloneElement(children, { onClick: download, disabled: isGenerating });
 }
 
 export default SituationOfficialPDFDocument;

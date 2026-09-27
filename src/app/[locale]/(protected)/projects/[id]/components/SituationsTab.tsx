@@ -177,18 +177,16 @@ export function SituationsTab({ project, isAr }: SituationsTabProps) {
                           {isAr ? "عرض" : "Ouvrir"}
                         </Button>
 
-                        <div suppressHydrationWarning>
-                          <SituationOfficialPDFDownload situation={{ ...sit, items: [] }} isAr={isAr}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-3 rounded-lg gap-1 text-xs font-bold text-foreground hover:bg-muted"
-                            >
-                              <Printer className="w-3.5 h-3.5" />
-                              PDF
-                            </Button>
-                          </SituationOfficialPDFDownload>
-                        </div>
+                        <SituationOfficialPDFDownload situation={{ ...sit, items: [] }} isAr={isAr}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-3 rounded-lg gap-1 text-xs font-bold text-foreground hover:bg-muted"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            PDF
+                          </Button>
+                        </SituationOfficialPDFDownload>
 
                         {sit.status === "draft" && (
                           <Button
@@ -243,13 +241,11 @@ export function SituationsTab({ project, isAr }: SituationsTabProps) {
                   >
                     <Eye className="w-3.5 h-3.5" /> {isAr ? "عرض" : "Ouvrir"}
                   </Button>
-                  <div suppressHydrationWarning>
-                    <SituationOfficialPDFDownload situation={{ ...sit, items: [] }} isAr={isAr}>
-                      <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs font-bold gap-1">
-                        <Printer className="w-3.5 h-3.5" /> PDF
-                      </Button>
-                    </SituationOfficialPDFDownload>
-                  </div>
+                  <SituationOfficialPDFDownload situation={{ ...sit, items: [] }} isAr={isAr}>
+                    <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs font-bold gap-1">
+                      <Printer className="w-3.5 h-3.5" /> PDF
+                    </Button>
+                  </SituationOfficialPDFDownload>
                   {sit.status === "draft" && (
                     <Button
                       variant="ghost"

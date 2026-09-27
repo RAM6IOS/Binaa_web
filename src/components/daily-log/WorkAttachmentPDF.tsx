@@ -1,28 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { cloneElement, useCallback } from "react";
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, StyleSheet,
 } from "@react-pdf/renderer";
 import { WorkAttachmentWithItems } from "@/lib/types/work-attachments";
 import { Project } from "@/lib/types/projects";
+import { registerPdfFonts } from "@/components/pdf/register-fonts";
+import { usePdfDownload } from "@/components/pdf/use-pdf-download";
 
-let fontsRegistered = false;
-try {
-  if (!fontsRegistered) {
-    const { Font } = require("@react-pdf/renderer");
-    Font.register({
-      family: "Cairo",
-      fonts: [
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-      ],
-    });
-    fontsRegistered = true;
-  }
-} catch (e) {
-  console.error("Font registration error:", e);
-}
+registerPdfFonts();
 
 // ─── Official Administrative Color Palette (Black / White / Dark Slate) ───
 const C = {
@@ -524,16 +511,17 @@ export function WorkAttachmentPDFDownload({
   project,
   isAr = false,
   children,
-}: WorkAttachmentPDFProps & { children: React.ReactNode }) {
-  return (
-    <PDFDownloadLink
-      document={<WorkAttachmentDocument attachment={attachment} project={project} isAr={isAr} />}
-      fileName={`Attachement_No${attachment?.attachment_number || 1}_${(project?.name || "project").replace(/\s+/g, "_")}.pdf`}
-      style={{ textDecoration: "none" }}
-    >
-      {children}
-    </PDFDownloadLink>
-  );
+}: WorkAttachmentPDFProps & { children: React.ReactElement }) {
+  const { download, isGenerating } = usePdfDownload({
+    buildDocument: useCallback(
+      () => <WorkAttachmentDocument attachment={attachment} project={project} isAr={isAr} />,
+      [attachment, project, isAr]
+    ),
+    fileName: `Attachement_No${attachment?.attachment_number || 1}_${(project?.name || "project").replace(/\s+/g, "_")}.pdf`,
+    isAr,
+  });
+
+  return cloneElement(children, { onClick: download, disabled: isGenerating });
 }
 
 export default WorkAttachmentDocument;

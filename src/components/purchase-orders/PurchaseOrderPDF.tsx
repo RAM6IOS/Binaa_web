@@ -1,30 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { cloneElement, useCallback } from "react";
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, StyleSheet,
 } from "@react-pdf/renderer";
 import { PurchaseOrderStatus, PurchaseOrderWithItems } from "@/lib/types/purchase-orders";
 import { CompanyInfo } from "@/lib/services/company-info";
+import { registerPdfFonts } from "@/components/pdf/register-fonts";
+import { usePdfDownload } from "@/components/pdf/use-pdf-download";
 
-// ─── Font Registration ───
 // Cairo يُستخدم للنص العربي فقط؛ الفرنسية تستعمل Helvetica المدمج (Latin-1 سليم).
-let fontsRegistered = false;
-try {
-  if (!fontsRegistered) {
-    const { Font } = require("@react-pdf/renderer");
-    Font.register({
-      family: "Cairo",
-      fonts: [
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 400 },
-        { src: "/fonts/Cairo-Variable.ttf", fontWeight: 700 },
-      ],
-    });
-    fontsRegistered = true;
-  }
-} catch (e) {
-  console.error("Font registration error:", e);
-}
+registerPdfFonts();
 
 // ─── Colors — وثيقة إدارية أبيض/أسود فقط ───
 const C = {
@@ -288,17 +274,17 @@ const PurchaseOrderDocument: React.FC<PurchaseOrderPDFProps> = ({ order, project
 // ─── Exported Components ───
 export function PurchaseOrderPDFDownload({
   order, projectName, company, isAr = false, children,
-}: PurchaseOrderPDFProps & { children: React.ReactNode }) {
-  const fileName = `BC_${order.number.replace(/[^a-zA-Z0-9_-]/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
-  return (
-    <PDFDownloadLink
-      document={<PurchaseOrderDocument order={order} projectName={projectName} company={company} isAr={isAr} />}
-      fileName={fileName}
-      style={{ textDecoration: "none" }}
-    >
-      {children}
-    </PDFDownloadLink>
-  );
+}: PurchaseOrderPDFProps & { children: React.ReactElement }) {
+  const { download, isGenerating } = usePdfDownload({
+    buildDocument: useCallback(
+      () => <PurchaseOrderDocument order={order} projectName={projectName} company={company} isAr={isAr} />,
+      [order, projectName, company, isAr]
+    ),
+    fileName: `BC_${order.number.replace(/[^a-zA-Z0-9_-]/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`,
+    isAr,
+  });
+
+  return cloneElement(children, { onClick: download, disabled: isGenerating });
 }
 
 export default PurchaseOrderDocument;
